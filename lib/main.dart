@@ -1,7 +1,19 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ramadhan_companion_app/firebase_options.dart';
+import 'package:ramadhan_companion_app/provider/signup_provider.dart';
+import 'package:ramadhan_companion_app/ui/signup_view.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => SignupProvider())],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -9,12 +21,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Liter',
+        scaffoldBackgroundColor: Colors.white,
       ),
+      home: SignupView(),
     );
   }
 }

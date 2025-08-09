@@ -1,14 +1,19 @@
 name: ramadhan_companion_app
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
   sdk: ^3.8.1
 
 dependencies:
+  firebase_auth: ^6.0.0
+  firebase_core: ^4.0.0
   flutter:
     sdk: flutter
+  html: ^0.15.6
+  provider: ^6.1.5
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +22,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+  - family: Liter
+    fonts:
+      - asset: assets/font/Liter-Regular.ttf

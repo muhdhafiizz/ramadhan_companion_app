@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAVnxI_Nis4u-LlzcDi3rw7hTMY5l_duZ4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>970576892648</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.ramadhanCompanionApp</string>
+	<key>PROJECT_ID</key>
+	<string>ramadhan-companion</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ramadhan-companion.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:970576892648:ios:40ac05ff5dba285de6af5d</string>
+</dict>
+</plist>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970576892648",
+    "project_id": "ramadhan-companion",
+    "storage_bucket": "ramadhan-companion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970576892648:android:d63838eb79b2f918e6af5d",
+        "android_client_info": {
+          "package_name": "com.example.ramadhan_companion_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyr-Dio_N85DnY4r3KxCO6Va7PJ9OgAFE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
