@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:ramadhan_companion_app/provider/signup_provider.dart';
-import 'package:ramadhan_companion_app/widgets/custom_appbar.dart';
+import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/ui/signup_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 
-class SignupView extends StatelessWidget {
-  SignupView({super.key});
+class LoginView extends StatelessWidget {
+  LoginView({super.key});
 
-  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -17,33 +17,30 @@ class SignupView extends StatelessWidget {
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-        child: _buildSignupButton(
-          context,
-          nameController,
-          emailController,
-          passwordController,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSignUpButton(context),
+            _buildLoginButton(context, emailController, passwordController),
+          ],
         ),
-      ),
-      appBar: CustomAppbar(
-        showBackButton: true,
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Consumer<SignupProvider>(
+          child: Consumer<LoginProvider>(
             builder: (context, provider, _) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Spacer(),
-                  _buildSignupText(),
-                  const SizedBox(height: 20),
-                  _buildTextField(nameController, "Name"),
-                  const SizedBox(height: 10),
-                  _buildTextField(emailController, "Email"),
+                  Spacer(),
+                  _buildLottieView(),
+                  _buildLoginText(),
+                  SizedBox(height: 20),
+                  _buildUsernameTextfield(emailController, "Email"),
                   const SizedBox(height: 10),
                   _buildPasswordTextfield(passwordController, "Password"),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   if (provider.error != null)
                     Text(
                       provider.error!,
@@ -52,7 +49,7 @@ class SignupView extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  const Spacer(),
+                  Spacer(),
                 ],
               );
             },
@@ -63,14 +60,18 @@ class SignupView extends StatelessWidget {
   }
 }
 
-Widget _buildSignupText() {
-  return const Text(
-    "Create your Account",
+Widget _buildLottieView(){
+  return Lottie.asset('assets/lottie/mosque_lottie.json');
+}
+
+Widget _buildLoginText() {
+  return Text(
+    "Login now for the best experience",
     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
   );
 }
 
-Widget _buildTextField(TextEditingController controller, String label) {
+Widget _buildUsernameTextfield(TextEditingController controller, String label) {
   return CustomTextField(controller: controller, label: label);
 }
 
@@ -82,35 +83,45 @@ Widget _buildPasswordTextfield(TextEditingController controller, String label) {
   );
 }
 
-Widget _buildSignupButton(
+Widget _buildLoginButton(
   BuildContext context,
-  TextEditingController nameController,
-  TextEditingController emailController,
+  TextEditingController usernameController,
   TextEditingController passwordController,
 ) {
-  final provider = Provider.of<SignupProvider>(context, listen: false);
+  final provider = Provider.of<LoginProvider>(context, listen: false);
 
   return CustomButton(
-    text: "Sign Up",
+    text: "Log in",
     backgroundColor: Colors.black,
     textColor: Colors.white,
     onTap: () async {
       provider.showLoadingDialog(context);
 
-      final success = await provider.signup(
-        nameController.text,
-        emailController.text,
+      final success = await provider.login(
+        usernameController.text,
         passwordController.text,
       );
 
       if (context.mounted) Navigator.pop(context);
 
       if (success && context.mounted) {
-        print("✅ Successful sign up");
-        Navigator.pop(context);
-      } else {
-        print("❌ Sign up failed: ${provider.error}");
+        print("Success to homepage");
       }
+    },
+  );
+}
+
+Widget _buildSignUpButton(BuildContext context) {
+  return CustomButton(
+    text: "Sign up",
+    backgroundColor: Colors.white,
+    textColor: Colors.black,
+    borderColor: Colors.black,
+    onTap: () async {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => SignupView()),
+      );
     },
   );
 }

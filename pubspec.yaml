@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   html: ^0.15.6
+  lottie: ^3.3.1
   provider: ^6.1.5
   shimmer: ^3.0.0
 
@@ -22,6 +23,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/lottie/mosque_lottie.json
   fonts:
   - family: Liter
     fonts:

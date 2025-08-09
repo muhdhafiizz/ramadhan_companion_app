@@ -2,15 +2,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
+import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
-import 'package:ramadhan_companion_app/ui/signup_view.dart';
+import 'package:ramadhan_companion_app/ui/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => SignupProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => SignupProvider()),
+        ChangeNotifierProvider(create: (_) => LoginProvider()),
+      ],
       child: const MainApp(),
     ),
   );
@@ -27,7 +31,7 @@ class MainApp extends StatelessWidget {
         fontFamily: 'Liter',
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: SignupView(),
+      home: LoginView(),
     );
   }
 }
