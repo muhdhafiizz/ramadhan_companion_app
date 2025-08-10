@@ -38,9 +38,13 @@ class LoginView extends StatelessWidget {
                   _buildLottieView(),
                   _buildLoginText(),
                   SizedBox(height: 20),
-                  _buildUsernameTextfield(emailController, "Email"),
+                  _buildEmailTextfield(emailController, "Email", provider),
                   const SizedBox(height: 10),
-                  _buildPasswordTextfield(passwordController, "Password"),
+                  _buildPasswordTextfield(
+                    passwordController,
+                    "Password",
+                    provider,
+                  ),
                   SizedBox(height: 20),
                   if (provider.error != null)
                     Text(
@@ -72,45 +76,66 @@ Widget _buildLoginText() {
   );
 }
 
-Widget _buildUsernameTextfield(TextEditingController controller, String label) {
-  return CustomTextField(controller: controller, label: label);
-}
-
-Widget _buildPasswordTextfield(TextEditingController controller, String label) {
+Widget _buildEmailTextfield(
+  TextEditingController controller,
+  String label,
+  LoginProvider provider,
+) {
   return CustomTextField(
     controller: controller,
     label: label,
+    onChanged: (value) {
+      provider.updateEmail(value);
+    },
+  );
+}
+
+Widget _buildPasswordTextfield(
+  TextEditingController controller,
+  String label,
+  LoginProvider provider,
+) {
+  return CustomTextField(
+    controller: controller,
+    label: label,
+    onChanged: (value) {
+      provider.updatePassword(value);
+    },
     isPassword: true,
   );
 }
 
 Widget _buildLoginButton(
   BuildContext context,
-  TextEditingController usernameController,
+  TextEditingController emailController,
   TextEditingController passwordController,
 ) {
-  final provider = Provider.of<LoginProvider>(context, listen: false);
+  return Consumer<LoginProvider>(
+    builder: (context, provider, _) {
+      return CustomButton(
+        text: "Log in",
+        backgroundColor: provider.isLoginEnabled ? Colors.black : Colors.grey,
+        textColor: Colors.white,
+        onTap: provider.isLoginEnabled
+            ? () async {
+                provider.showLoadingDialog(context);
 
-  return CustomButton(
-    text: "Log in",
-    backgroundColor: Colors.black,
-    textColor: Colors.white,
-    onTap: () async {
-      provider.showLoadingDialog(context);
+                final success = await provider.login(
+                  emailController.text,
+                  passwordController.text,
+                );
 
-      final success = await provider.login(
-        usernameController.text,
-        passwordController.text,
+                if (context.mounted) Navigator.pop(context);
+
+                if (success && context.mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PrayerTimesView()),
+                  );
+                }
+              }
+            : null,
       );
-
-      if (context.mounted) Navigator.pop(context);
-
-      if (success && context.mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const PrayerTimesView()),
-        );
-      }
     },
   );
 }

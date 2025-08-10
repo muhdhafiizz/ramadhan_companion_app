@@ -7,11 +7,14 @@ class LoginProvider extends ChangeNotifier {
   String? _error;
   Map<String, dynamic>? _user;
   bool _obscurePassword = true;
+  String _email = '';
+  String _password = '';
 
   bool get isLoading => _isLoading;
   bool get obscurePassword => _obscurePassword;
   String? get error => _error;
   Map<String, dynamic>? get user => _user;
+  bool get isLoginEnabled => _email.isNotEmpty && _password.isNotEmpty;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -24,8 +27,27 @@ class LoginProvider extends ChangeNotifier {
     );
   }
 
+  void resetLoginState() {
+    _email = '';
+    _password = '';
+    _error = null;
+    _isLoading = false;
+    _obscurePassword = true;
+    notifyListeners();
+  }
+
   void togglePasswordVisibility() {
     _obscurePassword = !_obscurePassword;
+    notifyListeners();
+  }
+
+  void updateEmail(String value) {
+    _email = value;
+    notifyListeners();
+  }
+
+  void updatePassword(String value) {
+    _password = value;
     notifyListeners();
   }
 

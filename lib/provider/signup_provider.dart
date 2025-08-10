@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
+import 'package:ramadhan_companion_app/widgets/custom_success_dialog.dart';
 
 class SignupProvider extends ChangeNotifier {
   bool _obscurePassword = true;
@@ -24,7 +25,6 @@ class SignupProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
-
       if (e.code == 'weak-password') {
         error = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
@@ -54,6 +54,15 @@ class SignupProvider extends ChangeNotifier {
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.2),
       builder: (_) => const LoadingDialog(),
+    );
+  }
+
+  void showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) =>
+          const CustomSuccessDialog(message: "Logged in successfully!"),
     );
   }
 }
