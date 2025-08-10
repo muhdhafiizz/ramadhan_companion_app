@@ -1,8 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
+import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 
@@ -14,6 +17,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SignupProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => PrayerTimesProvider()),
+        ChangeNotifierProvider(create: (_) => LocationInputProvider()),
       ],
       child: const MainApp(),
     ),
@@ -30,6 +35,9 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Liter',
         scaffoldBackgroundColor: Colors.white,
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          primaryColor: CupertinoColors.activeBlue,
+        ),
       ),
       home: LoginView(),
     );

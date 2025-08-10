@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/signup_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
@@ -60,7 +61,7 @@ class LoginView extends StatelessWidget {
   }
 }
 
-Widget _buildLottieView(){
+Widget _buildLottieView() {
   return Lottie.asset('assets/lottie/mosque_lottie.json');
 }
 
@@ -105,7 +106,10 @@ Widget _buildLoginButton(
       if (context.mounted) Navigator.pop(context);
 
       if (success && context.mounted) {
-        print("Success to homepage");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PrayerTimesView()),
+        );
       }
     },
   );
@@ -118,10 +122,7 @@ Widget _buildSignUpButton(BuildContext context) {
     textColor: Colors.black,
     borderColor: Colors.black,
     onTap: () async {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => SignupView()),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SignupView()));
     },
   );
 }

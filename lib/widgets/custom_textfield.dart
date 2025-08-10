@@ -3,24 +3,27 @@ import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 
 class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String label;
   final bool isPassword;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField({
     super.key,
-    required this.controller,
+    this.controller,
     required this.label,
     this.isPassword = false,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final loginProvider = Provider.of<SignupProvider>(context);
+    final signupProvider = Provider.of<SignupProvider>(context);
 
     return TextField(
       controller: controller,
-      obscureText: isPassword ? loginProvider.obscurePassword : false,
+      onChanged: onChanged,
+      obscureText: isPassword ? signupProvider.obscurePassword : false,
       cursorColor: Colors.black,
       decoration: InputDecoration(
         hintText: label,
@@ -37,11 +40,11 @@ class CustomTextField extends StatelessWidget {
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  loginProvider.obscurePassword
+                  signupProvider.obscurePassword
                       ? Icons.visibility_off
                       : Icons.visibility,
                 ),
-                onPressed: loginProvider.togglePasswordVisibility,
+                onPressed: signupProvider.togglePasswordVisibility,
               )
             : null,
       ),
