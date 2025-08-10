@@ -24,9 +24,7 @@ class SignupView extends StatelessWidget {
           passwordController,
         ),
       ),
-      appBar: CustomAppbar(
-        showBackButton: true,
-      ),
+      appBar: CustomAppbar(showBackButton: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -38,11 +36,15 @@ class SignupView extends StatelessWidget {
                   const Spacer(),
                   _buildSignupText(),
                   const SizedBox(height: 20),
-                  _buildTextField(nameController, "Name"),
+                  _buildNameTextField(nameController, "Name", provider),
                   const SizedBox(height: 10),
-                  _buildTextField(emailController, "Email"),
+                  _buildEmailTextField(emailController, "Email", provider),
                   const SizedBox(height: 10),
-                  _buildPasswordTextfield(passwordController, "Password"),
+                  _buildPasswordTextfield(
+                    passwordController,
+                    "Password",
+                    provider,
+                  ),
                   const SizedBox(height: 20),
                   if (provider.error != null)
                     Text(
@@ -70,15 +72,46 @@ Widget _buildSignupText() {
   );
 }
 
-Widget _buildTextField(TextEditingController controller, String label) {
-  return CustomTextField(controller: controller, label: label);
+Widget _buildNameTextField(
+  TextEditingController controller,
+  String label,
+  SignupProvider provider,
+) {
+  return CustomTextField(
+    controller: controller,
+    label: label,
+    onChanged: (value) {
+      provider.updateName(value);
+    },
+  );
 }
 
-Widget _buildPasswordTextfield(TextEditingController controller, String label) {
+Widget _buildEmailTextField(
+  TextEditingController controller,
+  String label,
+  SignupProvider provider,
+) {
+  return CustomTextField(
+    controller: controller,
+    label: label,
+    onChanged: (value) {
+      provider.updateEmail(value);
+    },
+  );
+}
+
+Widget _buildPasswordTextfield(
+  TextEditingController controller,
+  String label,
+  SignupProvider provider,
+) {
   return CustomTextField(
     controller: controller,
     label: label,
     isPassword: true,
+    onChanged: (value) {
+      provider.updatePassword(value);
+    },
   );
 }
 
@@ -88,29 +121,33 @@ Widget _buildSignupButton(
   TextEditingController emailController,
   TextEditingController passwordController,
 ) {
-  final provider = Provider.of<SignupProvider>(context, listen: false);
+  return Consumer<SignupProvider>(
+    builder: (context, provider, _) {
+      return CustomButton(
+        text: "Sign Up",
+        backgroundColor: provider.isSignUpEnabled ? Colors.black : Colors.grey,
+        textColor: Colors.white,
+        onTap: provider.isSignUpEnabled
+            ? () async {
+                provider.showLoadingDialog(context);
 
-  return CustomButton(
-    text: "Sign Up",
-    backgroundColor: Colors.black,
-    textColor: Colors.white,
-    onTap: () async {
-      provider.showLoadingDialog(context);
+                final success = await provider.signup(
+                  nameController.text,
+                  emailController.text,
+                  passwordController.text,
+                );
 
-      final success = await provider.signup(
-        nameController.text,
-        emailController.text,
-        passwordController.text,
+                if (context.mounted) Navigator.pop(context);
+
+                if (success && context.mounted) {
+                  print("Successful sign up");
+                  Navigator.pop(context);
+                } else {
+                  print("Sign up failed: ${provider.error}");
+                }
+              }
+            : null,
       );
-
-      if (context.mounted) Navigator.pop(context);
-
-      if (success && context.mounted) {
-        print("✅ Successful sign up");
-        Navigator.pop(context);
-      } else {
-        print("❌ Sign up failed: ${provider.error}");
-      }
     },
   );
 }

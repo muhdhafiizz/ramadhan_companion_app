@@ -6,8 +6,12 @@ import 'package:ramadhan_companion_app/widgets/custom_success_dialog.dart';
 class SignupProvider extends ChangeNotifier {
   bool _obscurePassword = true;
   String? error;
+  String _name = '';
+  String _email = '';
+  String _password = '';
 
   bool get obscurePassword => _obscurePassword;
+  bool get isSignUpEnabled => _email.isNotEmpty && _password.isNotEmpty && _name.isNotEmpty;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -65,4 +69,20 @@ class SignupProvider extends ChangeNotifier {
           const CustomSuccessDialog(message: "Logged in successfully!"),
     );
   }
+
+  void updateName(String value){
+    _name = value;
+    notifyListeners();
+  }
+
+  void updateEmail(String value) {
+    _email = value;
+    notifyListeners();
+  }
+
+  void updatePassword(String value) {
+    _password = value;
+    notifyListeners();
+  }
+
 }
