@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
+import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
@@ -240,6 +241,7 @@ void _showLogoutConfirmation(
             onPressed: () {
               Navigator.pop(context);
               provider.logout();
+              context.read<LoginProvider>().resetLoginState();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => LoginView()),
@@ -280,6 +282,7 @@ void _showLogoutConfirmation(
                 onTap: () {
                   Navigator.pop(context);
                   provider.logout();
+                  context.read<LoginProvider>().resetLoginState();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => LoginView()),
