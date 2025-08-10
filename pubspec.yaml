@@ -11,6 +11,7 @@ dependencies:
   firebase_core: ^4.0.0
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
   html: ^0.15.6
   lottie: ^3.3.1
   provider: ^6.1.5
@@ -25,7 +26,14 @@ flutter:
   uses-material-design: true
   assets:
     - assets/lottie/mosque_lottie.json
+    - assets/icon/app_icon.jpg
   fonts:
-  - family: Liter
-    fonts:
-      - asset: assets/font/Liter-Regular.ttf
+    - family: Liter
+      fonts:
+        - asset: assets/font/Liter-Regular.ttf
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.jpg"
+  min_sdk_android: 21
