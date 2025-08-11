@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/signup_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
@@ -132,6 +133,14 @@ Widget _buildLoginButton(
                     context,
                     MaterialPageRoute(builder: (_) => const PrayerTimesView()),
                   );
+                  Provider.of<PrayerTimesProvider>(
+                    context,
+                    listen: false,
+                  ).fetchRandomVerse();
+                  Provider.of<PrayerTimesProvider>(
+                    context,
+                    listen: false,
+                  ).fetchHijriDate();
                 }
               }
             : null,
