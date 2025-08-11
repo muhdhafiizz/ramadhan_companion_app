@@ -17,6 +17,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
         child: Column(
@@ -28,17 +29,17 @@ class LoginView extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Consumer<LoginProvider>(
             builder: (context, provider, _) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Spacer(),
+                  const SizedBox(height: 40),
                   _buildLottieView(),
                   _buildLoginText(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   _buildEmailTextfield(emailController, "Email", provider),
                   const SizedBox(height: 10),
                   _buildPasswordTextfield(
@@ -46,7 +47,7 @@ class LoginView extends StatelessWidget {
                     "Password",
                     provider,
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   if (provider.error != null)
                     Text(
                       provider.error!,
@@ -55,7 +56,7 @@ class LoginView extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  Spacer(),
+                  const SizedBox(height: 40),
                 ],
               );
             },
