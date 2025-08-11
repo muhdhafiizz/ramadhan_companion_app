@@ -10,7 +10,7 @@ It also has **user authentication** with email/password login and signup.
 Use this account to log in and test the app immediately:
 
 **Email:** test@gmail.com  
-**Password:** Test1234
+**Password:** test1234
 
 ---
 
