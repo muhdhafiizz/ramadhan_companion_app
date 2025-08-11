@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
-import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_appbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';

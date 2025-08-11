@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
-import 'package:ramadhan_companion_app/widgets/custom_success_dialog.dart';
 
 class SignupProvider extends ChangeNotifier {
   bool _obscurePassword = true;
