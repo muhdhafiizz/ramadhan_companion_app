@@ -7,6 +7,9 @@ class CustomSuccessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (context.mounted) Navigator.pop(context);
+    });
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -34,7 +37,7 @@ class CustomSuccessDialog extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
-              )
+              ),
             ],
           ),
         ),
