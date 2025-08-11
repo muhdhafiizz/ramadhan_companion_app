@@ -4,11 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ramadhan_companion_app/model/hijri_date_model.dart';
 import 'package:ramadhan_companion_app/model/prayer_times_model.dart';
+import 'package:ramadhan_companion_app/model/quran_daily_model.dart';
 import 'package:ramadhan_companion_app/service/hijri_date_service.dart';
 import 'package:ramadhan_companion_app/service/prayer_times_service.dart';
+import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
 
 class PrayerTimesProvider extends ChangeNotifier {
-  bool _isLoading = false;
+  bool _isPrayerTimesLoading = false;
+  bool _isQuranVerseLoading = false;
+  bool _isHijriDateLoading = false;
   bool _shouldAskLocation = false;
   String? _error;
   String? _city;
@@ -22,8 +26,13 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? _hijriYear;
   HijriDateModel? _hijriDateModel;
   PrayerTimesModel? _times;
+  QuranDailyModel? _quranDaily;
 
-  bool get isLoading => _isLoading;
+  final service = QuranDailyService();
+
+  bool get isPrayerTimesLoading => _isPrayerTimesLoading;
+  bool get isQuranVerseLoading => _isQuranVerseLoading;
+  bool get isHijriDateLoading => _isHijriDateLoading;
   bool get shouldAskLocation => _shouldAskLocation;
   String? get error => _error;
   String? get city => _city;
@@ -36,6 +45,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? get hijriYear => _hijriYear;
   PrayerTimesModel? get times => _times;
   HijriDateModel? get hijriDateModel => _hijriDateModel;
+  QuranDailyModel? get quranDaily => _quranDaily;
 
   PrayerTimesProvider() {
     _init();
@@ -49,7 +59,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   }
 
   Future<void> fetchPrayerTimes(String city, String country) async {
-    _isLoading = true;
+    _isPrayerTimesLoading = true;
     _error = null;
     _city = city;
     _country = country;
@@ -58,13 +68,35 @@ class PrayerTimesProvider extends ChangeNotifier {
     try {
       _times = await PrayerTimesService().getPrayerTimes(city, country);
       startCountdown();
-      _hijriDateModel = await HijriDateService()
-          .getTodayHijriDate(); // call service
+      _hijriDateModel = await HijriDateService().getTodayHijriDate();
     } catch (e) {
       _error = e.toString();
     } finally {
-      _isLoading = false;
+      _isPrayerTimesLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> fetchHijriDate() async {
+    try {
+      _hijriDateModel = await HijriDateService().getTodayHijriDate();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  void fetchRandomVerse() async {
+    try {
+      final verse = await service.getRandomVerse();
+      _quranDaily = verse;
+      notifyListeners();
+      print(
+        "${verse.surahName} [${verse.ayahNo}]: ${verse.arabic} — ${verse.english}",
+      );
+    } catch (e) {
+      print("Error: $e");
     }
   }
 
@@ -130,7 +162,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   }
 
   void checkIfShouldAskLocation() {
-    if (times == null && !isLoading) {
+    if (times == null && !_isPrayerTimesLoading) {
       _shouldAskLocation = true;
       notifyListeners();
     }
