@@ -26,51 +26,18 @@ class PrayerTimesView extends StatelessWidget {
                 provider.setLocationAsked();
               });
             }
-
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildWelcomeText(context, provider),
                   const SizedBox(height: 10),
-                  if (provider.city != null && provider.country != null)
-                    _buildLocationText(provider),
+                  _buildHijriAndGregorianDate(provider, context),
                   const SizedBox(height: 20),
-                  _buildResetLocationInkwell(context, provider),
-                  const SizedBox(height: 10),
-                  if (provider.error != null)
-                    Text(
-                      provider.error!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  if (provider.times != null || provider.isLoading) ...[
-                    _buildPrayerTimesRow(
-                      "Fajr",
-                      provider.times?.fajr,
-                      provider.isLoading,
-                    ),
-                    _buildPrayerTimesRow(
-                      "Dhuhr",
-                      provider.times?.dhuhr,
-                      provider.isLoading,
-                    ),
-                    _buildPrayerTimesRow(
-                      "Asr",
-                      provider.times?.asr,
-                      provider.isLoading,
-                    ),
-                    _buildPrayerTimesRow(
-                      "Maghrib",
-                      provider.times?.maghrib,
-                      provider.isLoading,
-                    ),
-                    _buildPrayerTimesRow(
-                      "Isha",
-                      provider.times?.isha,
-                      provider.isLoading,
-                    ),
-                  ],
+                  _buildCountdown(provider),
+                  const SizedBox(height: 20),
+                  _buildErrorText(provider),
+                  _buildPrayerTimesSection(provider),
                 ],
               ),
             );
@@ -105,36 +72,126 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
   );
 }
 
-Widget _buildLocationText(PrayerTimesProvider provider) {
-  return Align(
-    alignment: Alignment.center,
-    child: Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Text(
-        "📍 ${provider.city}, ${provider.country}",
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+Widget _buildHijriAndGregorianDate(
+  PrayerTimesProvider provider,
+  BuildContext context,
+) {
+  return provider.hijriDateModel != null
+      ? Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            _buildLocationText(provider, context),
+          ],
+        )
+      : const SizedBox.shrink();
+}
+
+Widget _buildLocationText(PrayerTimesProvider provider, BuildContext context) {
+  return (provider.city != null && provider.country != null)
+      ? Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: InkWell(
+            onTap: () => _showLocationBottomSheet(context, provider),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text("📍"),
+                Text(
+                  "${provider.city}, ${provider.country}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+      : const SizedBox.shrink();
+}
+
+Widget _buildCountdown(PrayerTimesProvider provider) {
+  if (provider.isLoading) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        ShimmerLoadingWidget(width: 120, height: 24), // countdown text
+        SizedBox(height: 8),
+        ShimmerLoadingWidget(width: 220, height: 18), // subtitle
+      ],
+    );
+  }
+
+  if (provider.countdownText.isNotEmpty) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            provider.countdownText,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(color: Colors.black),
+              children: [
+                const TextSpan(text: "Countdown to the next prayer: "),
+                TextSpan(
+                  text: provider.nextPrayerText,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-    ),
+    );
+  }
+
+  return const SizedBox.shrink();
+}
+
+Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
+  if (provider.times == null && !provider.isLoading) {
+    return const SizedBox.shrink();
+  }
+
+  return Column(
+    children: [
+      _buildPrayerTimesRow("Fajr", provider.times?.fajr, provider.isLoading),
+      _buildPrayerTimesRow("Dhuhr", provider.times?.dhuhr, provider.isLoading),
+      _buildPrayerTimesRow("Asr", provider.times?.asr, provider.isLoading),
+      _buildPrayerTimesRow(
+        "Maghrib",
+        provider.times?.maghrib,
+        provider.isLoading,
+      ),
+      _buildPrayerTimesRow("Isha", provider.times?.isha, provider.isLoading),
+    ],
   );
 }
 
-Widget _buildResetLocationInkwell(
-  BuildContext context,
-  PrayerTimesProvider provider,
-) {
-  return Align(
-    alignment: Alignment.centerRight,
-    child: InkWell(
-      onTap: () => _showLocationBottomSheet(context, provider),
-      child: const Text(
-        "Reset your location",
-        style: TextStyle(
-          decoration: TextDecoration.underline,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  );
+Widget _buildErrorText(PrayerTimesProvider provider) {
+  return provider.error != null
+      ? Text(provider.error!, style: const TextStyle(color: Colors.red))
+      : const SizedBox.shrink();
 }
 
 Widget _buildPrayerTimesRow(
