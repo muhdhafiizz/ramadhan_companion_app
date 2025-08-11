@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ramadhan_companion_app/model/hijri_date_model.dart';
 import 'package:ramadhan_companion_app/model/prayer_times_model.dart';
+import 'package:ramadhan_companion_app/service/hijri_date_service.dart';
 import 'package:ramadhan_companion_app/service/prayer_times_service.dart';
 
 class PrayerTimesProvider extends ChangeNotifier {
@@ -9,6 +13,14 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? _error;
   String? _city;
   String? _country;
+  String _countdownText = "";
+  String _nextPrayerText = "";
+  Timer? _countdownTimer;
+  String? _hijriDate;
+  String? _hijriDay;
+  String? _hijriMonth;
+  String? _hijriYear;
+  HijriDateModel? _hijriDateModel;
   PrayerTimesModel? _times;
 
   bool get isLoading => _isLoading;
@@ -16,7 +28,14 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? get error => _error;
   String? get city => _city;
   String? get country => _country;
+  String get countdownText => _countdownText;
+  String get nextPrayerText => _nextPrayerText;
+  String? get hijriDate => _hijriDate;
+  String? get hijriDay => _hijriDay;
+  String? get hijriMonth => _hijriMonth;
+  String? get hijriYear => _hijriYear;
   PrayerTimesModel? get times => _times;
+  HijriDateModel? get hijriDateModel => _hijriDateModel;
 
   PrayerTimesProvider() {
     _init();
@@ -38,12 +57,72 @@ class PrayerTimesProvider extends ChangeNotifier {
 
     try {
       _times = await PrayerTimesService().getPrayerTimes(city, country);
+      startCountdown();
+      _hijriDateModel = await HijriDateService()
+          .getTodayHijriDate(); // call service
     } catch (e) {
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void startCountdown() {
+    _countdownTimer?.cancel();
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_times == null) return;
+
+      final now = DateTime.now();
+
+      final prayerMap = {
+        "Fajr": _times!.fajr,
+        "Dhuhr": _times!.dhuhr,
+        "Asr": _times!.asr,
+        "Maghrib": _times!.maghrib,
+        "Isha": _times!.isha,
+      };
+
+      final prayerTimesList = prayerMap.entries.map((entry) {
+        final parts = entry.value.split(":");
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        return MapEntry(
+          entry.key,
+          DateTime(now.year, now.month, now.day, hour, minute),
+        );
+      }).toList();
+
+      MapEntry<String, DateTime>? nextPrayer = prayerTimesList.firstWhere(
+        (entry) => entry.value.isAfter(now),
+        orElse: () {
+          final parts = prayerMap["Fajr"]!.split(":");
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          return MapEntry(
+            "Fajr",
+            DateTime(now.year, now.month, now.day + 1, hour, minute),
+          );
+        },
+      );
+
+      final diff = nextPrayer.value.difference(now);
+      final hours = diff.inHours.toString().padLeft(2, '0');
+      final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+      final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
+
+      _countdownText = "$hours:$minutes:$seconds";
+      _nextPrayerText = nextPrayer.key;
+
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> logout() async {
