@@ -52,24 +52,6 @@ class SignupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.2),
-      builder: (_) => const LoadingDialog(),
-    );
-  }
-
-  void showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) =>
-          const CustomSuccessDialog(message: "Logged in successfully!"),
-    );
-  }
-
   void updateName(String value){
     _name = value;
     notifyListeners();

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
+import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_appbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
+import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
+import 'package:ramadhan_companion_app/widgets/custom_success_dialog.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 
 class SignupView extends StatelessWidget {
@@ -129,7 +132,7 @@ Widget _buildSignupButton(
         textColor: Colors.white,
         onTap: provider.isSignUpEnabled
             ? () async {
-                provider.showLoadingDialog(context);
+                showLoadingDialog(context);
 
                 final success = await provider.signup(
                   nameController.text,
@@ -141,7 +144,18 @@ Widget _buildSignupButton(
 
                 if (success && context.mounted) {
                   print("Successful sign up");
-                  Navigator.pop(context);
+
+                  await showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (_) => const CustomSuccessDialog(
+                      message: "Signed up successfully!",
+                    ),
+                  );
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 } else {
                   print("Sign up failed: ${provider.error}");
                 }
@@ -149,5 +163,23 @@ Widget _buildSignupButton(
             : null,
       );
     },
+  );
+}
+
+void showLoadingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black.withOpacity(0.2),
+    builder: (_) => const LoadingDialog(),
+  );
+}
+
+void showSuccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black.withOpacity(0.2),
+    builder: (_) => const LoadingDialog(),
   );
 }
