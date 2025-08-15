@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:ramadhan_companion_app/model/hijri_date_model.dart';
 import 'package:ramadhan_companion_app/model/prayer_times_model.dart';
 import 'package:ramadhan_companion_app/model/quran_daily_model.dart';
+import 'package:ramadhan_companion_app/model/random_hadith_model.dart';
 import 'package:ramadhan_companion_app/service/hijri_date_service.dart';
 import 'package:ramadhan_companion_app/service/prayer_times_service.dart';
 import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
+import 'package:ramadhan_companion_app/service/random_hadith_service.dart';
 
 class PrayerTimesProvider extends ChangeNotifier {
   bool _isPrayerTimesLoading = false;
@@ -27,8 +29,10 @@ class PrayerTimesProvider extends ChangeNotifier {
   HijriDateModel? _hijriDateModel;
   PrayerTimesModel? _times;
   QuranDailyModel? _quranDaily;
+  RandomHadithModel? _hadithDaily;
 
-  final service = QuranDailyService();
+  final quranService = QuranDailyService();
+  final hadithService = RandomHadithService();
 
   bool get isPrayerTimesLoading => _isPrayerTimesLoading;
   bool get isQuranVerseLoading => _isQuranVerseLoading;
@@ -46,6 +50,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   PrayerTimesModel? get times => _times;
   HijriDateModel? get hijriDateModel => _hijriDateModel;
   QuranDailyModel? get quranDaily => _quranDaily;
+  RandomHadithModel? get hadithDaily => _hadithDaily;
 
   PrayerTimesProvider() {
     _init();
@@ -89,7 +94,7 @@ class PrayerTimesProvider extends ChangeNotifier {
 
   void fetchRandomVerse() async {
     try {
-      final verse = await service.getRandomVerse();
+      final verse = await quranService.getRandomVerse();
       _quranDaily = verse;
       notifyListeners();
       print(
@@ -97,6 +102,18 @@ class PrayerTimesProvider extends ChangeNotifier {
       );
     } catch (e) {
       print("Error: $e");
+    }
+  }
+
+  void fetchRandomHadith() async {
+    print("Is it here?");
+    try {
+      final hadith = await hadithService.fetchRandomHadith();
+      print("Fetched hadith: $hadith");
+      _hadithDaily = hadith;
+      notifyListeners();
+    } catch (e) {
+      print("Error $e");
     }
   }
 
