@@ -11,8 +11,8 @@ import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
 
 class PrayerTimesProvider extends ChangeNotifier {
   bool _isPrayerTimesLoading = false;
-  bool _isQuranVerseLoading = false;
-  bool _isHijriDateLoading = false;
+  final bool _isQuranVerseLoading = false;
+  final bool _isHijriDateLoading = false;
   bool _shouldAskLocation = false;
   String? _error;
   String? _city;
