@@ -141,6 +141,10 @@ Widget _buildLoginButton(
                   Provider.of<PrayerTimesProvider>(
                     context,
                     listen: false,
+                  ).fetchRandomHadith();
+                  Provider.of<PrayerTimesProvider>(
+                    context,
+                    listen: false,
                   ).fetchHijriDate();
                 }
               }

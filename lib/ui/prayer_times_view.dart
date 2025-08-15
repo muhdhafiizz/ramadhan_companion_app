@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
@@ -10,22 +12,40 @@ import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class PrayerTimesView extends StatelessWidget {
   const PrayerTimesView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final RefreshController refreshController = RefreshController(
+      initialRefresh: false,
+    );
+
+    Future<void> _refreshData() async {
+      final provider = context.read<PrayerTimesProvider>();
+
+      if (provider.city != null && provider.country != null) {
+        await provider.fetchPrayerTimes(provider.city!, provider.country!);
+      }
+      await provider.quranService.getRandomVerse();
+      await provider.hadithService.fetchRandomHadith();
+
+      refreshController.refreshCompleted();
+    }
+
     return Scaffold(
       body: SafeArea(
-        child: Consumer<PrayerTimesProvider>(
-          builder: (context, provider, _) {
+        child: Consumer2<PrayerTimesProvider, CarouselProvider>(
+          builder: (context, provider, carouselProvider, _) {
             if (provider.shouldAskLocation) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _showLocationBottomSheet(context, provider);
                 provider.setLocationAsked();
               });
             }
+
             return Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -33,20 +53,28 @@ class PrayerTimesView extends StatelessWidget {
                 children: [
                   _buildWelcomeText(context, provider),
                   const SizedBox(height: 10),
+                  _buildHijriAndGregorianDate(provider, context),
+                  const SizedBox(height: 20),
                   Expanded(
-                    child: ListView(
-                      children: [
-                        _buildHijriAndGregorianDate(provider, context),
-                        const SizedBox(height: 20),
-                        _buildCountdown(provider),
-                        const SizedBox(height: 20),
-                        _buildErrorText(provider),
-                        _buildPrayerTimesSection(provider),
-                        const SizedBox(height: 20),
-                        _buildTitleText("Daily Quran Verse"),
-                        const SizedBox(height: 10),
-                        _buildDailyQuranVerse(provider),
-                      ],
+                    child: SmartRefresher(
+                      controller: refreshController,
+                      enablePullDown: true,
+                      onRefresh: _refreshData,
+                      header:
+                          const WaterDropHeader(), // Instagram/Facebook feel
+                      child: ListView(
+                        children: [
+                          _buildIconsRow(),
+                          const SizedBox(height: 20),
+                          _buildCountdown(provider),
+                          const SizedBox(height: 20),
+                          _buildErrorText(provider),
+                          _buildPrayerTimesSection(provider),
+                          const SizedBox(height: 20),
+                          _buildTitleText("Random Verse"),
+                          _dailyVerseCarousel(provider, carouselProvider),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -238,9 +266,42 @@ Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
   );
 }
 
+Widget _dailyVerseCarousel(
+  PrayerTimesProvider provider,
+  CarouselProvider carouselProvider,
+) {
+  return Column(
+    children: [
+      SizedBox(
+        height: 270,
+        child: PageView(
+          controller: carouselProvider.pageController,
+          onPageChanged: (index) {
+            carouselProvider.onPageChanged(index);
+          },
+          children: [
+            _buildDailyQuranVerse(provider),
+            _buildHadithVerse(provider),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      SmoothPageIndicator(
+        controller: carouselProvider.pageController,
+        count: 2,
+        effect: const WormEffect(
+          dotHeight: 13,
+          dotWidth: 13,
+          activeDotColor: Colors.deepPurple,
+        ),
+      ),
+    ],
+  );
+}
+
 Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10.0, right: 10),
+    padding: const EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -277,11 +338,15 @@ Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.right,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 20),
                   Text(
                     provider.quranDaily!.english,
                     style: const TextStyle(fontSize: 16),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -298,6 +363,73 @@ Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
                 ],
               )
             : const SizedBox.shrink(),
+      ),
+    ),
+  );
+}
+
+Widget _buildHadithVerse(PrayerTimesProvider provider) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10.0, right: 10, top: 20, bottom: 20),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.30),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: provider.hadithDaily == null
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  ShimmerLoadingWidget(width: 120, height: 24),
+                  SizedBox(height: 20),
+                  ShimmerLoadingWidget(width: 220, height: 18),
+                  SizedBox(height: 8),
+                  ShimmerLoadingWidget(width: 100, height: 16),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    provider.hadithDaily!.hadithArabic,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.right,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    provider.hadithDaily!.hadithEnglish,
+                    style: const TextStyle(fontSize: 16),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        provider.hadithDaily!.bookSlug,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 2),
+                      Text(": ${provider.hadithDaily!.volume}"),
+                    ],
+                  ),
+                ],
+              ),
       ),
     ),
   );
@@ -350,6 +482,43 @@ Widget _buildInsertText() {
   return Text(
     "Please insert your city and country to determine prayer times.",
     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+  );
+}
+
+Widget _buildIconsRow() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    children: [_buildLocateMasjidNearby(), _buildQiblaFinder()],
+  );
+}
+
+Widget _buildLocateMasjidNearby() {
+  return GestureDetector(
+    onTap: () {
+      print("Locate to masjid");
+    },
+    child: Column(
+      children: [
+        Image.asset('assets/icon/masjid_icon.png', height: 50, width: 50),
+        SizedBox(height: 5),
+        Text("Masjid Nearby", style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    ),
+  );
+}
+
+Widget _buildQiblaFinder() {
+  return GestureDetector(
+    onTap: () {
+      print("Locate to masjid");
+    },
+    child: Column(
+      children: [
+        Image.asset('assets/icon/kaaba_icon.png', height: 50, width: 50),
+        SizedBox(height: 5),
+        Text("Qibla Finder", style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    ),
   );
 }
 
