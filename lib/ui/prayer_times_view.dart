@@ -540,6 +540,19 @@ Widget _buildQiblaFinder() {
   );
 }
 
+Widget _buildLocateMe(BuildContext context, PrayerTimesProvider provider) {
+  return GestureDetector(
+    onTap: () async {
+      Navigator.pop(context);
+      await provider.locateMe();
+    },
+    child: const Text(
+      'Locate me instead',
+      style: TextStyle(decoration: TextDecoration.underline),
+    ),
+  );
+}
+
 void _showLocationBottomSheet(
   BuildContext context,
   PrayerTimesProvider provider,
@@ -579,6 +592,8 @@ void _showLocationBottomSheet(
                     onChanged: locationProvider.setCountry,
                   ),
                   const SizedBox(height: 20),
+                  _buildLocateMe(context, provider),
+                  const SizedBox(height: 10),
                   CustomButton(
                     text: "Find your prayer times",
                     backgroundColor: Colors.black,
