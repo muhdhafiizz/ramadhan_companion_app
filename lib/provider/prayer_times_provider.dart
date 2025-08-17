@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:ramadhan_companion_app/model/hijri_date_model.dart';
 import 'package:ramadhan_companion_app/model/prayer_times_model.dart';
 import 'package:ramadhan_companion_app/model/quran_daily_model.dart';
@@ -92,6 +94,55 @@ class PrayerTimesProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> locateMe() async {
+    _isPrayerTimesLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Request permission if not granted
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception("Location permissions are denied");
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception("Location permissions are permanently denied");
+      }
+
+      // Get device location
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Reverse-geocode into city/country
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
+      if (placemarks.isEmpty) {
+        throw Exception("Could not determine address from coordinates");
+      }
+      final placemark = placemarks.first;
+      final city = placemark.locality ?? placemark.subAdministrativeArea ?? "";
+      final country = placemark.country ?? "";
+
+      if (city.isEmpty || country.isEmpty) {
+        throw Exception("Could not determine city/country from location");
+      }
+
+      // Use existing prayer times fetcher
+      await fetchPrayerTimes(city, country);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isPrayerTimesLoading = false;
+      notifyListeners();
+    }
+  }
+
   void fetchRandomVerse() async {
     try {
       final verse = await quranService.getRandomVerse();
@@ -106,7 +157,6 @@ class PrayerTimesProvider extends ChangeNotifier {
   }
 
   void fetchRandomHadith() async {
-    print("Is it here?");
     try {
       final hadith = await hadithService.fetchRandomHadith();
       print("Fetched hadith: $hadith");
