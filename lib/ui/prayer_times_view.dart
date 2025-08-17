@@ -11,6 +11,7 @@ import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
+import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
@@ -238,32 +239,41 @@ Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
 
   return Column(
     children: [
-      _buildPrayerTimesRow(
-        "Fajr",
-        provider.times?.fajr,
-        provider.isPrayerTimesLoading,
-      ),
-      _buildPrayerTimesRow(
-        "Dhuhr",
-        provider.times?.dhuhr,
-        provider.isPrayerTimesLoading,
-      ),
-      _buildPrayerTimesRow(
-        "Asr",
-        provider.times?.asr,
-        provider.isPrayerTimesLoading,
-      ),
-      _buildPrayerTimesRow(
+      _buildPrayerRowWithHighlight("Fajr", provider.times?.fajr, provider),
+      _buildPrayerRowWithHighlight("Dhuhr", provider.times?.dhuhr, provider),
+      _buildPrayerRowWithHighlight("Asr", provider.times?.asr, provider),
+      _buildPrayerRowWithHighlight(
         "Maghrib",
         provider.times?.maghrib,
-        provider.isPrayerTimesLoading,
+        provider,
       ),
-      _buildPrayerTimesRow(
-        "Isha",
-        provider.times?.isha,
-        provider.isPrayerTimesLoading,
-      ),
+      _buildPrayerRowWithHighlight("Isha", provider.times?.isha, provider),
     ],
+  );
+}
+
+Widget _buildPrayerRowWithHighlight(
+  String prayer,
+  String? time,
+  PrayerTimesProvider provider,
+) {
+  bool isNext = provider.nextPrayerText.toLowerCase() == prayer.toLowerCase();
+
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 3),
+    decoration: BoxDecoration(
+      color: isNext ? Colors.green.withOpacity(0.15) : null,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 8),
+      child: _buildPrayerTimesRow(
+        prayer,
+        time,
+        provider.isPrayerTimesLoading,
+        isNext: isNext,
+      ),
+    ),
   );
 }
 
@@ -463,8 +473,9 @@ Widget _buildErrorText(PrayerTimesProvider provider) {
 Widget _buildPrayerTimesRow(
   String prayerName,
   String? prayerTime,
-  bool isLoading,
-) {
+  bool isLoading, {
+  bool isNext = false,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
@@ -473,7 +484,12 @@ Widget _buildPrayerTimesRow(
         Text(prayerName, style: const TextStyle(fontWeight: FontWeight.bold)),
         isLoading
             ? const ShimmerLoadingWidget(width: 60, height: 16)
-            : Text(prayerTime ?? "-"),
+            : Text(
+                prayerTime ?? "--:--",
+                style: TextStyle(
+                  fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
       ],
     ),
   );
@@ -491,7 +507,7 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
     mainAxisAlignment: MainAxisAlignment.spaceAround,
     children: [
       _buildLocateMasjidNearby(context, provider),
-      _buildQiblaFinder(),
+      _buildQiblaFinder(context, provider),
     ],
   );
 }
@@ -525,10 +541,19 @@ Widget _buildLocateMasjidNearby(
   );
 }
 
-Widget _buildQiblaFinder() {
+Widget _buildQiblaFinder(BuildContext context, PrayerTimesProvider provider) {
   return GestureDetector(
     onTap: () {
       print("Locate to masjid");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => QiblaCompassView(
+            city: provider.city ?? "",
+            country: provider.country ?? "",
+          ),
+        ),
+      );
     },
     child: Column(
       children: [

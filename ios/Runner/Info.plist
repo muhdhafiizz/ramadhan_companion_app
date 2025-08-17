@@ -16,6 +16,10 @@
 <string>This app needs access to your location to show prayer times</string>
 <key>NSLocationAlwaysUsageDescription</key>
 <string>This app needs access to your location to show prayer times</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>To get location and direction</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>To get location and direction</string>
 	<key>CFBundleName</key>
 	<string>ramadhan_companion_app</string>
 	<key>CFBundlePackageType</key>

@@ -1,17 +1,34 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:ramadhan_companion_app/service/masjid_nearby_service.dart';
 
 class QiblaProvider extends ChangeNotifier {
   final _masjidService = MasjidNearbyService();
 
-  double? _bearing;
+  double? _qiblaBearing;
+  double? _deviceHeading;
   bool _isLoading = false;
   String? _error;
 
-  double? get bearing => _bearing;
+  bool _wasAligned = false;
+  StreamSubscription<CompassEvent>? _compassSubscription;
+
+  double? get qiblaBearing => _qiblaBearing;
+  double? get deviceHeading => _deviceHeading;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  static const double kaabaLat = 21.4225;
+  static const double kaabaLng = 39.8262;
+
+  bool get isAligned {
+    if (_qiblaBearing == null || _deviceHeading == null) return false;
+    final diff = (_qiblaBearing! - _deviceHeading!).abs();
+    return diff < 10 || (360 - diff) < 10;
+  }
 
   Future<void> fetchQibla(String city, String country) async {
     _isLoading = true;
@@ -20,7 +37,20 @@ class QiblaProvider extends ChangeNotifier {
 
     try {
       final coords = await _masjidService.getLatLngFromAddress(city, country);
-      _bearing = calculateQiblaDirection(coords.lat, coords.lng);
+      _qiblaBearing = calculateQiblaDirection(coords.lat, coords.lng);
+
+      _compassSubscription = FlutterCompass.events?.listen((event) {
+        _deviceHeading = event.heading;
+
+        if (isAligned && !_wasAligned) {
+          HapticFeedback.mediumImpact();
+          _wasAligned = true;
+        } else if (!isAligned && _wasAligned) {
+          _wasAligned = false;
+        }
+
+        notifyListeners();
+      });
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -29,10 +59,6 @@ class QiblaProvider extends ChangeNotifier {
     }
   }
 
-  static const double kaabaLat = 21.4225;
-  static const double kaabaLng = 39.8262;
-
-  /// Calculates the bearing (degrees from North) towards the Kaaba
   double calculateQiblaDirection(double userLat, double userLng) {
     final userLatRad = _degToRad(userLat);
     final userLngRad = _degToRad(userLng);
@@ -40,7 +66,6 @@ class QiblaProvider extends ChangeNotifier {
     final kaabaLngRad = _degToRad(kaabaLng);
 
     final diffLng = kaabaLngRad - userLngRad;
-
     final y = sin(diffLng);
     final x =
         cos(userLatRad) * tan(kaabaLatRad) - sin(userLatRad) * cos(diffLng);
@@ -53,4 +78,10 @@ class QiblaProvider extends ChangeNotifier {
 
   double _degToRad(double deg) => deg * pi / 180.0;
   double _radToDeg(double rad) => rad * 180.0 / pi;
+
+  @override
+  void dispose() {
+    _compassSubscription?.cancel();
+    super.dispose();
+  }
 }
