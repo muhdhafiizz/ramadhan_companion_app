@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
+import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 
-class QiblaCompassScreen extends StatelessWidget {
+class QiblaCompassView extends StatelessWidget {
   final String city;
   final String country;
 
-  const QiblaCompassScreen({
+  const QiblaCompassView({
     super.key,
     required this.city,
     required this.country,
@@ -21,43 +22,35 @@ class QiblaCompassScreen extends StatelessWidget {
           child: Column(
             children: [
               _buildAppBar(context),
-              ChangeNotifierProvider(
-                create: (_) => QiblaProvider()..fetchQibla(city, country),
-                child: Consumer<QiblaProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (provider.error != null) {
-                      return Center(child: Text("Error: ${provider.error}"));
-                    }
-                    if (provider.bearing == null) {
-                      return const Center(child: Text("No Qibla data"));
-                    }
+              Expanded(
+                child: ChangeNotifierProvider(
+                  create: (_) => QiblaProvider()..fetchQibla(city, country),
+                  child: Consumer<QiblaProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isLoading) {
+                        return Center(child: _buildShimmerLoading());
+                      }
+                      if (provider.error != null) {
+                        return Center(child: Text("Error: ${provider.error}"));
+                      }
+                      if (provider.qiblaBearing == null) {
+                        return const Center(child: Text("No Qibla data"));
+                      }
 
-                    return Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            "${provider.bearing!.toStringAsFixed(2)}°",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Image.asset("assets/icon/kaaba_icon.png", width: 100, height: 100,),
-                          Transform.rotate(
-                            angle: provider.bearing! * (3.14159 / 180),
-                            child: Icon(
-                              Icons.navigation,
-                              size: 150,
-                              color: Colors.green,
-                            ),
-                          ),
+                          _buildBlendColor(provider),
+                          const SizedBox(height: 20),
+                          _buildDeviceHeadingText(provider),
+                          _buildQiblaHeadingText(provider),
+                          const SizedBox(height: 40),
+                          _buildCompass(provider),
                           const SizedBox(height: 20),
                         ],
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -73,13 +66,76 @@ Widget _buildAppBar(BuildContext context) {
     children: [
       GestureDetector(
         onTap: () => Navigator.pop(context),
-        child: Icon(Icons.arrow_back),
+        child: const Icon(Icons.arrow_back),
       ),
-      SizedBox(width: 10),
-      Text(
+      const SizedBox(width: 10),
+      const Text(
         "Qibla Finder",
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
       ),
+    ],
+  );
+}
+
+Widget _buildBlendColor(QiblaProvider provider) {
+  return ColorFiltered(
+    colorFilter: provider.isAligned
+        ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+        : const ColorFilter.mode(Colors.grey, BlendMode.saturation),
+    child: Image.asset("assets/icon/kaaba_icon.png", width: 100, height: 100),
+  );
+}
+
+Widget _buildDeviceHeadingText(QiblaProvider provider) {
+  return Text(
+    "${(provider.deviceHeading ?? 0).toStringAsFixed(2)}°",
+    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 40),
+  );
+}
+
+Widget _buildQiblaHeadingText(QiblaProvider provider) {
+  return Text(
+    "Qibla: ${provider.qiblaBearing!.toStringAsFixed(2)}°",
+    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  );
+}
+
+Widget _buildCompass(QiblaProvider provider) {
+  return SizedBox(
+    width: 250,
+    height: 250,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 250,
+          height: 250,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.grey.shade400, width: 3),
+          ),
+        ),
+
+        Transform.rotate(
+          angle:
+              ((provider.qiblaBearing ?? 0) - (provider.deviceHeading ?? 0)) *
+              (3.14159 / 180),
+          child: Icon(Icons.navigation, size: 100, color: Colors.green),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildShimmerLoading() {
+  return Column(
+    children: [
+      ShimmerLoadingWidget(width: 50, height: 50),
+      const SizedBox(height: 20),
+      ShimmerLoadingWidget(width: 50, height: 100),
+      ShimmerLoadingWidget(width: 80, height: 50),
+      const SizedBox(height: 40),
+      ShimmerLoadingWidget(width: 100, height: 100),
     ],
   );
 }

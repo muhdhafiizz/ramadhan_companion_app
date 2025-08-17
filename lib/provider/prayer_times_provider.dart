@@ -100,7 +100,6 @@ class PrayerTimesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Request permission if not granted
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -112,12 +111,10 @@ class PrayerTimesProvider extends ChangeNotifier {
         throw Exception("Location permissions are permanently denied");
       }
 
-      // Get device location
       final pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Reverse-geocode into city/country
       final placemarks = await placemarkFromCoordinates(
         pos.latitude,
         pos.longitude,
@@ -133,7 +130,6 @@ class PrayerTimesProvider extends ChangeNotifier {
         throw Exception("Could not determine city/country from location");
       }
 
-      // Use existing prayer times fetcher
       await fetchPrayerTimes(city, country);
     } catch (e) {
       _error = e.toString();

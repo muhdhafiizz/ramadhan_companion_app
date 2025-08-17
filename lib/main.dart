@@ -8,6 +8,7 @@ import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 
@@ -23,6 +24,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LocationInputProvider()),
         ChangeNotifierProvider(create: (_) => CarouselProvider()),
         ChangeNotifierProvider(create: (_) => MasjidNearbyProvider()),
+        ChangeNotifierProvider(create: (_) => QiblaProvider()),
       ],
       child: const MainApp(),
     ),

@@ -7,9 +7,6 @@ import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/secrets/api_keys.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'dart:math';
-
-import 'package:url_launcher/url_launcher.dart';
 
 class MasjidNearbyScreen extends StatelessWidget {
   final String city;
