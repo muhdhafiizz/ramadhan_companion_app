@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+import 'package:ramadhan_companion_app/model/masjid_nearby_model.dart';
+import 'package:ramadhan_companion_app/service/masjid_nearby_service.dart';
+import 'dart:math';
+
+import 'package:url_launcher/url_launcher.dart';
+
+class MasjidNearbyProvider extends ChangeNotifier {
+  final MasjidNearbyService _masjidService = MasjidNearbyService();
+
+  List<MasjidNearbyModel> _masjids = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  double? originLat;
+  double? originLng;
+  String? originCity;
+  String? originCountry;
+
+  List<MasjidNearbyModel> get masjids => _masjids;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> fetchMasjidsFromAddress(String city, String country) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final coords = await _masjidService.getLatLngFromAddress(city, country);
+
+      originLat = coords.lat;
+      originLng = coords.lng;
+      originCity = city;
+      originCountry = country;
+
+      _masjids = await _masjidService.getNearbyMasjids(coords.lat, coords.lng);
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchMasjidsFromCoordinates(double lat, double lng) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      originLat = lat;
+      originLng = lng;
+
+      _masjids = await _masjidService.getNearbyMasjids(lat, lng);
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> openMap(double lat, double lng) async {
+    final googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
+    final wazeUrl = Uri.parse('https://waze.com/ul?ll=$lat,$lng&navigate=yes');
+
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(wazeUrl)) {
+        await launchUrl(wazeUrl, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint("Could not launch any map application.");
+        throw 'Could not launch map';
+      }
+    } catch (e) {
+      debugPrint("Error launching map: $e");
+    }
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const earthRadius = 6371;
+
+    final dLat = _deg2rad(lat2 - lat1);
+    final dLon = _deg2rad(lon2 - lon1);
+
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_deg2rad(lat1)) *
+            cos(_deg2rad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return earthRadius * c;
+  }
+
+  double _deg2rad(double deg) => deg * (pi / 180);
+}

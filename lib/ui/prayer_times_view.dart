@@ -7,8 +7,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
+import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
@@ -60,11 +62,10 @@ class PrayerTimesView extends StatelessWidget {
                       controller: refreshController,
                       enablePullDown: true,
                       onRefresh: _refreshData,
-                      header:
-                          const WaterDropHeader(), // Instagram/Facebook feel
+                      header: const WaterDropHeader(),
                       child: ListView(
                         children: [
-                          _buildIconsRow(),
+                          _buildIconsRow(context, provider),
                           const SizedBox(height: 20),
                           _buildCountdown(provider),
                           const SizedBox(height: 20),
@@ -485,23 +486,40 @@ Widget _buildInsertText() {
   );
 }
 
-Widget _buildIconsRow() {
+Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [_buildLocateMasjidNearby(), _buildQiblaFinder()],
+    children: [
+      _buildLocateMasjidNearby(context, provider),
+      _buildQiblaFinder(),
+    ],
   );
 }
 
-Widget _buildLocateMasjidNearby() {
+Widget _buildLocateMasjidNearby(
+  BuildContext context,
+  PrayerTimesProvider provider,
+) {
   return GestureDetector(
     onTap: () {
-      print("Locate to masjid");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MasjidNearbyScreen(
+            city: provider.city ?? "",
+            country: provider.country ?? "",
+          ),
+        ),
+      );
     },
     child: Column(
       children: [
         Image.asset('assets/icon/masjid_icon.png', height: 50, width: 50),
-        SizedBox(height: 5),
-        Text("Masjid Nearby", style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 5),
+        const Text(
+          "Masjid Nearby",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ],
     ),
   );

@@ -19,6 +19,7 @@ dependencies:
   pull_to_refresh: ^2.0.0
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
     - assets/icon/app_icon.jpg
     - assets/icon/masjid_icon.png
     - assets/icon/kaaba_icon.png
+    - assets/icon/star_icon.png
   fonts:
     - family: Liter
       fonts:
