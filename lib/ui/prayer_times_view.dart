@@ -8,6 +8,7 @@ import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
@@ -513,6 +514,7 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
     children: [
       _buildLocateMasjidNearby(context, provider),
       _buildQiblaFinder(context, provider),
+      _buildIslamicCalendar(context, provider)
     ],
   );
 }
@@ -549,7 +551,6 @@ Widget _buildLocateMasjidNearby(
 Widget _buildQiblaFinder(BuildContext context, PrayerTimesProvider provider) {
   return GestureDetector(
     onTap: () {
-      print("Locate to masjid");
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -565,6 +566,34 @@ Widget _buildQiblaFinder(BuildContext context, PrayerTimesProvider provider) {
         Image.asset('assets/icon/kaaba_icon.png', height: 50, width: 50),
         SizedBox(height: 5),
         Text("Qibla Finder", style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    ),
+  );
+}
+
+Widget _buildIslamicCalendar(
+  BuildContext context,
+  PrayerTimesProvider provider,
+) {
+  return GestureDetector(
+    onTap: () {
+      print("Locate to Islamic Calendar");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => IslamicCalendarView()
+        ),
+      );
+    },
+    child: Column(
+      children: [
+        Image.asset(
+          'assets/icon/islamic_calendar_icon.png',
+          height: 50,
+          width: 50,
+        ),
+        SizedBox(height: 5),
+        Text("Islamic Calendar", style: TextStyle(fontWeight: FontWeight.bold)),
       ],
     ),
   );

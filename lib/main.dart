@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
+import 'package:ramadhan_companion_app/provider/islamic_calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
@@ -28,6 +29,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CarouselProvider()),
         ChangeNotifierProvider(create: (_) => MasjidNearbyProvider()),
         ChangeNotifierProvider(create: (_) => QiblaProvider()),
+        ChangeNotifierProvider(create: (_) => IslamicCalendarProvider()),
       ],
       child: const MainApp(),
     ),

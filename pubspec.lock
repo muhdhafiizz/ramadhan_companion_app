@@ -74,7 +74,7 @@ packages:
     source: hosted
     version: "1.1.2"
   collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection
       sha256: "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76"
@@ -328,6 +328,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.8"
+  hijri:
+    dependency: "direct main"
+    description:
+      name: hijri
+      sha256: "203eb7341e32789af6429877e88411b1526ef44c5d157ce4d3b930dd32c37ef1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
+  hijri_calendar:
+    dependency: "direct main"
+    description:
+      name: hijri_calendar
+      sha256: "5b99f8924b738cb7156fff2c679a261cecf4214c324f2529255afb3a9ccfea58"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7+7"
   html:
     dependency: "direct main"
     description:
