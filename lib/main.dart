@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
+import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
+import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +48,27 @@ class MainApp extends StatelessWidget {
           primaryColor: CupertinoColors.activeBlue,
         ),
       ),
-      home: LoginView(),
+      home: AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: LoadingDialog());
+        }
+        if (snapshot.hasData) {
+          return PrayerTimesView();
+        }
+        return LoginView();
+      },
     );
   }
 }

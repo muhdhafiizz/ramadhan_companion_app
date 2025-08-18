@@ -21,11 +21,17 @@ class PrayerTimesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PrayerTimesProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!provider.shouldAskLocation) provider.initialize();
+    });
+
     final RefreshController refreshController = RefreshController(
       initialRefresh: false,
     );
 
-    Future<void> _refreshData() async {
+    Future<void> refreshData() async {
       final provider = context.read<PrayerTimesProvider>();
 
       if (provider.city != null && provider.country != null) {
@@ -61,7 +67,7 @@ class PrayerTimesView extends StatelessWidget {
                     child: SmartRefresher(
                       controller: refreshController,
                       enablePullDown: true,
-                      onRefresh: _refreshData,
+                      onRefresh: refreshData,
                       header: const WaterDropHeader(),
                       child: ListView(
                         children: [

@@ -12,11 +12,13 @@ import 'package:ramadhan_companion_app/service/hijri_date_service.dart';
 import 'package:ramadhan_companion_app/service/prayer_times_service.dart';
 import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
 import 'package:ramadhan_companion_app/service/random_hadith_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrayerTimesProvider extends ChangeNotifier {
   bool _isPrayerTimesLoading = false;
   final bool _isQuranVerseLoading = false;
   final bool _isHijriDateLoading = false;
+  bool _initialized = false;
   bool _shouldAskLocation = false;
   String? _error;
   String? _city;
@@ -58,8 +60,14 @@ class PrayerTimesProvider extends ChangeNotifier {
     _init();
   }
 
-  void _init() {
-    if (times == null) {
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _city = prefs.getString('city');
+    _country = prefs.getString('country');
+
+    if (_city != null && _country != null) {
+      await fetchPrayerTimes(_city!, _country!);
+    } else {
       _shouldAskLocation = true;
       notifyListeners();
     }
@@ -76,12 +84,27 @@ class PrayerTimesProvider extends ChangeNotifier {
       _times = await PrayerTimesService().getPrayerTimes(city, country);
       startCountdown();
       _hijriDateModel = await HijriDateService().getTodayHijriDate();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('city', city);
+      await prefs.setString('country', country);
     } catch (e) {
       _error = e.toString();
     } finally {
       _isPrayerTimesLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> clearCachedLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('city');
+    await prefs.remove('country');
+    _city = null;
+    _country = null;
+    _times = null;
+    _shouldAskLocation = true;
+    notifyListeners();
   }
 
   Future<void> fetchHijriDate() async {
@@ -137,6 +160,17 @@ class PrayerTimesProvider extends ChangeNotifier {
       _isPrayerTimesLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> initialize() async {
+    if (_initialized) return;
+
+    fetchRandomVerse();
+    fetchRandomHadith();
+    await fetchHijriDate();
+
+    _initialized = true;
+    notifyListeners();
   }
 
   void fetchRandomVerse() async {
