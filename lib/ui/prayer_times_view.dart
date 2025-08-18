@@ -7,7 +7,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
-import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
@@ -72,8 +71,7 @@ class PrayerTimesView extends StatelessWidget {
                           const SizedBox(height: 20),
                           _buildErrorText(provider),
                           _buildPrayerTimesSection(provider),
-                          const SizedBox(height: 20),
-                          _buildTitleText("Random Verse"),
+                          const SizedBox(height: 10),
                           _dailyVerseCarousel(provider, carouselProvider),
                         ],
                       ),
@@ -283,8 +281,9 @@ Widget _dailyVerseCarousel(
 ) {
   return Column(
     children: [
+      _buildTitleText("Random Verse"),
       SizedBox(
-        height: 270,
+        height: 220,
         child: PageView(
           controller: carouselProvider.pageController,
           onPageChanged: (index) {
@@ -312,7 +311,7 @@ Widget _dailyVerseCarousel(
 
 Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
+    padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 20),
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -349,14 +348,14 @@ Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.right,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 20),
                   Text(
                     provider.quranDaily!.english,
                     style: const TextStyle(fontSize: 16),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
@@ -381,7 +380,7 @@ Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
 
 Widget _buildHadithVerse(PrayerTimesProvider provider) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10.0, right: 10, top: 20, bottom: 20),
+    padding: const EdgeInsets.only(left: 10.0, right: 10, top: 10, bottom: 20),
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -417,14 +416,14 @@ Widget _buildHadithVerse(PrayerTimesProvider provider) {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.right,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     provider.hadithDaily!.hadithEnglish,
                     style: const TextStyle(fontSize: 16),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
