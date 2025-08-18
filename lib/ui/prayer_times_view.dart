@@ -8,6 +8,7 @@ import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
 import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
@@ -79,7 +80,7 @@ class PrayerTimesView extends StatelessWidget {
                           _buildErrorText(provider),
                           _buildPrayerTimesSection(provider),
                           const SizedBox(height: 10),
-                          _dailyVerseCarousel(provider, carouselProvider),
+                          _dailyVerseCarousel(provider, carouselProvider, context),
                         ],
                       ),
                     ),
@@ -285,6 +286,7 @@ Widget _buildPrayerRowWithHighlight(
 Widget _dailyVerseCarousel(
   PrayerTimesProvider provider,
   CarouselProvider carouselProvider,
+  BuildContext context
 ) {
   return Column(
     children: [
@@ -297,8 +299,8 @@ Widget _dailyVerseCarousel(
             carouselProvider.onPageChanged(index);
           },
           children: [
-            _buildDailyQuranVerse(provider),
-            _buildHadithVerse(provider),
+            _buildDailyQuranVerse(provider, context),
+            _buildHadithVerse(provider, context),
           ],
         ),
       ),
@@ -316,137 +318,162 @@ Widget _dailyVerseCarousel(
   );
 }
 
-Widget _buildDailyQuranVerse(PrayerTimesProvider provider) {
+Widget _buildDailyQuranVerse(
+  PrayerTimesProvider provider,
+  BuildContext context,
+) {
   return Padding(
     padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 20),
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.30),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+    child: InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                VerseDetailView(type: "quran", verse: provider.quranDaily!),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: provider.isQuranVerseLoading
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ShimmerLoadingWidget(width: 120, height: 24),
-                  SizedBox(height: 20),
-                  ShimmerLoadingWidget(width: 220, height: 18),
-                  SizedBox(height: 8),
-                  ShimmerLoadingWidget(width: 100, height: 16),
-                ],
-              )
-            : provider.quranDaily != null
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    provider.quranDaily!.arabic,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.right,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    provider.quranDaily!.english,
-                    style: const TextStyle(fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        provider.quranDaily!.surahName,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.30),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: provider.isQuranVerseLoading
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ShimmerLoadingWidget(width: 120, height: 24),
+                    SizedBox(height: 20),
+                    ShimmerLoadingWidget(width: 220, height: 18),
+                    SizedBox(height: 8),
+                    ShimmerLoadingWidget(width: 100, height: 16),
+                  ],
+                )
+              : provider.quranDaily != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      provider.quranDaily!.arabic,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 2),
-                      Text(": ${provider.quranDaily!.ayahNo}"),
-                    ],
-                  ),
-                ],
-              )
-            : const SizedBox.shrink(),
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      provider.quranDaily!.english,
+                      style: const TextStyle(fontSize: 16),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          provider.quranDaily!.surahName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(": ${provider.quranDaily!.ayahNo}"),
+                      ],
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
+        ),
       ),
     ),
   );
 }
 
-Widget _buildHadithVerse(PrayerTimesProvider provider) {
+Widget _buildHadithVerse(PrayerTimesProvider provider, BuildContext context) {
   return Padding(
     padding: const EdgeInsets.only(left: 10.0, right: 10, top: 10, bottom: 20),
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.30),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+    child: InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                VerseDetailView(type: "hadith", verse: provider.hadithDaily!),
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: provider.hadithDaily == null
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ShimmerLoadingWidget(width: 120, height: 24),
-                  SizedBox(height: 20),
-                  ShimmerLoadingWidget(width: 220, height: 18),
-                  SizedBox(height: 8),
-                  ShimmerLoadingWidget(width: 100, height: 16),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    provider.hadithDaily!.hadithArabic,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.right,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    provider.hadithDaily!.hadithEnglish,
-                    style: const TextStyle(fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        provider.hadithDaily!.bookSlug,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.30),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: provider.hadithDaily == null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ShimmerLoadingWidget(width: 120, height: 24),
+                    SizedBox(height: 20),
+                    ShimmerLoadingWidget(width: 220, height: 18),
+                    SizedBox(height: 8),
+                    ShimmerLoadingWidget(width: 100, height: 16),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      provider.hadithDaily!.hadithArabic,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 2),
-                      Text(": ${provider.hadithDaily!.volume}"),
-                    ],
-                  ),
-                ],
-              ),
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      provider.hadithDaily!.hadithEnglish,
+                      style: const TextStyle(fontSize: 16),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          provider.hadithDaily!.bookSlug,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(": ${provider.hadithDaily!.volume}"),
+                      ],
+                    ),
+                  ],
+                ),
+        ),
       ),
     ),
   );
@@ -514,7 +541,7 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
     children: [
       _buildLocateMasjidNearby(context, provider),
       _buildQiblaFinder(context, provider),
-      _buildIslamicCalendar(context, provider)
+      _buildIslamicCalendar(context, provider),
     ],
   );
 }
@@ -580,9 +607,7 @@ Widget _buildIslamicCalendar(
       print("Locate to Islamic Calendar");
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => IslamicCalendarView()
-        ),
+        MaterialPageRoute(builder: (_) => IslamicCalendarView()),
       );
     },
     child: Column(
