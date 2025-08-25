@@ -11,6 +11,8 @@ import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
+import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
+import 'package:ramadhan_companion_app/provider/quran_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
@@ -30,6 +32,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MasjidNearbyProvider()),
         ChangeNotifierProvider(create: (_) => QiblaProvider()),
         ChangeNotifierProvider(create: (_) => IslamicCalendarProvider()),
+        ChangeNotifierProvider(create: (_) => QuranProvider()),
+        // ChangeNotifierProvider(create: (_) => QuranDetailProvider()),
       ],
       child: const MainApp(),
     ),
