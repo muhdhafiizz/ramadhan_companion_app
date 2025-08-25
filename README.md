@@ -33,8 +33,11 @@ Make sure you have:
 ## Key Features
 - Firebase Authentication for login/signup.
 - Prayer Times API integration for real-time timings.
-- Daily Quran Verse display from an external API.
+- Daily Quran and Hadith Verse with translation display from an external API.
 - Hijri Date display alongside Gregorian date.
+- Nearby Masjid to display the nearest Masjid under 10km based on location set.
+- Quran using quran flutter package to ensure offline availability.
+- Islamic calendar for Hijri date with special events during the month.
 - State Management using Provider package.
 - Custom UI Components for dialogs, buttons, and loading states.
 
@@ -42,6 +45,7 @@ Make sure you have:
 - Prayer Times API: Fetches daily prayer times.
 - Quran API: Provides daily random Quran verse.
 - Hijri Date API: Displays the Islamic date.
+- Google Maps API: To display nearby masjid.
 
 ## Tech Stack
 - Flutter (Dart)
