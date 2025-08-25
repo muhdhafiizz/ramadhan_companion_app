@@ -13,6 +13,7 @@ import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
+import 'package:ramadhan_companion_app/ui/quran_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
@@ -80,7 +81,11 @@ class PrayerTimesView extends StatelessWidget {
                           _buildErrorText(provider),
                           _buildPrayerTimesSection(provider),
                           const SizedBox(height: 10),
-                          _dailyVerseCarousel(provider, carouselProvider, context),
+                          _dailyVerseCarousel(
+                            provider,
+                            carouselProvider,
+                            context,
+                          ),
                         ],
                       ),
                     ),
@@ -286,7 +291,7 @@ Widget _buildPrayerRowWithHighlight(
 Widget _dailyVerseCarousel(
   PrayerTimesProvider provider,
   CarouselProvider carouselProvider,
-  BuildContext context
+  BuildContext context,
 ) {
   return Column(
     children: [
@@ -536,13 +541,66 @@ Widget _buildInsertText() {
 }
 
 Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
+  return Column(
     children: [
-      _buildLocateMasjidNearby(context, provider),
-      _buildQiblaFinder(context, provider),
-      _buildIslamicCalendar(context, provider),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildLocateMasjidNearby(context, provider),
+          _buildQiblaFinder(context, provider),
+          _buildIslamicCalendar(context, provider),
+        ],
+      ),
+      SizedBox(height:  20,),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildQuran(context),
+          _buildSedekah(context)
+        ],
+      ),
     ],
+  );
+}
+
+Widget _buildSedekah(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      print("Sedekah");
+    },
+    child: Column(
+      children: [
+        Image.asset('assets/icon/donation_icon.png', height: 50, width: 50),
+        const SizedBox(height: 5),
+        const Text(
+          "Sadaqah",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildQuran(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => QuranView()
+        ),
+      );
+    },
+    child: Column(
+      children: [
+        Image.asset('assets/icon/quran_icon.png', height: 50, width: 50),
+        const SizedBox(height: 5),
+        const Text(
+          "Quran",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
   );
 }
 
