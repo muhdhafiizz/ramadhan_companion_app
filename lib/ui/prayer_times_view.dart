@@ -14,6 +14,7 @@ import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_view.dart';
+import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
@@ -566,6 +567,10 @@ Widget _buildSedekah(BuildContext context) {
   return GestureDetector(
     onTap: () {
       print("Sedekah");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => SadaqahListView()),
+      );
     },
     child: Column(
       children: [
