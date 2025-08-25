@@ -49,6 +49,7 @@ flutter:
     - assets/icon/quran_icon.png
     - assets/icon/donation_icon.png
     - assets/lottie/no_internet_lottie.json
+    - assets/data/sadaqah.json
 
   fonts:
     - family: Liter
