@@ -366,11 +366,12 @@ Widget _buildDailyQuranVerse(
                 )
               : provider.quranDaily != null
               ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       provider.quranDaily!.arabic,
                       style: const TextStyle(
+                        fontFamily: 'AmiriQuran',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -450,6 +451,7 @@ Widget _buildHadithVerse(PrayerTimesProvider provider, BuildContext context) {
                     Text(
                       provider.hadithDaily!.hadithArabic,
                       style: const TextStyle(
+                        fontFamily: 'AmiriQuran',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -551,13 +553,10 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
           _buildIslamicCalendar(context, provider),
         ],
       ),
-      SizedBox(height:  20,),
+      SizedBox(height: 20),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildQuran(context),
-          _buildSedekah(context)
-        ],
+        children: [_buildQuran(context), _buildSedekah(context)],
       ),
     ],
   );
@@ -572,10 +571,7 @@ Widget _buildSedekah(BuildContext context) {
       children: [
         Image.asset('assets/icon/donation_icon.png', height: 50, width: 50),
         const SizedBox(height: 5),
-        const Text(
-          "Sadaqah",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        const Text("Sadaqah", style: TextStyle(fontWeight: FontWeight.bold)),
       ],
     ),
   );
@@ -584,21 +580,13 @@ Widget _buildSedekah(BuildContext context) {
 Widget _buildQuran(BuildContext context) {
   return GestureDetector(
     onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => QuranView()
-        ),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (_) => QuranView()));
     },
     child: Column(
       children: [
         Image.asset('assets/icon/quran_icon.png', height: 50, width: 50),
         const SizedBox(height: 5),
-        const Text(
-          "Quran",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        const Text("Quran", style: TextStyle(fontWeight: FontWeight.bold)),
       ],
     ),
   );

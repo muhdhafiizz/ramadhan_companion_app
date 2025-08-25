@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class VerseDetailView extends StatelessWidget {
-  final String type; 
-  final dynamic verse; 
+  final String type;
+  final dynamic verse;
 
   const VerseDetailView({super.key, required this.type, required this.verse});
 
@@ -15,7 +15,7 @@ class VerseDetailView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAppBar(context, type), 
+              _buildAppBar(context, type),
               const SizedBox(height: 20),
               Expanded(
                 child: SingleChildScrollView(
@@ -37,14 +37,15 @@ class VerseDetailView extends StatelessWidget {
       children: [
         Text(
           verse.arabic,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontFamily: 'AmiriQuran',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: TextAlign.right,
         ),
         const SizedBox(height: 20),
-        Text(
-          verse.english,
-          style: const TextStyle(fontSize: 18),
-        ),
+        Text(verse.english, style: const TextStyle(fontSize: 18)),
         const SizedBox(height: 20),
         Text(
           "${verse.surahName} : ${verse.ayahNo}",
@@ -60,14 +61,15 @@ class VerseDetailView extends StatelessWidget {
       children: [
         Text(
           verse.hadithArabic,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontFamily: 'AmiriQuran',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: TextAlign.right,
         ),
         const SizedBox(height: 20),
-        Text(
-          verse.hadithEnglish,
-          style: const TextStyle(fontSize: 18),
-        ),
+        Text(verse.hadithEnglish, style: const TextStyle(fontSize: 18)),
         const SizedBox(height: 20),
         Text(
           "${verse.bookSlug} : ${verse.volume}",

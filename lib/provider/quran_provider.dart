@@ -6,13 +6,11 @@ class QuranProvider extends ChangeNotifier {
 
   String get query => _query;
 
-  // Update search query
   void updateQuery(String value) {
     _query = value;
     notifyListeners();
   }
 
-  // Filtered surah list
   List<int> get filteredSurahs {
     return List.generate(quran.totalSurahCount, (i) => i + 1).where((index) {
       final name = quran.getSurahName(index).toLowerCase();

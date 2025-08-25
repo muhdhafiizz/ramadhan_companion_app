@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   collection: ^1.19.1
+  connectivity_plus: ^6.1.5
   firebase_auth: ^6.0.0
   firebase_core: ^4.0.0
   flutter:
@@ -47,6 +48,7 @@ flutter:
     - assets/icon/glitter_icon.png
     - assets/icon/quran_icon.png
     - assets/icon/donation_icon.png
+    - assets/lottie/no_internet_lottie.json
 
   fonts:
     - family: Liter
