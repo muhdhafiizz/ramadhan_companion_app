@@ -130,12 +130,12 @@ Widget _buildCompass(QiblaProvider provider) {
 Widget _buildShimmerLoading() {
   return Column(
     children: [
-      ShimmerLoadingWidget(width: 50, height: 50),
+      ShimmerLoadingWidget(width: 50, height: 50, isCircle: false,),
       const SizedBox(height: 20),
-      ShimmerLoadingWidget(width: 50, height: 100),
-      ShimmerLoadingWidget(width: 80, height: 50),
+      ShimmerLoadingWidget(width: 50, height: 100, isCircle: false,),
+      ShimmerLoadingWidget(width: 80, height: 50, isCircle: false,),
       const SizedBox(height: 40),
-      ShimmerLoadingWidget(width: 100, height: 100),
+      ShimmerLoadingWidget(width: 100, height: 100, isCircle: false,),
     ],
   );
 }

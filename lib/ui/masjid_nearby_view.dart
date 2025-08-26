@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/secrets/api_keys.dart';
+import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -62,7 +64,7 @@ class MasjidNearbyScreen extends StatelessWidget {
                             ratings: masjid.rating ?? 0,
                             latitude: masjid.latitude,
                             longitude: masjid.longitude,
-                            provider: provider
+                            provider: provider,
                           );
                         },
                       ),
@@ -95,11 +97,30 @@ Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ShimmerLoadingWidget(width: double.infinity, height: 220),
-      SizedBox(height: 10),
-      ShimmerLoadingWidget(width: 150, height: 20),
-      SizedBox(height: 5),
-      ShimmerLoadingWidget(width: 100, height: 20),
+      ShimmerLoadingWidget(
+        width: double.infinity,
+        height: 220,
+        isCircle: false,
+      ),
+      Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10),
+              ShimmerLoadingWidget(width: 150, height: 20, isCircle: false),
+              SizedBox(height: 5),
+              ShimmerLoadingWidget(width: 100, height: 20, isCircle: false),
+              SizedBox(height: 5),
+              ShimmerLoadingWidget(width: 70, height: 20, isCircle: false),
+            ],
+          ),
+          Spacer(),
+          ShimmerLoadingWidget(width: 50, height: 50, isCircle: true),
+          SizedBox(width: 5),
+          ShimmerLoadingWidget(width: 50, height: 50, isCircle: true),
+        ],
+      ),
     ],
   );
 }
@@ -112,7 +133,7 @@ Widget _buildMasjidCard({
   required double ratings,
   required double latitude,
   required double longitude,
-  required MasjidNearbyProvider provider
+  required MasjidNearbyProvider provider,
 }) {
   final pageController = PageController();
 
@@ -176,38 +197,140 @@ Widget _buildMasjidCard({
           ),
         const SizedBox(height: 8),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  "${distanceKm.toStringAsFixed(2)} km away",
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                Row(
-                  children: [
-                    Text(ratings.toString()),
-                    SizedBox(width: 5),
-                    Image.asset(
-                      'assets/icon/star_icon.png',
-                      height: 13,
-                      width: 13,
+            Expanded(
+              flex: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                  ],
-                ),
-              ],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    "${distanceKm.toStringAsFixed(2)} km away",
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  Row(
+                    children: [
+                      Text(ratings.toString()),
+                      SizedBox(width: 5),
+                      Image.asset(
+                        'assets/icon/star_icon.png',
+                        height: 13,
+                        width: 13,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+            Spacer(),
+            GestureDetector(
+              onTap: () async {
+                final accounts = await provider.loadMasjidAccounts(context);
+                final matched = provider.findClosestMatch(name, accounts);
+
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                  ),
+                  builder: (_) {
+                    if (matched != null) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 16,
+                          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                matched.masjidName,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                matched.bankName,
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 10),
+                              Text("Account Number"),
+                              const SizedBox(height: 5),
+                              GestureDetector(
+                                onTap: () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(text: matched.accNum),
+                                  );
+
+                                  Navigator.pop(context);
+
+                                  CustomPillSnackbar.show(
+                                    context,
+                                    message: "✅ Account number copied",
+                                  );
+                                },
+                                child: Text(
+                                  matched.accNum,
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Container(
+                          width: double.infinity,
+                          child: Text("No donation info found for this masjid"),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[200],
+                child: Image.asset(
+                  'assets/icon/donation_icon.png',
+                  height: 30,
+                  width: 30,
+                ),
+              ),
+            ),
+            SizedBox(width: 8),
             GestureDetector(
               onTap: () {
-                _showNavigationOptions(context, name, latitude, longitude, provider);
+                _showNavigationOptions(
+                  context,
+                  name,
+                  latitude,
+                  longitude,
+                  provider,
+                );
               },
               child: CircleAvatar(
                 backgroundColor: Colors.grey[200],

@@ -30,6 +30,7 @@ dependencies:
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
+  string_similarity: ^2.1.1
   url_launcher: ^6.3.2
 
 dev_dependencies:
@@ -53,6 +54,7 @@ flutter:
     - assets/data/sadaqah.json
     - assets/icon/bookmark_empty_icon.png
     - assets/icon/bookmark_icon.png
+    - assets/data/masjid_account.json
 
   fonts:
     - family: Liter
