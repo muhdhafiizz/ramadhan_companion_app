@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:ramadhan_companion_app/model/masjid_account_model.dart';
 import 'package:ramadhan_companion_app/model/masjid_nearby_model.dart';
 import 'package:ramadhan_companion_app/service/masjid_nearby_service.dart';
 import 'dart:math';
-
+import 'package:string_similarity/string_similarity.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MasjidNearbyProvider extends ChangeNotifier {
@@ -79,6 +82,40 @@ class MasjidNearbyProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error launching map: $e");
     }
+  }
+
+  Future<List<MasjidAccount>> loadMasjidAccounts(BuildContext context) async {
+    final String data = await DefaultAssetBundle.of(
+      context,
+    ).loadString('assets/data/masjid_account.json');
+    final List<dynamic> jsonResult = json.decode(data);
+    return jsonResult.map((e) => MasjidAccount.fromJson(e)).toList();
+  }
+
+  MasjidAccount? findClosestMatch(
+    String googleName,
+    List<MasjidAccount> accounts,
+  ) {
+    // Normalize and remove "masjid" / "mosque"
+    String normalize(String input) {
+      return input
+          .toLowerCase()
+          .replaceAll(RegExp(r'\bmasjid\b'), '')
+          .replaceAll(RegExp(r'\bmosque\b'), '')
+          .trim();
+    }
+
+    final query = normalize(googleName);
+
+    for (final account in accounts) {
+      final name = normalize(account.masjidName);
+
+      if (name == query) {
+        return account; // ✅ exact match after normalization
+      }
+    }
+
+    return null; // ❌ no match found
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

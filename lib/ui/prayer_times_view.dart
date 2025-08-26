@@ -29,7 +29,6 @@ class PrayerTimesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PrayerTimesProvider>();
-    final bookmarkProvider = context.watch<BookmarkProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!provider.shouldAskLocation) provider.initialize();
@@ -141,9 +140,9 @@ Widget _buildHijriAndGregorianDate(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          ShimmerLoadingWidget(width: 120, height: 24),
+          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
           SizedBox(height: 8),
-          ShimmerLoadingWidget(width: 220, height: 18),
+          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
         ],
       ),
     );
@@ -220,9 +219,9 @@ Widget _buildCountdown(PrayerTimesProvider provider) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          ShimmerLoadingWidget(width: 120, height: 24),
+          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
           SizedBox(height: 8),
-          ShimmerLoadingWidget(width: 220, height: 18),
+          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
         ],
       ),
     );
@@ -379,11 +378,11 @@ Widget _buildDailyQuranVerse(
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    ShimmerLoadingWidget(width: 120, height: 24),
+                    ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
                     SizedBox(height: 20),
-                    ShimmerLoadingWidget(width: 220, height: 18),
+                    ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
                     SizedBox(height: 8),
-                    ShimmerLoadingWidget(width: 100, height: 16),
+                    ShimmerLoadingWidget(width: 100, height: 16, isCircle: false,),
                   ],
                 )
               : provider.quranDaily != null
@@ -461,11 +460,11 @@ Widget _buildHadithVerse(PrayerTimesProvider provider, BuildContext context) {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    ShimmerLoadingWidget(width: 120, height: 24),
+                    ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
                     SizedBox(height: 20),
-                    ShimmerLoadingWidget(width: 220, height: 18),
+                    ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
                     SizedBox(height: 8),
-                    ShimmerLoadingWidget(width: 100, height: 16),
+                    ShimmerLoadingWidget(width: 100, height: 16, isCircle: false,),
                   ],
                 )
               : Column(
@@ -550,7 +549,7 @@ Widget _buildPrayerTimesRow(
       children: [
         Text(prayerName, style: const TextStyle(fontWeight: FontWeight.bold)),
         isLoading
-            ? const ShimmerLoadingWidget(width: 60, height: 16)
+            ? const ShimmerLoadingWidget(width: 60, height: 16, isCircle:  false,)
             : Text(
                 prayerTime ?? "--:--",
                 style: TextStyle(
