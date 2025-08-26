@@ -38,7 +38,7 @@ class _SurahDetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scrollController = ScrollController();
+    final provider = context.watch<QuranDetailProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -50,21 +50,17 @@ class _SurahDetailBody extends StatelessWidget {
               const SizedBox(height: 10),
               CustomTextField(
                 label: "Search related verse",
-                onChanged: (val) {
-                  context.read<QuranDetailProvider>().search(val);
-                },
+                onChanged: provider.search,
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: Consumer<QuranDetailProvider>(
-                  builder: (context, provider, _) {
-                    final verses = provider.verses;
-
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: verses.length,
+                child: Stack(
+                  children: [
+                    ListView.builder(
+                      controller: provider.scrollController,
+                      itemCount: provider.verses.length,
                       itemBuilder: (context, index) {
-                        final verse = verses[index];
+                        final verse = provider.verses[index];
                         final verseNum = int.parse(verse["number"]!);
 
                         return Padding(
@@ -101,8 +97,39 @@ class _SurahDetailBody extends StatelessWidget {
                           ),
                         );
                       },
-                    );
-                  },
+                    ),
+
+                    // Scroll buttons
+                    Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: Column(
+                        children: [
+                          if (provider.showScrollUp)
+                            FloatingActionButton(
+                              shape: CircleBorder(),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              mini: true,
+                              heroTag: "scroll_up",
+                              onPressed: provider.scrollToTop,
+                              child: const Icon(Icons.arrow_upward),
+                            ),
+                          const SizedBox(height: 10),
+                          if (provider.showScrollDown)
+                            FloatingActionButton(
+                              shape: CircleBorder(),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              mini: true,
+                              heroTag: "scroll_down",
+                              onPressed: provider.scrollToBottom,
+                              child: const Icon(Icons.arrow_downward),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

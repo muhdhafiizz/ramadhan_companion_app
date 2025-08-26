@@ -10,7 +10,7 @@ class QuranView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<QuranProvider>(context);
+    final provider = context.watch<QuranProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -19,36 +19,75 @@ class QuranView extends StatelessWidget {
           child: Column(
             children: [
               _buildAppBar(context),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CustomTextField(
                   label: "Search Surah",
-                  onChanged: (val) => provider.updateQuery(val),
+                  onChanged: provider.updateQuery,
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: provider.filteredSurahs.length,
-                  itemBuilder: (context, i) {
-                    final index = provider.filteredSurahs[i];
-                    return ListTile(
-                      title: Text(
-                        "${index}. ${quran.getSurahName(index)}",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text("Verses: ${quran.getVerseCount(index)}"),
-                      trailing: const Icon(Icons.arrow_forward),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => SurahDetailView(surahNumber: index),
+                child: Stack(
+                  children: [
+                    ListView.builder(
+                      controller: provider.scrollController,
+                      itemCount: provider.filteredSurahs.length,
+                      itemBuilder: (context, i) {
+                        final index = provider.filteredSurahs[i];
+                        return ListTile(
+                          title: Text(
+                            "$index. ${quran.getSurahName(index)}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
+                          subtitle: Text(
+                            "Verses: ${quran.getVerseCount(index)}",
+                          ),
+                          trailing: const Icon(Icons.arrow_forward),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    SurahDetailView(surahNumber: index),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
+                    ),
+
+                    // Scroll buttons
+                    Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: Column(
+                        children: [
+                          if (provider.showScrollUp)
+                            FloatingActionButton(
+                              shape: CircleBorder(),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              mini: true,
+                              heroTag: "scroll_up_quran",
+                              onPressed: provider.scrollToTop,
+                              child: const Icon(Icons.arrow_upward),
+                            ),
+                          const SizedBox(height: 10),
+                          if (provider.showScrollDown)
+                            FloatingActionButton(
+                              shape: CircleBorder(),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              mini: true,
+                              heroTag: "scroll_down_quran",
+                              onPressed: provider.scrollToBottom,
+                              child: const Icon(Icons.arrow_downward),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -64,10 +103,10 @@ Widget _buildAppBar(BuildContext context) {
     children: [
       GestureDetector(
         onTap: () => Navigator.pop(context),
-        child: Icon(Icons.arrow_back),
+        child: const Icon(Icons.arrow_back),
       ),
-      SizedBox(width: 10),
-      Text(
+      const SizedBox(width: 10),
+      const Text(
         "Surah",
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
       ),
