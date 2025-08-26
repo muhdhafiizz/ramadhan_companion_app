@@ -26,6 +26,7 @@ dependencies:
   provider: ^6.1.5
   pull_to_refresh: ^2.0.0
   quran: ^1.3.3
+  quran_api: ^0.1.1
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
@@ -50,6 +51,8 @@ flutter:
     - assets/icon/donation_icon.png
     - assets/lottie/no_internet_lottie.json
     - assets/data/sadaqah.json
+    - assets/icon/bookmark_empty_icon.png
+    - assets/icon/bookmark_icon.png
 
   fonts:
     - family: Liter

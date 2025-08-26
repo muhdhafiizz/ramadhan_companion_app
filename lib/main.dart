@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
+import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/islamic_calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
@@ -13,6 +14,7 @@ import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
+import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
@@ -35,6 +37,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => QiblaProvider()),
         ChangeNotifierProvider(create: (_) => IslamicCalendarProvider()),
         ChangeNotifierProvider(create: (_) => QuranProvider()),
+        ChangeNotifierProvider(create: (_) => BookmarkProvider()),
         ChangeNotifierProvider(create: (_) => SadaqahProvider()),
       ],
       child: const MainApp(),

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
@@ -20,7 +19,7 @@ class QuranView extends StatelessWidget {
           child: Column(
             children: [
               _buildAppBar(context),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CustomTextField(
@@ -34,7 +33,10 @@ class QuranView extends StatelessWidget {
                   itemBuilder: (context, i) {
                     final index = provider.filteredSurahs[i];
                     return ListTile(
-                      title: Text("${index}. ${quran.getSurahName(index)}"),
+                      title: Text(
+                        "${index}. ${quran.getSurahName(index)}",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Text("Verses: ${quran.getVerseCount(index)}"),
                       trailing: const Icon(Icons.arrow_forward),
                       onTap: () {
