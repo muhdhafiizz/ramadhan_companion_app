@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:ramadhan_companion_app/model/masjid_account_model.dart';
 import 'package:ramadhan_companion_app/model/masjid_nearby_model.dart';
 import 'package:ramadhan_companion_app/service/masjid_nearby_service.dart';
 import 'dart:math';
-import 'package:string_similarity/string_similarity.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MasjidNearbyProvider extends ChangeNotifier {

@@ -14,7 +14,6 @@ import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
-import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
