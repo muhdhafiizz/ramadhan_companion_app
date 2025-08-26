@@ -32,8 +32,7 @@ class QuranDetailProvider extends ChangeNotifier {
       _filteredVerses = List.from(_allVerses);
     } else {
       _filteredVerses = _allVerses.where((verse) {
-        return verse["number"]!.contains(_query) ||
-               verse["translation"]!.toLowerCase().contains(_query);
+        return verse["translation"]!.toLowerCase().contains(_query);
       }).toList();
     }
     notifyListeners();

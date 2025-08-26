@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final bool isPassword;
   final ValueChanged<String>? onChanged;
+  final TextInputType? keyboardType;
 
   const CustomTextField({
     super.key,
@@ -14,6 +15,7 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.isPassword = false,
     this.onChanged,
+    this.keyboardType
   });
 
   @override
@@ -23,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      keyboardType: keyboardType,
       obscureText: isPassword ? signupProvider.obscurePassword : false,
       cursorColor: Colors.black,
       decoration: InputDecoration(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import '../provider/sadaqah_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -72,26 +73,9 @@ class SadaqahListView extends StatelessWidget {
                                       ),
                                     );
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: const Text(
-                                          "✅ Account number copied!",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        duration: const Duration(seconds: 3),
-                                        behavior: SnackBarBehavior.floating,
-                                        width: 220,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
-                                        elevation: 8,
-                                      ),
+                                    CustomPillSnackbar.show(
+                                      context,
+                                      message: "✅ Account number copied!",
                                     );
                                   },
                                   child: Text(
