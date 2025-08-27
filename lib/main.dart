@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
+import 'package:ramadhan_companion_app/provider/calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/islamic_calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
@@ -38,6 +39,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => QuranProvider()),
         ChangeNotifierProvider(create: (_) => BookmarkProvider()),
         ChangeNotifierProvider(create: (_) => SadaqahProvider()),
+        ChangeNotifierProvider(create: (_) => DateProvider()),
       ],
       child: const MainApp(),
     ),

@@ -61,21 +61,61 @@ class PrayerTimesView extends StatelessWidget {
               });
             }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildWelcomeText(context, provider),
-                const SizedBox(height: 10),
-                _buildHijriAndGregorianDate(provider, context),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: SmartRefresher(
-                    controller: refreshController,
-                    enablePullDown: true,
-                    onRefresh: refreshData,
-                    header: const WaterDropHeader(),
-                    child: ListView(
+            return SmartRefresher(
+              controller: refreshController,
+              enablePullDown: true,
+              onRefresh: refreshData,
+              header: const WaterDropHeader(),
+              child: CustomScrollView(
+                slivers: [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _HeaderDelegate(
+                      minExtent: 40,
+                      maxExtent: 90,
+                      builder: (context, shrinkOffset, overlapsContent) {
+                        final progress = (shrinkOffset / (90 - 40)).clamp(
+                          0.0,
+                          1.0,
+                        );
+
+                        return Container(
+                          color: Colors.white,
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: 12 - (progress * 40),
+                                left: 1,
+                                right: 1,
+                                child: Opacity(
+                                  opacity: 1 - progress,
+                                  child: _buildWelcomeText(context, provider),
+                                ),
+                              ),
+
+                              Positioned(
+                                left: 1,
+                                right: 1,
+                                bottom: 8,
+                                child: Transform.translate(
+                                  offset: Offset(0, 20 * (1 - progress)),
+                                  child: _buildHijriAndGregorianDate(
+                                    provider,
+                                    context,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: Column(
                       children: [
+                        const SizedBox(height: 30),
                         _buildIconsRow(context, provider),
                         const SizedBox(height: 20),
                         _buildBookmark(context),
@@ -93,8 +133,8 @@ class PrayerTimesView extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -140,9 +180,9 @@ Widget _buildHijriAndGregorianDate(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
+          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false),
           SizedBox(height: 8),
-          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
+          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false),
         ],
       ),
     );
@@ -154,23 +194,27 @@ Widget _buildHijriAndGregorianDate(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
-                        ),
-                      ],
-                    ),
-                  ],
+                flex: 2,
+                child: GestureDetector(
+                  onTap: () => _showPrayerTimesDate(context, provider),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Expanded(child: _buildLocationText(provider, context)),
+              Expanded(flex: 2, child: _buildLocationText(provider, context)),
             ],
           ),
         )
@@ -219,9 +263,9 @@ Widget _buildCountdown(PrayerTimesProvider provider) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
+          ShimmerLoadingWidget(width: 120, height: 24, isCircle: false),
           SizedBox(height: 8),
-          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
+          ShimmerLoadingWidget(width: 220, height: 18, isCircle: false),
         ],
       ),
     );
@@ -294,7 +338,7 @@ Widget _buildPrayerRowWithHighlight(
   return Container(
     margin: const EdgeInsets.symmetric(vertical: 3),
     decoration: BoxDecoration(
-      color: isNext ? Colors.green.withOpacity(0.15) : null,
+      color: isNext ? Colors.purple.withOpacity(0.15) : null,
       borderRadius: BorderRadius.circular(12),
     ),
     child: Padding(
@@ -378,11 +422,23 @@ Widget _buildDailyQuranVerse(
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 120,
+                      height: 24,
+                      isCircle: false,
+                    ),
                     SizedBox(height: 20),
-                    ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 220,
+                      height: 18,
+                      isCircle: false,
+                    ),
                     SizedBox(height: 8),
-                    ShimmerLoadingWidget(width: 100, height: 16, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 100,
+                      height: 16,
+                      isCircle: false,
+                    ),
                   ],
                 )
               : provider.quranDaily != null
@@ -401,14 +457,14 @@ Widget _buildDailyQuranVerse(
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 20),
+                    Spacer(),
                     Text(
                       provider.quranDaily!.english,
                       style: const TextStyle(fontSize: 16),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -460,11 +516,23 @@ Widget _buildHadithVerse(PrayerTimesProvider provider, BuildContext context) {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    ShimmerLoadingWidget(width: 120, height: 24, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 120,
+                      height: 24,
+                      isCircle: false,
+                    ),
                     SizedBox(height: 20),
-                    ShimmerLoadingWidget(width: 220, height: 18, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 220,
+                      height: 18,
+                      isCircle: false,
+                    ),
                     SizedBox(height: 8),
-                    ShimmerLoadingWidget(width: 100, height: 16, isCircle: false,),
+                    ShimmerLoadingWidget(
+                      width: 100,
+                      height: 16,
+                      isCircle: false,
+                    ),
                   ],
                 )
               : Column(
@@ -549,7 +617,7 @@ Widget _buildPrayerTimesRow(
       children: [
         Text(prayerName, style: const TextStyle(fontWeight: FontWeight.bold)),
         isLoading
-            ? const ShimmerLoadingWidget(width: 60, height: 16, isCircle:  false,)
+            ? const ShimmerLoadingWidget(width: 60, height: 16, isCircle: false)
             : Text(
                 prayerTime ?? "--:--",
                 style: TextStyle(
@@ -591,7 +659,6 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
 Widget _buildSedekah(BuildContext context) {
   return GestureDetector(
     onTap: () {
-      print("Sedekah");
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => SadaqahListView()),
@@ -767,7 +834,6 @@ Widget _buildBookmark(BuildContext context) {
                       ),
                     ],
                   ),
-
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -775,7 +841,7 @@ Widget _buildBookmark(BuildContext context) {
                         verse,
                         style: const TextStyle(
                           fontFamily: 'AmiriQuran',
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           height: 2.5,
                         ),
@@ -783,7 +849,6 @@ Widget _buildBookmark(BuildContext context) {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-
                       const Spacer(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -813,6 +878,7 @@ void _showLocationBottomSheet(
   PrayerTimesProvider provider,
 ) {
   showModalBottomSheet(
+    backgroundColor: Colors.white,
     context: context,
     isScrollControlled: true,
     isDismissible: provider.times != null,
@@ -871,6 +937,133 @@ void _showLocationBottomSheet(
       );
     },
   );
+}
+
+void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
+  final content = Container(
+    color: Colors.white,
+    child: Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: Consumer<PrayerTimesProvider>(
+        builder: (context, provider, _) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () {
+                      provider.setSelectedDate(
+                        provider.selectedDate.subtract(const Duration(days: 1)),
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: provider.selectedDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          provider.setSelectedDate(picked);
+                        }
+                      },
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                            Text(
+                              " ${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward, color: Colors.black),
+                    onPressed: () {
+                      provider.setSelectedDate(
+                        provider.selectedDate.add(const Duration(days: 1)),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              if (provider.isPrayerTimesLoading)
+                Center(
+                  child: Column(
+                    children: [
+                      _buildPrayerTimesRow("Fajr", provider.times!.fajr, true),
+                      _buildPrayerTimesRow(
+                        "Dhuhr",
+                        provider.times!.dhuhr,
+                        true,
+                      ),
+                      _buildPrayerTimesRow("Asr", provider.times!.asr, true),
+                      _buildPrayerTimesRow(
+                        "Maghrib",
+                        provider.times!.maghrib,
+                        true,
+                      ),
+                      _buildPrayerTimesRow("Isha", provider.times!.isha, true),
+                    ],
+                  ),
+                )
+              else if (provider.times != null)
+                Column(
+                  children: [
+                    _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
+                    _buildPrayerTimesRow("Dhuhr", provider.times!.dhuhr, false),
+                    _buildPrayerTimesRow("Asr", provider.times!.asr, false),
+                    _buildPrayerTimesRow(
+                      "Maghrib",
+                      provider.times!.maghrib,
+                      false,
+                    ),
+                    _buildPrayerTimesRow("Isha", provider.times!.isha, false),
+                  ],
+                )
+              else if (provider.error != null)
+                Text(provider.error!)
+              else
+                const Text("No data"),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
+    showCupertinoSheet(
+      context: context,
+      pageBuilder: (context) => Material(child: content),
+    );
+  } else {
+    showModalBottomSheet(context: context, builder: (context) => content);
+  }
 }
 
 void _showLogoutConfirmation(
@@ -947,4 +1140,31 @@ void _showLogoutConfirmation(
       },
     );
   }
+}
+
+class _HeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double minExtent;
+  final double maxExtent;
+  final Widget Function(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  )
+  builder;
+
+  _HeaderDelegate({
+    required this.minExtent,
+    required this.maxExtent,
+    required this.builder,
+  });
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => builder(context, shrinkOffset, overlapsContent);
+
+  @override
+  bool shouldRebuild(covariant _HeaderDelegate oldDelegate) => true;
 }

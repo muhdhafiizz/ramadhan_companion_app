@@ -3,10 +3,9 @@ import 'package:http/http.dart' as http;
 import '../model/hijri_date_model.dart';
 
 class HijriDateService {
-  Future<HijriDateModel> getTodayHijriDate() async {
-    final today = DateTime.now();
+  Future<HijriDateModel> getHijriDateByGregorian(DateTime date) async {
     final formattedDate =
-        "${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year}";
+        "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
 
     final url = Uri.parse("https://api.aladhan.com/v1/gToH/$formattedDate");
     final response = await http.get(url);
@@ -16,5 +15,9 @@ class HijriDateService {
     } else {
       throw Exception("Failed to load Hijri date");
     }
+  }
+
+  Future<HijriDateModel> getTodayHijriDate() async {
+    return getHijriDateByGregorian(DateTime.now());
   }
 }
