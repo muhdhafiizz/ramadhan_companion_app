@@ -5,6 +5,7 @@ import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class SurahDetailView extends StatelessWidget {
   final int surahNumber;
@@ -19,7 +20,8 @@ class SurahDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => QuranDetailProvider(surahNumber),
+      create: (_) =>
+          QuranDetailProvider(surahNumber, initialVerse: initialVerse),
       builder: (context, child) {
         return _SurahDetailBody(
           surahNumber: surahNumber,
@@ -56,8 +58,9 @@ class _SurahDetailBody extends StatelessWidget {
               Expanded(
                 child: Stack(
                   children: [
-                    ListView.builder(
-                      controller: provider.scrollController,
+                    ScrollablePositionedList.builder(
+                      itemScrollController: provider.itemScrollController,
+                      itemPositionsListener: provider.itemPositionsListener,
                       itemCount: provider.verses.length,
                       itemBuilder: (context, index) {
                         final verse = provider.verses[index];
@@ -99,7 +102,6 @@ class _SurahDetailBody extends StatelessWidget {
                       },
                     ),
 
-                    // Scroll buttons
                     Positioned(
                       bottom: 20,
                       right: 20,
@@ -107,7 +109,7 @@ class _SurahDetailBody extends StatelessWidget {
                         children: [
                           if (provider.showScrollUp)
                             FloatingActionButton(
-                              shape: CircleBorder(),
+                              shape: const CircleBorder(),
                               backgroundColor: Colors.white,
                               foregroundColor: Colors.black,
                               mini: true,
@@ -118,7 +120,7 @@ class _SurahDetailBody extends StatelessWidget {
                           const SizedBox(height: 10),
                           if (provider.showScrollDown)
                             FloatingActionButton(
-                              shape: CircleBorder(),
+                              shape: const CircleBorder(),
                               backgroundColor: Colors.white,
                               foregroundColor: Colors.black,
                               mini: true,

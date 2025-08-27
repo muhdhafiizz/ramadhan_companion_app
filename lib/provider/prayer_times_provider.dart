@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:ramadhan_companion_app/model/hijri_date_model.dart';
 import 'package:ramadhan_companion_app/model/prayer_times_model.dart';
 import 'package:ramadhan_companion_app/model/quran_daily_model.dart';
@@ -30,6 +32,8 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? _hijriDay;
   String? _hijriMonth;
   String? _hijriYear;
+  DateTime _selectedDate = DateTime.now();
+  DateTime get selectedDate => _selectedDate;
   HijriDateModel? _hijriDateModel;
   PrayerTimesModel? _times;
   QuranDailyModel? _quranDaily;
@@ -89,6 +93,51 @@ class PrayerTimesProvider extends ChangeNotifier {
       await prefs.setString('city', city);
       await prefs.setString('country', country);
     } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isPrayerTimesLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchPrayerTimesByDate(
+    String city,
+    String country,
+    DateTime date,
+  ) async {
+    _isPrayerTimesLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final formattedDate =
+          "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
+
+      final url = Uri.parse(
+        'https://api.aladhan.com/v1/timingsByCity/$formattedDate?city=$city&country=$country&method=2',
+      );
+
+      print("📡 Fetching prayer times for: $formattedDate");
+      print("🌍 City: $city, Country: $country");
+      print("🔗 URL: $url");
+
+      final response = await http.get(url);
+      print("📥 Response status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print("✅ API success, data received");
+
+        _times = PrayerTimesModel.fromJson(data);
+        _hijriDateModel = await HijriDateService().getHijriDateByGregorian(
+          date,
+        );
+      } else {
+        print("❌ API failed: ${response.body}");
+        throw Exception('Failed to load prayer times');
+      }
+    } catch (e) {
+      print("💥 Error fetching prayer times: $e");
       _error = e.toString();
     } finally {
       _isPrayerTimesLoading = false;
@@ -170,6 +219,14 @@ class PrayerTimesProvider extends ChangeNotifier {
     await fetchHijriDate();
 
     _initialized = true;
+    notifyListeners();
+  }
+
+  void setSelectedDate(DateTime date) {
+    _selectedDate = date;
+    if (city != null && country != null) {
+      fetchPrayerTimesByDate(city!, country!, _selectedDate);
+    }
     notifyListeners();
   }
 

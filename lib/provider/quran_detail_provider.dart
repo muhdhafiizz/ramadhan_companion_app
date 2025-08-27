@@ -1,53 +1,76 @@
 import 'package:flutter/cupertino.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class QuranDetailProvider extends ChangeNotifier {
   final int surahNumber;
+  final int? initialVerse;
+
   List<Map<String, String>> _allVerses = [];
   List<Map<String, String>> _filteredVerses = [];
   String _query = "";
   bool _showScrollUp = false;
   bool _showScrollDown = false;
 
-  QuranDetailProvider(this.surahNumber) {
+  // instead of ScrollController + GlobalKeys
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
+
+  QuranDetailProvider(this.surahNumber, {this.initialVerse}) {
     _loadVerses();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
+
+    // listen for scroll changes
+    itemPositionsListener.itemPositions.addListener(() {
+      final positions = itemPositionsListener.itemPositions.value;
+      if (positions.isEmpty) return;
+
+      final min = positions.reduce((a, b) => a.index < b.index ? a : b).index;
+      final max = positions.reduce((a, b) => a.index > b.index ? a : b).index;
+
+      _showScrollUp = min > 0;
+      _showScrollDown = max < _filteredVerses.length - 1;
+
+      notifyListeners();
+    });
+
+    // scroll to initial verse after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (initialVerse != null) {
+        scrollToVerse(initialVerse!);
+      }
+    });
   }
 
-  late ScrollController _scrollController;
-
   List<Map<String, String>> get verses => _filteredVerses;
-  ScrollController get scrollController => _scrollController;
   bool get showScrollUp => _showScrollUp;
   bool get showScrollDown => _showScrollDown;
 
-  void _scrollListener() {
-    final offset = _scrollController.offset;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-
-    _showScrollUp = offset >= maxScroll - 50;
-    _showScrollDown = offset > 20 && offset < maxScroll - 200;
-
-    notifyListeners();
-  }
-
   void scrollToTop() {
-    _scrollController.animateTo(
-      0,
+    itemScrollController.scrollTo(
+      index: 0,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
   }
 
-  void scrollToBottom() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
+  void scrollToBottom() {
+    itemScrollController.scrollTo(
+      index: _filteredVerses.length - 1,
       duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOutSine,
+      curve: Curves.easeInOut,
     );
+  }
+
+  void scrollToVerse(int verseNum) {
+    final index = verseNum - 1;
+    if (index >= 0 && index < _filteredVerses.length) {
+      itemScrollController.scrollTo(
+        index: index,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _loadVerses() {
@@ -75,11 +98,5 @@ class QuranDetailProvider extends ChangeNotifier {
           .toList();
     }
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 }
