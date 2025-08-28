@@ -13,12 +13,7 @@ class IslamicCalendarView extends StatelessWidget {
         final days = provider.getDaysInMonth();
         final startWeekday = provider.firstWeekdayOfMonth();
         final leadingEmpty = startWeekday - 1;
-
         final todayKey = HijriCalendar.now().toFormat("dd/MM/yyyy");
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          provider.fetchSpecialDays();
-        });
 
         return Scaffold(
           body: SafeArea(
@@ -129,9 +124,7 @@ class IslamicCalendarView extends StatelessWidget {
                                     width: 30,
                                   ),
                                   title: Text(special.name),
-                                  subtitle: Text(
-                                    "Day: ${special.day}",
-                                  ),
+                                  subtitle: Text("Day: ${special.day}"),
                                 ),
                               );
                             },

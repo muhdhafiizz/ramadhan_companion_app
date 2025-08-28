@@ -18,6 +18,7 @@ import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_detail_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
@@ -338,7 +339,7 @@ Widget _buildPrayerRowWithHighlight(
   return Container(
     margin: const EdgeInsets.symmetric(vertical: 3),
     decoration: BoxDecoration(
-      color: isNext ? Colors.purple.withOpacity(0.15) : null,
+      color: isNext ? AppColors.lightViolet.withOpacity(0.9) : null,
       borderRadius: BorderRadius.circular(12),
     ),
     child: Padding(
@@ -378,10 +379,10 @@ Widget _dailyVerseCarousel(
       SmoothPageIndicator(
         controller: carouselProvider.pageController,
         count: 2,
-        effect: const WormEffect(
+        effect: WormEffect(
           dotHeight: 13,
           dotWidth: 13,
-          activeDotColor: Colors.deepPurple,
+          activeDotColor: AppColors.violet.withOpacity(1),
         ),
       ),
     ],
@@ -393,7 +394,7 @@ Widget _buildDailyQuranVerse(
   BuildContext context,
 ) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 20),
+    padding: const EdgeInsets.only(left: 12, right: 12, top: 10, bottom: 20),
     child: InkWell(
       onTap: () {
         Navigator.push(
@@ -615,13 +616,20 @@ Widget _buildPrayerTimesRow(
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(prayerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          prayerName,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isNext ? Colors.white : null,
+          ),
+        ),
         isLoading
             ? const ShimmerLoadingWidget(width: 60, height: 16, isCircle: false)
             : Text(
                 prayerTime ?? "--:--",
                 style: TextStyle(
                   fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+                  color: isNext ? Colors.white : null,
                 ),
               ),
       ],
@@ -788,7 +796,7 @@ Widget _buildBookmark(BuildContext context) {
     children: [
       _buildTitleText("Your Bookmark"),
       SizedBox(
-        height: 200,
+        height: 80,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: provider.bookmarks.length,
@@ -804,7 +812,6 @@ Widget _buildBookmark(BuildContext context) {
             if (surahNum == 0 || verseNum == 0) return const SizedBox.shrink();
 
             final surahName = quran.getSurahName(surahNum);
-            final verse = quran.getVerse(surahNum, verseNum);
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -820,7 +827,6 @@ Widget _buildBookmark(BuildContext context) {
               child: Padding(
                 padding: const EdgeInsets.only(left: 20.0, bottom: 20, top: 10),
                 child: Container(
-                  width: 250,
                   margin: const EdgeInsets.only(right: 10),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -837,19 +843,6 @@ Widget _buildBookmark(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        verse,
-                        style: const TextStyle(
-                          fontFamily: 'AmiriQuran',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          height: 2.5,
-                        ),
-                        textAlign: TextAlign.right,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [

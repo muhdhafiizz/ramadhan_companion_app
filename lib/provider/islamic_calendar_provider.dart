@@ -18,6 +18,10 @@ class IslamicCalendarProvider extends ChangeNotifier {
 
   final _service = IslamicCalendarService();
 
+  IslamicCalendarProvider(){
+    fetchSpecialDays();
+  }
+
   Future<void> fetchSpecialDays() async {
     try {
       final result = await _service.getSpecialDays();

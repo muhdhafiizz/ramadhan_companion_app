@@ -57,7 +57,6 @@ class QuranView extends StatelessWidget {
                       },
                     ),
 
-                    // Scroll buttons
                     Positioned(
                       bottom: 20,
                       right: 20,

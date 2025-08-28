@@ -7,6 +7,7 @@ environment:
   sdk: ^3.8.1
 
 dependencies:
+  audioplayers: ^6.5.0
   collection: ^1.19.1
   connectivity_plus: ^6.1.5
   firebase_auth: ^6.0.0
@@ -56,6 +57,8 @@ flutter:
     - assets/icon/bookmark_empty_icon.png
     - assets/icon/bookmark_icon.png
     - assets/data/masjid_account.json
+    - assets/icon/volume_icon.png
+    - assets/icon/volume_outlined_icon.png
 
   fonts:
     - family: Liter

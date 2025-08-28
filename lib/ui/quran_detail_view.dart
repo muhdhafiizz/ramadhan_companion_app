@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
+import 'package:ramadhan_companion_app/widgets/custom_audio_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -61,9 +62,27 @@ class _SurahDetailBody extends StatelessWidget {
                     ScrollablePositionedList.builder(
                       itemScrollController: provider.itemScrollController,
                       itemPositionsListener: provider.itemPositionsListener,
-                      itemCount: provider.verses.length,
+                      itemCount:
+                          provider.verses.length + 1,
                       itemBuilder: (context, index) {
-                        final verse = provider.verses[index];
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              quran.basmala,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontFamily: 'AmiriQuran',
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                height: 2.5,
+                              ),
+                            ),
+                          );
+                        }
+
+                        // 👇 Adjust index since we added basmala at 0
+                        final verse = provider.verses[index - 1];
                         final verseNum = int.parse(verse["number"]!);
 
                         return Padding(
@@ -89,10 +108,20 @@ class _SurahDetailBody extends StatelessWidget {
                               const SizedBox(height: 5),
                               Align(
                                 alignment: Alignment.bottomLeft,
-                                child: _buildBookmark(
-                                  context,
-                                  surahNumber,
-                                  verseNum,
+                                child: Row(
+                                  children: [
+                                    _buildBookmark(
+                                      context,
+                                      surahNumber,
+                                      verseNum,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _buildVerseAudio(
+                                      provider,
+                                      surahNumber,
+                                      verseNum,
+                                    ),
+                                  ],
                                 ),
                               ),
                               const Divider(),
@@ -131,6 +160,7 @@ class _SurahDetailBody extends StatelessWidget {
                         ],
                       ),
                     ),
+                    Positioned(bottom: 20, right: 90, child: AudioPillWidget()),
                   ],
                 ),
               ),
@@ -145,6 +175,7 @@ class _SurahDetailBody extends StatelessWidget {
 Widget _buildAppBar(BuildContext context, int surahNumber) {
   final surahNameArabic = quran.getSurahName(surahNumber);
   final surahNameEnglish = quran.getSurahNameEnglish(surahNumber);
+  final provider = context.read<QuranDetailProvider>();
 
   return Row(
     children: [
@@ -162,6 +193,17 @@ Widget _buildAppBar(BuildContext context, int surahNumber) {
           ),
           Text(surahNameEnglish, style: const TextStyle(fontSize: 14)),
         ],
+      ),
+      const Spacer(),
+      GestureDetector(
+        onTap: () {
+          provider.playAudio();
+        },
+        child: Image.asset(
+          'assets/icon/volume_icon.png',
+          width: 24,
+          height: 24,
+        ),
       ),
     ],
   );
@@ -193,5 +235,31 @@ Widget _buildBookmark(BuildContext context, int surahNumber, int verseNum) {
               backgroundColor: Colors.black,
             );
     },
+  );
+}
+
+Widget _buildVerseAudio(
+  QuranDetailProvider provider,
+  int surahNumber,
+  int verseNumber,
+) {
+  final isPlayingThisVerse =
+      provider.playingVerse == verseNumber && provider.isVersePlaying;
+
+  return GestureDetector(
+    onTap: () {
+      if (isPlayingThisVerse) {
+        provider.pauseVerseAudio();
+      } else {
+        provider.playAudioVerse(verse: verseNumber);
+      }
+    },
+    child: Image.asset(
+      isPlayingThisVerse
+          ? 'assets/icon/volume_icon.png'
+          : 'assets/icon/volume_outlined_icon.png',
+      height: 24,
+      width: 24,
+    ),
   );
 }
