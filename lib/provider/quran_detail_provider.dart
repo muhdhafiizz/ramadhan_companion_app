@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+enum Reciter { alafasy, husary, shaatree }
 
 class QuranDetailProvider extends ChangeNotifier {
   final int surahNumber;
@@ -9,18 +13,58 @@ class QuranDetailProvider extends ChangeNotifier {
   List<Map<String, String>> _allVerses = [];
   List<Map<String, String>> _filteredVerses = [];
   String _query = "";
-  bool _showScrollUp = false;
-  bool _showScrollDown = false;
 
-  // instead of ScrollController + GlobalKeys
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
+  bool _showScrollUp = false;
+  bool _showScrollDown = false;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  late final StreamSubscription<PlayerState> _playerStateSub;
+  late final StreamSubscription<Duration> _durationSub;
+  late final StreamSubscription<Duration> _positionSub;
+
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+  Reciter _reciter = Reciter.alafasy;
+
+  int? _playingVerse;
 
   QuranDetailProvider(this.surahNumber, {this.initialVerse}) {
     _loadVerses();
+    _setupScrollListener();
+    _setupAudioListeners();
 
-    // listen for scroll changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (initialVerse != null) scrollToVerse(initialVerse!);
+    });
+  }
+
+  @override
+  void dispose() {
+    _playerStateSub.cancel();
+    _durationSub.cancel();
+    _positionSub.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  List<Map<String, String>> get verses => _filteredVerses;
+  bool get showScrollUp => _showScrollUp;
+  bool get showScrollDown => _showScrollDown;
+
+  bool get isPlaying => _isPlaying;
+  Duration get duration => _duration;
+  Duration get position => _position;
+  Reciter get reciter => _reciter;
+
+  int? get playingVerse => _playingVerse;
+  bool get isVersePlaying => _playingVerse != null;
+
+
+  void _setupScrollListener() {
     itemPositionsListener.itemPositions.addListener(() {
       final positions = itemPositionsListener.itemPositions.value;
       if (positions.isEmpty) return;
@@ -33,18 +77,7 @@ class QuranDetailProvider extends ChangeNotifier {
 
       notifyListeners();
     });
-
-    // scroll to initial verse after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (initialVerse != null) {
-        scrollToVerse(initialVerse!);
-      }
-    });
   }
-
-  List<Map<String, String>> get verses => _filteredVerses;
-  bool get showScrollUp => _showScrollUp;
-  bool get showScrollDown => _showScrollDown;
 
   void scrollToTop() {
     itemScrollController.scrollTo(
@@ -98,5 +131,66 @@ class QuranDetailProvider extends ChangeNotifier {
           .toList();
     }
     notifyListeners();
+  }
+
+  void _setupAudioListeners() {
+    _playerStateSub = _audioPlayer.onPlayerStateChanged.listen((state) async {
+      _isPlaying = state == PlayerState.playing;
+
+      if (state == PlayerState.completed) {
+        if (_playingVerse != null) {
+          _isPlaying = false;
+          notifyListeners();
+        } else {
+          _isPlaying = false;
+        }
+      }
+
+      notifyListeners();
+    });
+
+    _durationSub = _audioPlayer.onDurationChanged.listen((d) {
+      _duration = d;
+      notifyListeners();
+    });
+
+    _positionSub = _audioPlayer.onPositionChanged.listen((p) {
+      _position = p;
+      notifyListeners();
+    });
+  }
+
+  Future<void> playAudio({Reciter? reciter}) async {
+    if (reciter != null) _reciter = reciter;
+    final url = getAudioURLBySurah(surahNumber, reciter: _reciter);
+    await _audioPlayer.play(UrlSource(url));
+  }
+
+  Future<void> playAudioVerse({required int verse}) async {
+    _playingVerse = verse;
+    final url = quran.getAudioURLByVerse(surahNumber, verse);
+    await _audioPlayer.play(UrlSource(url));
+    notifyListeners();
+  }
+
+  Future<void> pauseVerseAudio() async {
+    await _audioPlayer.pause();
+    notifyListeners();
+  }
+
+  Future<void> pauseAudio() async => await _audioPlayer.pause();
+  Future<void> stopAudio() async => await _audioPlayer.stop();
+
+  String getAudioURLBySurah(
+    int surahNumber, {
+    Reciter reciter = Reciter.alafasy,
+  }) {
+    final reciterStr = reciter == Reciter.alafasy
+        ? "ar.alafasy"
+        : reciter == Reciter.husary
+        ? "ar.husary"
+        : "ar.shaatree";
+
+    return "https://cdn.islamic.network/quran/audio-surah/128/$reciterStr/$surahNumber.mp3";
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
+import 'package:ramadhan_companion_app/widgets/custom_reminder.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import '../provider/sadaqah_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,115 +12,139 @@ class SadaqahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // trigger reminder once
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<SadaqahProvider>();
+      if (!provider.hasShownReminder) {
+        provider.markReminderShown();
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              _buildAppBar(context),
-              SizedBox(height: 10),
-              _buildSearchBar(context),
-              Expanded(
-                child: Consumer<SadaqahProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (provider.sadaqahList.isEmpty) {
-                      return const Center(
-                        child: Text("No organizations available"),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: provider.sadaqahList.length,
-                      itemBuilder: (context, index) {
-                        final sadaqah = provider.sadaqahList[index];
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.30),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              sadaqah.organization,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sadaqah.bankName,
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    await Clipboard.setData(
-                                      ClipboardData(
-                                        text: sadaqah.accountNumber,
-                                      ),
-                                    );
-
-                                    CustomPillSnackbar.show(
-                                      context,
-                                      message: "✅ Account number copied!",
-                                    );
-                                  },
-                                  child: Text(
-                                    sadaqah.accountNumber,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline,
+        child: Consumer<SadaqahProvider>(
+          builder: (context, provider, child) {
+            return Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      _buildAppBar(context),
+                      const SizedBox(height: 10),
+                      _buildSearchBar(context),
+                      Expanded(
+                        child: provider.isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : provider.sadaqahList.isEmpty
+                            ? const Center(
+                                child: Text("No organizations available"),
+                              )
+                            : ListView.builder(
+                                itemCount: provider.sadaqahList.length,
+                                itemBuilder: (context, index) {
+                                  final sadaqah = provider.sadaqahList[index];
+                                  return Container(
+                                    margin: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.30),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ),
-                                if (sadaqah.reference.isNotEmpty)
-                                  Text("Reference: ${sadaqah.reference}"),
-                              ],
-                            ),
-                            trailing: GestureDetector(
-                              onTap: () async {
-                                if (sadaqah.url.isNotEmpty) {
-                                  final url = Uri.parse(sadaqah.url);
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(
-                                      url,
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                  }
-                                }
-                              },
-                              child: CircleAvatar(
-                                backgroundColor: Colors.grey[100],
-                                child: Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.black,
-                                ),
+                                    child: ListTile(
+                                      title: Text(
+                                        sadaqah.organization,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            sadaqah.bankName,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await Clipboard.setData(
+                                                ClipboardData(
+                                                  text: sadaqah.accountNumber,
+                                                ),
+                                              );
+                                              CustomPillSnackbar.show(
+                                                context,
+                                                message:
+                                                    "✅ Account number copied!",
+                                              );
+                                            },
+                                            child: Text(
+                                              sadaqah.accountNumber,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                            ),
+                                          ),
+                                          if (sadaqah.reference.isNotEmpty)
+                                            Text(
+                                              "Reference: ${sadaqah.reference}",
+                                            ),
+                                        ],
+                                      ),
+                                      trailing: GestureDetector(
+                                        onTap: () async {
+                                          if (sadaqah.url.isNotEmpty) {
+                                            final url = Uri.parse(sadaqah.url);
+                                            if (await canLaunchUrl(url)) {
+                                              await launchUrl(
+                                                url,
+                                                mode: LaunchMode
+                                                    .externalApplication,
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: CircleAvatar(
+                                          backgroundColor: Colors.grey[100],
+                                          child: const Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+
+                // 👇 Floating reminder
+                if (provider.hasShownReminder)
+                  Positioned(
+                    bottom: 20,
+                    left: 12,
+                    right: 12,
+                    child: CustomReminder(),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

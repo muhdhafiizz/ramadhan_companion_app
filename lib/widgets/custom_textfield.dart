@@ -15,7 +15,7 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.isPassword = false,
     this.onChanged,
-    this.keyboardType
+    this.keyboardType,
   });
 
   @override
@@ -32,7 +32,7 @@ class CustomTextField extends StatelessWidget {
         hintText: label,
         labelStyle: const TextStyle(color: Colors.grey),
         floatingLabelStyle: const TextStyle(color: Colors.black),
-        border: OutlineInputBorder(
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: Colors.grey),
         ),

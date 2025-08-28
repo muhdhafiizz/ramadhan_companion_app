@@ -11,9 +11,11 @@ class SadaqahProvider extends ChangeNotifier {
   List<Sadaqah> _allSadaqah = [];
   List<Sadaqah> _filteredSadaqah = [];
   bool _isLoading = false;
+  bool _hasShownReminder = false;
 
   List<Sadaqah> get sadaqahList => _filteredSadaqah;
   bool get isLoading => _isLoading;
+  bool get hasShownReminder => _hasShownReminder;
 
   void _init() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -45,6 +47,16 @@ class SadaqahProvider extends ChangeNotifier {
             s.bankName.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
+    notifyListeners();
+  }
+
+  void markReminderShown() {
+    _hasShownReminder = true;
+    notifyListeners();
+  }
+
+  void dismissReminder() {
+    _hasShownReminder = false;
     notifyListeners();
   }
 }
