@@ -72,7 +72,7 @@ class PrayerTimesView extends StatelessWidget {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _HeaderDelegate(
-                      minExtent: 40,
+                      minExtent: 50,
                       maxExtent: 90,
                       builder: (context, shrinkOffset, overlapsContent) {
                         final progress = (shrinkOffset / (90 - 40)).clamp(

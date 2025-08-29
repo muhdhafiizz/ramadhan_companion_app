@@ -26,6 +26,7 @@ class QuranDetailProvider extends ChangeNotifier {
   late final StreamSubscription<Duration> _positionSub;
 
   bool _isPlaying = false;
+  bool _showAppBar = true;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   Reciter _reciter = Reciter.alafasy;
@@ -56,13 +57,14 @@ class QuranDetailProvider extends ChangeNotifier {
   bool get showScrollDown => _showScrollDown;
 
   bool get isPlaying => _isPlaying;
+  bool get showAppBar => _showAppBar;
   Duration get duration => _duration;
   Duration get position => _position;
   Reciter get reciter => _reciter;
 
   int? get playingVerse => _playingVerse;
   bool get isVersePlaying => _playingVerse != null;
-
+  double _lastOffset = 0;
 
   void _setupScrollListener() {
     itemPositionsListener.itemPositions.addListener(() {
@@ -104,6 +106,19 @@ class QuranDetailProvider extends ChangeNotifier {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void handleScroll(double offset) {
+    if (offset > _lastOffset && _showAppBar) {
+      // scrolling down → hide
+      _showAppBar = false;
+      notifyListeners();
+    } else if (offset < _lastOffset && !_showAppBar) {
+      // scrolling up → show
+      _showAppBar = true;
+      notifyListeners();
+    }
+    _lastOffset = offset;
   }
 
   void _loadVerses() {
