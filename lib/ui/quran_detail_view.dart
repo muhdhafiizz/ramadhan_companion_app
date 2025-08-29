@@ -62,10 +62,14 @@ class _SurahDetailBody extends StatelessWidget {
                     ScrollablePositionedList.builder(
                       itemScrollController: provider.itemScrollController,
                       itemPositionsListener: provider.itemPositionsListener,
-                      itemCount:
-                          provider.verses.length + 1,
+                      itemCount: (surahNumber != 1 && surahNumber != 9)
+                          ? provider.verses.length +
+                                1 
+                          : provider.verses.length, 
                       itemBuilder: (context, index) {
-                        if (index == 0) {
+                        if (index == 0 &&
+                            surahNumber != 1 &&
+                            surahNumber != 9) {
                           return Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Text(
@@ -81,8 +85,12 @@ class _SurahDetailBody extends StatelessWidget {
                           );
                         }
 
-                        // 👇 Adjust index since we added basmala at 0
-                        final verse = provider.verses[index - 1];
+                        final verseIndex =
+                            (surahNumber != 1 && surahNumber != 9)
+                            ? index - 1
+                            : index;
+
+                        final verse = provider.verses[verseIndex];
                         final verseNum = int.parse(verse["number"]!);
 
                         return Padding(
