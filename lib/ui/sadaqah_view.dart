@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
+import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_reminder.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
@@ -134,13 +137,12 @@ class SadaqahListView extends StatelessWidget {
                   ),
                 ),
 
-                // 👇 Floating reminder
                 if (provider.hasShownReminder)
                   Positioned(
                     bottom: 20,
                     left: 12,
                     right: 12,
-                    child: CustomReminder(),
+                    child: _buildSadaqahOrganization(context, provider),
                   ),
               ],
             );
@@ -181,3 +183,222 @@ Widget _buildSearchBar(BuildContext context) {
     ),
   );
 }
+
+Widget _buildTitleText(String name) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12.0),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        name,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ),
+    ),
+  );
+}
+
+Widget _buildSubtitleText(String name) {
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Text(name, style: TextStyle(fontSize: 18)),
+  );
+}
+
+Widget _buildDescriptionText(String name) {
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Text(
+      name,
+      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    ),
+  );
+}
+
+Widget _buildSadaqahOrganization(
+  BuildContext context,
+  SadaqahProvider provider,
+) {
+  return GestureDetector(
+    onTap: () => _showSadaqahField(context, provider),
+    child: CustomReminder(),
+  );
+}
+
+Widget _buildContainer() {
+  return Container(
+    padding: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: AppColors.lightGray.withOpacity(1),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      children: [
+        _buildDescriptionText(
+          'Gain exposure to a wider Muslim community\n\nBuild credibility by being listed in a curated Islamic platform.\n\nSimplify the donation process for your supporters.\n\nHelp Muslims fulfill their sadaqah and charity obligations more easily.\n\nEngage recurring donors who want to give regularly (daily, weekly, or monthly).',
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildPriceText() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSubtitleText('Only at'),
+      Text.rich(
+        TextSpan(
+          text: 'RM 19.90/',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+          children: [
+            const TextSpan(text: ' '),
+            const TextSpan(
+              text: 'month',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildContainerNotice() {
+  return Container(
+    decoration: BoxDecoration(
+      border: Border.all(width: 2, color: AppColors.betterGray.withOpacity(1)),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    padding: EdgeInsets.all(10),
+    child: Text(
+      'Please take note it will take up to 3-5 business days to display your organization as part of verification matter.',
+      style: TextStyle(fontSize: 14),
+    ),
+  );
+}
+
+
+void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
+  final pageController = PageController();
+
+  final content = StatefulBuilder(
+    builder: (context, setState) {
+      pageController.addListener(() {
+        setState(() {});
+      });
+
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              bottom: 30,
+              top: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  offset: Offset(0, -1),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            child: CustomButton(
+              onTap: () {
+                if (pageController.page == 0) {
+                  pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                } else {
+                  print('submit sadaqah form');
+                }
+              },
+              backgroundColor: AppColors.violet.withOpacity(1),
+              text: (pageController.hasClients &&
+                      pageController.page?.round() == 1)
+                  ? 'Submit'
+                  : 'Review your details',
+              textColor: Colors.white,
+            ),
+          ),
+          body: Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: PageView(
+              controller: pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                // Page 1
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTitleText('🌙  Benefits of Adding Your Organization'),
+                    const SizedBox(height: 12),
+                    _buildContainer(),
+                    const SizedBox(height: 20),
+                    _buildPriceText(),
+                  ],
+                ),
+
+                // Page 2
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: const Icon(Icons.arrow_back),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTitleText('Your Organization'),
+                    CustomTextField(label: 'Organization Name'),
+                    _buildTitleText('Link to your website/ social'),
+                    CustomTextField(label: 'Link'),
+                    _buildTitleText('Bank Name'),
+                    CustomTextField(label: 'Bank Name'),
+                    _buildTitleText('Account Number'),
+                    CustomTextField(label: 'Account Number'),
+                    const Spacer(),
+                    _buildContainerNotice(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
+    showCupertinoSheet(
+      context: context,
+      pageBuilder: (context) => Material(child: content),
+    ).whenComplete(() {
+      // 👇 Reset system bar style after sheet closes
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
+  } else {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => content,
+    ).whenComplete(() {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
+  }
+}
+
