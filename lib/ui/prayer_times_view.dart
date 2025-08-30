@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:quran/quran.dart' as quran;
@@ -933,118 +934,120 @@ void _showLocationBottomSheet(
 }
 
 void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
-  final content = Container(
-    color: Colors.white,
-    child: Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Consumer<PrayerTimesProvider>(
-        builder: (context, provider, _) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () {
-                      provider.setSelectedDate(
-                        provider.selectedDate.subtract(const Duration(days: 1)),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: provider.selectedDate,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
+  final content = AnnotatedRegion<SystemUiOverlayStyle>(
+    value: SystemUiOverlayStyle.dark,
+    child: Scaffold(
+      body: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: Consumer<PrayerTimesProvider>(
+          builder: (context, provider, _) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () {
+                        provider.setSelectedDate(
+                          provider.selectedDate.subtract(const Duration(days: 1)),
                         );
-                        if (picked != null) {
-                          provider.setSelectedDate(picked);
-                        }
                       },
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                decoration: TextDecoration.underline,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: provider.selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            provider.setSelectedDate(picked);
+                          }
+                        },
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
-                            ),
-                            Text(
-                              " ${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
+                              Text(
+                                " ${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Colors.black),
-                    onPressed: () {
-                      provider.setSelectedDate(
-                        provider.selectedDate.add(const Duration(days: 1)),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              if (provider.isPrayerTimesLoading)
-                Center(
-                  child: Column(
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward, color: Colors.black),
+                      onPressed: () {
+                        provider.setSelectedDate(
+                          provider.selectedDate.add(const Duration(days: 1)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+    
+                if (provider.isPrayerTimesLoading)
+                  Center(
+                    child: Column(
+                      children: [
+                        _buildPrayerTimesRow("Fajr", provider.times!.fajr, true),
+                        _buildPrayerTimesRow(
+                          "Dhuhr",
+                          provider.times!.dhuhr,
+                          true,
+                        ),
+                        _buildPrayerTimesRow("Asr", provider.times!.asr, true),
+                        _buildPrayerTimesRow(
+                          "Maghrib",
+                          provider.times!.maghrib,
+                          true,
+                        ),
+                        _buildPrayerTimesRow("Isha", provider.times!.isha, true),
+                      ],
+                    ),
+                  )
+                else if (provider.times != null)
+                  Column(
                     children: [
-                      _buildPrayerTimesRow("Fajr", provider.times!.fajr, true),
-                      _buildPrayerTimesRow(
-                        "Dhuhr",
-                        provider.times!.dhuhr,
-                        true,
-                      ),
-                      _buildPrayerTimesRow("Asr", provider.times!.asr, true),
+                      _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
+                      _buildPrayerTimesRow("Dhuhr", provider.times!.dhuhr, false),
+                      _buildPrayerTimesRow("Asr", provider.times!.asr, false),
                       _buildPrayerTimesRow(
                         "Maghrib",
                         provider.times!.maghrib,
-                        true,
+                        false,
                       ),
-                      _buildPrayerTimesRow("Isha", provider.times!.isha, true),
+                      _buildPrayerTimesRow("Isha", provider.times!.isha, false),
                     ],
-                  ),
-                )
-              else if (provider.times != null)
-                Column(
-                  children: [
-                    _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
-                    _buildPrayerTimesRow("Dhuhr", provider.times!.dhuhr, false),
-                    _buildPrayerTimesRow("Asr", provider.times!.asr, false),
-                    _buildPrayerTimesRow(
-                      "Maghrib",
-                      provider.times!.maghrib,
-                      false,
-                    ),
-                    _buildPrayerTimesRow("Isha", provider.times!.isha, false),
-                  ],
-                )
-              else if (provider.error != null)
-                Text(provider.error!)
-              else
-                const Text("No data"),
-            ],
-          );
-        },
+                  )
+                else if (provider.error != null)
+                  Text(provider.error!)
+                else
+                  const Text("No data"),
+              ],
+            );
+          },
+        ),
       ),
     ),
   );
