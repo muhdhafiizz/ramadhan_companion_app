@@ -1,0 +1,78 @@
+{
+    "sadaqahReferences": {
+      "quranVerses": [
+        {
+          "verseKey": "2:261",
+          "arabic": "مَّثَلُ ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُمْ فِى سَبِيلِ ٱللَّهِ كَمَثَلِ حَبَّةٍ أَنۢبَتَتْ سَبْعَ سَنَابِلَ فِى كُلِّ سُنۢبُلَةٍۢ مِّا۟ئَةُ حَبَّةٍۢ ۗ وَٱللَّهُ يُضَٰعِفُ لِمَن يَشَآءُ ۗ وَٱللَّهُ وَٰسِعٌ عَلِيمٌ",
+          "transliteration": "Mathalul-ladhīna yunfiqūna amwālahum fī sabīlillāhi kamathali habbatin ambatat sab'a sanābil-a, fī kulli sunbulatim mi'atu habbah. Wallāhu yuḍā'ifu liman yashā'. Wallāhu wāsi'un 'alīm.",
+          "translation": "The example of those who spend their wealth in the way of Allah is like a seed [of grain] which grows seven spikes; in each spike is a hundred grains. And Allah multiplies [His reward] for whom He wills. And Allah is all-Encompassing and Knowing.",
+          "source": "Quran, Surah Al-Baqarah (2:261)"
+        },
+        {
+          "verseKey": "2:274",
+          "arabic": "ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُم بِٱلَّيْلِ وَٱلنَّهَارِ سِرًّۭا وَعَلَانِيَةًۭ فَلَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ وَلَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ",
+          "transliteration": "Alladhīna yunfiqūna amwālahum bil-layli wan-nahāri sirran wa 'alāniyatan falahum ajruhum 'inda rabbihim wa lā khawfun 'alayhim wa lā hum yaḥzanūn.",
+          "translation": "Those who spend their wealth [in Allah's way] by night and by day, secretly and publicly - they will have their reward with their Lord. And no fear will there be concerning them, nor will they grieve.",
+          "source": "Quran, Surah Al-Baqarah (2:274)"
+        },
+        {
+          "verseKey": "9:103",
+          "arabic": "خُذْ مِنْ أَمْوَٰلِهِمْ صَدَقَةًۭ تُطَهِّرُهُمْ وَتُزَكِّيهِم بِهَا وَصَلِّ عَلَيْهِمْ ۖ إِنَّ صَلَوٰتَكَ سَكَنٌۭ لَّهُمْ ۗ وَٱللَّهُ سَمِيعٌ عَلِيمٌ",
+          "transliteration": "Khudh min amwālihim ṣadaqatan tuṭahhiruhum wa tuzakkīhim bihā wa ṣalli 'alayhim. Inna ṣalātaka sakanun lahum. Wallāhu samī'un 'alīm.",
+          "translation": "Take, [O Muhammad], from their wealth a charity by which you purify them and cause them to increase, and invoke [Allah's blessings] upon them. Indeed, your invocations are reassurance for them. And Allah is Hearing and Knowing.",
+          "source": "Quran, Surah At-Tawbah (9:103)"
+        },
+        {
+          "verseKey": "57:18",
+          "arabic": "إِنَّ ٱلْمُصَّدِّقِينَ وَٱلْمُصَّدِّقَٰتِ وَأَقْرَضُوا۟ ٱللَّهَ قَرْضًا حَسَنًۭا يُضَٰعَفُ لَهُمْ وَلَهُمْ أَجْرٌۭ كَرِيمٌۭ",
+          "transliteration": "Inna al-muṣṣaddiqīna wal-muṣṣaddiqāti wa aqraḍū Allāha qarḍan ḥasanan yuḍā'afu lahum wa lahum ajrun karīm.",
+          "translation": "Indeed, the men and women who give in charity and lend to Allah a good loan will have it multiplied for them, and they will have a noble reward.",
+          "source": "Quran, Surah Al-Hadid (57:18)"
+        },
+        {
+          "verseKey": "64:16",
+          "arabic": "فَٱتَّقُوا۟ ٱللَّهَ مَا ٱسْتَطَعْتُمْ وَٱسْمَعُوا۟ وَأَطِيعُوا۟ وَأَنفِقُوا۟ خَيْرًۭا لِّأَنفُسِكُمْ ۗ وَمَن يُوقَ شُحَّ نَفْسِهِۦ فَأُو۟لَٰٓئِكَ هُمُ ٱلْمُفْلِحُونَ",
+          "transliteration": "Fattaqullāha mā istaṭa'tum wasma'ū wa aṭī'ū wa anfiqū khayran li'anfusikum. Wa man yūqa shuḥḥa nafsihī fa-ulā'ika humu al-mufliḥūn.",
+          "translation": "So fear Allah as much as you are able and listen and obey and spend [in charity] for your own benefit. And whoever is protected from the stinginess of his soul - it is those who will be the successful.",
+          "source": "Quran, Surah At-Taghabun (64:16)"
+        }
+      ],
+      "hadiths": [
+        {
+          "hadithNumber": "Sahih al-Bukhari 1410",
+          "arabic": "مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ",
+          "transliteration": "Mā naqaṣat ṣadaqatun min māl.",
+          "translation": "Charity does not decrease wealth.",
+          "source": "Sahih al-Bukhari"
+        },
+        {
+          "hadithNumber": "Sahih Muslim 1011",
+          "arabic": "اتَّقُوا النَّارَ وَلَوْ بِشِقِّ تَمْرَةٍ",
+          "transliteration": "Ittaqū an-nāra wa law bi-shiqqi tamrah.",
+          "translation": "Protect yourself from the Hellfire, even by giving half a date-fruit in charity.",
+          "source": "Sahih Muslim"
+        },
+        {
+          "hadithNumber": "Sahih al-Bukhari 2931",
+          "arabic": "كُلُّ مَعْرُوفٍ صَدَقَةٌ",
+          "transliteration": "Kullu ma'rūfin ṣadaqah.",
+          "translation": "Every act of kindness is charity.",
+          "source": "Sahih al-Bukhari"
+        },
+        {
+          "hadithNumber": "Sahih Muslim 2588",
+          "arabic": "الصَّدَقَةُ تُطْفِئُ الْخَطِيئَةَ كَمَا يُطْفِئُ الْمَاءُ النَّارَ",
+          "transliteration": "As-ṣadaqatu tuṭfi'u al-khaṭī'ata kamā yuṭfi'u al-mā'u an-nār.",
+          "translation": "Charity extinguishes sin, just as water extinguishes fire.",
+          "source": "Sunan Ibn Majah, At-Tirmidhi"
+        },
+        {
+          "hadithNumber": "Sahih al-Bukhari 1421",
+          "arabic": "مَنْ تَصَدَّقَ بِعَدْلِ تَمْرَةٍ مِنْ كَسَبٍ طَيِّبٍ، وَلاَ يَقْبَلُ اللَّهُ إِلاَّ الطَّيِّبَ، وَإِنَّ اللَّهَ يَتَقَبَّلُهَا بِيَمِينِهِ، ثُمَّ يُرَبِّيهَا لِصَاحِبِهِ، كَمَا يُرَبِّي أَحَدُكُمْ فَلُوَّهُ، حَتَّى تَكُونَ مِثْلَ الْجَبَلِ",
+          "transliteration": "Man taṣaddaqa bi-'adli tamratin min kasabin ṭayyib, wa lā yaqbalullāhu illā aṭ-ṭayyib. Wa innallāha yataqabbaluhā biyamīnih, thumma yurabbīhā liṣāḥibih, kamā yurabbī aḥadukum faluwwahu ḥattā takūna mithla al-jabal.",
+          "translation": "Whoever gives in charity the equivalent of a date from honest earnings—and Allah only accepts what is pure—Allah will accept it with His Right Hand and nurture it for its owner, as one of you nurtures his young foal, until it becomes like a mountain.",
+          "source": "Sahih al-Bukhari"
+        }
+      ]
+    }
+  }

@@ -121,6 +121,7 @@ class PrayerTimesView extends StatelessWidget {
                         _buildIconsRow(context, provider),
                         const SizedBox(height: 20),
                         _buildBookmark(context),
+                        _buildSadaqahReminder(context),
                         const SizedBox(height: 20),
                         _buildCountdown(provider),
                         const SizedBox(height: 20),
@@ -683,6 +684,41 @@ Widget _buildSedekah(BuildContext context) {
   );
 }
 
+Widget _buildSadaqahReminder(BuildContext context) {
+  if (DateTime.now().weekday != DateTime.friday) {
+    return const SizedBox.shrink();
+  }
+
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SadaqahListView()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.lightViolet.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.violet.withOpacity(1)),
+        ),
+        child: const Text(
+          'Sadaqah now ',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Widget _buildQuran(BuildContext context) {
   return GestureDetector(
     onTap: () {
@@ -955,7 +991,9 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                       icon: const Icon(Icons.arrow_back, color: Colors.black),
                       onPressed: () {
                         provider.setSelectedDate(
-                          provider.selectedDate.subtract(const Duration(days: 1)),
+                          provider.selectedDate.subtract(
+                            const Duration(days: 1),
+                          ),
                         );
                       },
                     ),
@@ -995,7 +1033,10 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: Colors.black),
+                      icon: const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.black,
+                      ),
                       onPressed: () {
                         provider.setSelectedDate(
                           provider.selectedDate.add(const Duration(days: 1)),
@@ -1005,12 +1046,16 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                   ],
                 ),
                 const SizedBox(height: 16),
-    
+
                 if (provider.isPrayerTimesLoading)
                   Center(
                     child: Column(
                       children: [
-                        _buildPrayerTimesRow("Fajr", provider.times!.fajr, true),
+                        _buildPrayerTimesRow(
+                          "Fajr",
+                          provider.times!.fajr,
+                          true,
+                        ),
                         _buildPrayerTimesRow(
                           "Dhuhr",
                           provider.times!.dhuhr,
@@ -1022,7 +1067,11 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                           provider.times!.maghrib,
                           true,
                         ),
-                        _buildPrayerTimesRow("Isha", provider.times!.isha, true),
+                        _buildPrayerTimesRow(
+                          "Isha",
+                          provider.times!.isha,
+                          true,
+                        ),
                       ],
                     ),
                   )
@@ -1030,7 +1079,11 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                   Column(
                     children: [
                       _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
-                      _buildPrayerTimesRow("Dhuhr", provider.times!.dhuhr, false),
+                      _buildPrayerTimesRow(
+                        "Dhuhr",
+                        provider.times!.dhuhr,
+                        false,
+                      ),
                       _buildPrayerTimesRow("Asr", provider.times!.asr, false),
                       _buildPrayerTimesRow(
                         "Maghrib",

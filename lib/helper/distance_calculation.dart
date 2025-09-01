@@ -16,3 +16,8 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 }
 
 double _deg2rad(double deg) => deg * (pi / 180);
+
+String formatCurrency(double value) {
+  return value.toStringAsFixed(2);
+}
+
