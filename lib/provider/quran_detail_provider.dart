@@ -13,6 +13,8 @@ class QuranDetailProvider extends ChangeNotifier {
   List<Map<String, String>> _allVerses = [];
   List<Map<String, String>> _filteredVerses = [];
   String _query = "";
+  double _arabicFontSize = 23;
+  double _translationFontSize = 16;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -55,6 +57,8 @@ class QuranDetailProvider extends ChangeNotifier {
   List<Map<String, String>> get verses => _filteredVerses;
   bool get showScrollUp => _showScrollUp;
   bool get showScrollDown => _showScrollDown;
+  double get arabicFontSize => _arabicFontSize;
+  double get translationFontSize => _translationFontSize;
 
   bool get isPlaying => _isPlaying;
   bool get showAppBar => _showAppBar;
@@ -79,6 +83,16 @@ class QuranDetailProvider extends ChangeNotifier {
 
       notifyListeners();
     });
+  }
+
+  void setArabicFontSize(double size) {
+    _arabicFontSize = size;
+    notifyListeners();
+  }
+
+  void setTranslationFontSize(double size) {
+    _translationFontSize = size;
+    notifyListeners();
   }
 
   void scrollToTop() {
@@ -110,11 +124,9 @@ class QuranDetailProvider extends ChangeNotifier {
 
   void handleScroll(double offset) {
     if (offset > _lastOffset && _showAppBar) {
-      // scrolling down → hide
       _showAppBar = false;
       notifyListeners();
     } else if (offset < _lastOffset && !_showAppBar) {
-      // scrolling up → show
       _showAppBar = true;
       notifyListeners();
     }
