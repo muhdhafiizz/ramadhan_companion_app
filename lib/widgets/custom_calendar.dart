@@ -38,7 +38,6 @@ class CustomDatePickerSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // manual input
             Row(
               children: [
                 Expanded(
@@ -105,7 +104,6 @@ class CustomDatePickerSheet extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // month navigation
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -143,7 +141,6 @@ class CustomDatePickerSheet extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // weekdays header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
@@ -154,7 +151,6 @@ class CustomDatePickerSheet extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // calendar grid
             Flexible(
               child: GridView.builder(
                 shrinkWrap: true,

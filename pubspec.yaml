@@ -59,6 +59,7 @@ flutter:
     - assets/data/masjid_account.json
     - assets/icon/volume_icon.png
     - assets/icon/volume_outlined_icon.png
+    - assets/icon/slider_filled_icon.png
 
   fonts:
     - family: Liter

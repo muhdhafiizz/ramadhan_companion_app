@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_audio_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
@@ -63,9 +64,8 @@ class _SurahDetailBody extends StatelessWidget {
                       itemScrollController: provider.itemScrollController,
                       itemPositionsListener: provider.itemPositionsListener,
                       itemCount: (surahNumber != 1 && surahNumber != 9)
-                          ? provider.verses.length +
-                                1 
-                          : provider.verses.length, 
+                          ? provider.verses.length + 1
+                          : provider.verses.length,
                       itemBuilder: (context, index) {
                         if (index == 0 &&
                             surahNumber != 1 &&
@@ -101,9 +101,9 @@ class _SurahDetailBody extends StatelessWidget {
                               Text(
                                 verse["arabic"]!,
                                 textAlign: TextAlign.right,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'AmiriQuran',
-                                  fontSize: 22,
+                                  fontSize: provider.arabicFontSize,
                                   fontWeight: FontWeight.bold,
                                   height: 2.5,
                                 ),
@@ -111,7 +111,9 @@ class _SurahDetailBody extends StatelessWidget {
                               const SizedBox(height: 15),
                               Text(
                                 verse["translation"]!,
-                                style: const TextStyle(fontSize: 16),
+                                style: TextStyle(
+                                  fontSize: provider.translationFontSize,
+                                ),
                               ),
                               const SizedBox(height: 5),
                               Align(
@@ -183,7 +185,7 @@ class _SurahDetailBody extends StatelessWidget {
 Widget _buildAppBar(BuildContext context, int surahNumber) {
   final surahNameArabic = quran.getSurahName(surahNumber);
   final surahNameEnglish = quran.getSurahNameEnglish(surahNumber);
-  final provider = context.read<QuranDetailProvider>();
+  final provider = context.watch<QuranDetailProvider>();
 
   return Row(
     children: [
@@ -203,6 +205,16 @@ Widget _buildAppBar(BuildContext context, int surahNumber) {
         ],
       ),
       const Spacer(),
+      GestureDetector(
+        onTap: () => _showFontSizeAdjuster(provider, context),
+        child: Image.asset(
+          'assets/icon/slider_filled_icon.png',
+          width: 24,
+          height: 24,
+        ),
+      ),
+
+      SizedBox(width: 10),
       GestureDetector(
         onTap: () {
           provider.playAudio();
@@ -269,5 +281,68 @@ Widget _buildVerseAudio(
       height: 24,
       width: 24,
     ),
+  );
+}
+
+void _showFontSizeAdjuster(QuranDetailProvider provider, BuildContext context) {
+  showModalBottomSheet(
+    backgroundColor: Colors.white,
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return ChangeNotifierProvider.value(
+        value: provider,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Adjust Font Size",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              const Text("Arabic Font"),
+              Consumer<QuranDetailProvider>(
+                builder: (context, provider, _) {
+                  return Slider(
+                    value: provider.arabicFontSize,
+                    min: 18,
+                    max: 40,
+                    activeColor: Colors.black,
+                    inactiveColor: AppColors.betterGray.withOpacity(1),
+                    divisions: 4,
+                    label: "${provider.arabicFontSize.toInt()}",
+                    onChanged: provider.setArabicFontSize,
+                  );
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text("Translation Font"),
+              Consumer<QuranDetailProvider>(
+                builder: (context, provider, _) {
+                  return Slider(
+                    value: provider.translationFontSize,
+                    min: 12,
+                    max: 30,
+                    activeColor: Colors.black,
+                    inactiveColor: AppColors.betterGray.withOpacity(1),
+                    divisions: 4,
+                    label: "${provider.translationFontSize.toInt()}",
+                    onChanged: provider.setTranslationFontSize,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }
