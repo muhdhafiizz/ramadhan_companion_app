@@ -94,7 +94,6 @@ class MasjidNearbyProvider extends ChangeNotifier {
     String googleName,
     List<MasjidAccount> accounts,
   ) {
-    // Normalize and remove "masjid" / "mosque"
     String normalize(String input) {
       return input
           .toLowerCase()
@@ -109,11 +108,11 @@ class MasjidNearbyProvider extends ChangeNotifier {
       final name = normalize(account.masjidName);
 
       if (name == query) {
-        return account; // ✅ exact match after normalization
+        return account; 
       }
     }
 
-    return null; // ❌ no match found
+    return null; 
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

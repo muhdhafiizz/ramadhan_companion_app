@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
@@ -15,7 +16,6 @@ class SadaqahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // trigger reminder once
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<SadaqahProvider>();
       if (!provider.hasShownReminder) {
@@ -197,13 +197,6 @@ Widget _buildTitleText(String name) {
   );
 }
 
-Widget _buildSubtitleText(String name) {
-  return Align(
-    alignment: Alignment.centerLeft,
-    child: Text(name, style: TextStyle(fontSize: 18)),
-  );
-}
-
 Widget _buildDescriptionText(String name) {
   return Align(
     alignment: Alignment.centerLeft,
@@ -241,28 +234,6 @@ Widget _buildContainer() {
   );
 }
 
-Widget _buildPriceText() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildSubtitleText('Only at'),
-      Text.rich(
-        TextSpan(
-          text: 'RM 19.90/',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-          children: [
-            const TextSpan(text: ' '),
-            const TextSpan(
-              text: 'month',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
 Widget _buildContainerNotice() {
   return Container(
     decoration: BoxDecoration(
@@ -277,9 +248,16 @@ Widget _buildContainerNotice() {
   );
 }
 
-
 void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
   final pageController = PageController();
+
+  // ✅ Default selected plan with all details
+  Map<String, dynamic> selectedPlan = {
+    "subscription": "Monthly",
+    "billed": "monthly",
+    "amount": 312,
+    "amountPerMonth": 26,
+  };
 
   final content = StatefulBuilder(
     builder: (context, setState) {
@@ -315,11 +293,12 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
                     curve: Curves.easeInOut,
                   );
                 } else {
-                  print('submit sadaqah form');
+                  print('submit sadaqah form with plan: $selectedPlan');
                 }
               },
-              backgroundColor: AppColors.violet.withOpacity(1),
-              text: (pageController.hasClients &&
+              backgroundColor: Colors.black,
+              text:
+                  (pageController.hasClients &&
                       pageController.page?.round() == 1)
                   ? 'Submit'
                   : 'Review your details',
@@ -337,19 +316,51 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                // Page 1
+                // PAGE 1 (Plan selection)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTitleText('🌙  Benefits of Adding Your Organization'),
+                    _buildTitleText('🌙 Benefits of Adding Your Organization'),
                     const SizedBox(height: 12),
                     _buildContainer(),
                     const SizedBox(height: 20),
-                    _buildPriceText(),
+                    _buildTitleText('Subscription'),
+                    const SizedBox(height: 10),
+                    _buildContainerSubscription(
+                      subscription: 'Annual',
+                      billed: 'annually',
+                      amount: 240,
+                      amountPerMonth: 20,
+                      selectedPlan: selectedPlan['subscription'],
+                      onTap: () => setState(() {
+                        selectedPlan = {
+                          "subscription": "Annual",
+                          "billed": "annually",
+                          "amount": 240,
+                          "amountPerMonth": 20,
+                        };
+                      }),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildContainerSubscription(
+                      subscription: 'Monthly',
+                      billed: 'monthly',
+                      amount: 312,
+                      amountPerMonth: 26,
+                      selectedPlan: selectedPlan['subscription'],
+                      onTap: () => setState(() {
+                        selectedPlan = {
+                          "subscription": "Monthly",
+                          "billed": "monthly",
+                          "amount": 312,
+                          "amountPerMonth": 26,
+                        };
+                      }),
+                    ),
                   ],
                 ),
 
-                // Page 2
+                // PAGE 2 (Review + Org details)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -364,6 +375,26 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
                     ),
                     const SizedBox(height: 20),
                     _buildTitleText('Your Organization'),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Selected Plan: ${selectedPlan['subscription']}",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "RM ${formatCurrency(selectedPlan['amount'].toDouble())} billed ${selectedPlan['billed']} "
+                      "(RM ${formatCurrency(selectedPlan['amountPerMonth'].toDouble())} per month)",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
                     CustomTextField(label: 'Organization Name'),
                     _buildTitleText('Link to your website/ social'),
                     CustomTextField(label: 'Link'),
@@ -388,7 +419,6 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
       context: context,
       pageBuilder: (context) => Material(child: content),
     ).whenComplete(() {
-      // 👇 Reset system bar style after sheet closes
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
   } else {
@@ -402,3 +432,47 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
   }
 }
 
+Widget _buildContainerSubscription({
+  required String subscription,
+  required String billed,
+  required double amount,
+  required double amountPerMonth,
+  required String selectedPlan,
+  required VoidCallback onTap,
+}) {
+  final isSelected = selectedPlan == subscription;
+
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.lightGray.withOpacity(1),
+        border: Border.all(
+          color: isSelected
+              ? AppColors.violet.withOpacity(1)
+              : Colors.transparent,
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '$subscription subscription',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('RM ${formatCurrency(amountPerMonth)} / month'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text('RM ${formatCurrency(amount)} per year, billed $billed'),
+        ],
+      ),
+    ),
+  );
+}
