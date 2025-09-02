@@ -251,7 +251,6 @@ Widget _buildContainerNotice() {
 void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
   final pageController = PageController();
 
-  // ✅ Default selected plan with all details
   Map<String, dynamic> selectedPlan = {
     "subscription": "Monthly",
     "billed": "monthly",
@@ -375,7 +374,14 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
                     ),
                     const SizedBox(height: 20),
                     _buildTitleText('Your Organization'),
-                    const SizedBox(height: 10),
+                    CustomTextField(label: 'Organization Name'),
+                    _buildTitleText('Link to your website/ social'),
+                    CustomTextField(label: 'Link'),
+                    _buildTitleText('Bank Name'),
+                    CustomTextField(label: 'Bank Name'),
+                    _buildTitleText('Account Number'),
+                    CustomTextField(label: 'Account Number'),
+                    const SizedBox(height: 20),
                     Text(
                       "Selected Plan: ${selectedPlan['subscription']}",
                       style: const TextStyle(
@@ -393,15 +399,6 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
                         color: Colors.black54,
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-                    CustomTextField(label: 'Organization Name'),
-                    _buildTitleText('Link to your website/ social'),
-                    CustomTextField(label: 'Link'),
-                    _buildTitleText('Bank Name'),
-                    CustomTextField(label: 'Bank Name'),
-                    _buildTitleText('Account Number'),
-                    CustomTextField(label: 'Account Number'),
                     const Spacer(),
                     _buildContainerNotice(),
                   ],

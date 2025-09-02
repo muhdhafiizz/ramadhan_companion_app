@@ -46,9 +46,8 @@ class PrayerTimesView extends StatelessWidget {
       if (provider.city != null && provider.country != null) {
         await provider.fetchPrayerTimes(provider.city!, provider.country!);
       }
-      await provider.quranService.getRandomVerse();
-      await provider.hadithService.fetchRandomHadith();
 
+      // await provider.refreshDailyContent();
       refreshController.refreshCompleted();
     }
 
@@ -164,9 +163,18 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
             ),
           ],
         ),
-        InkWell(
-          onTap: () => _showLogoutConfirmation(context, provider),
-          child: const Icon(Icons.logout),
+        Row(
+          children: [
+            InkWell(
+              // onTap: () => _showLogoutConfirmation(context, provider),
+              child: const Icon(Icons.settings_outlined),
+            ),
+            SizedBox(width: 8),
+            InkWell(
+              onTap: () => _showLogoutConfirmation(context, provider),
+              child: const Icon(Icons.logout),
+            ),
+          ],
         ),
       ],
     ),
@@ -197,7 +205,6 @@ Widget _buildHijriAndGregorianDate(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
-                // ⬅️ allow content to shrink/wrap
                 child: GestureDetector(
                   onTap: () => _showPrayerTimesDate(context, provider),
                   child: Column(
@@ -217,9 +224,7 @@ Widget _buildHijriAndGregorianDate(
                 ),
               ),
               const SizedBox(width: 8),
-              Flexible(
-                child: _buildLocationText(provider, context),
-              ),
+              Flexible(child: _buildLocationText(provider, context)),
             ],
           ),
         )
@@ -386,7 +391,7 @@ Widget _dailyVerseCarousel(
         effect: WormEffect(
           dotHeight: 13,
           dotWidth: 13,
-          activeDotColor: AppColors.violet.withOpacity(1),
+          activeDotColor: AppColors.lightViolet.withOpacity(1),
         ),
       ),
     ],
@@ -459,7 +464,7 @@ Widget _buildDailyQuranVerse(
                         height: 2.5,
                       ),
                       textAlign: TextAlign.right,
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Spacer(),
@@ -624,6 +629,7 @@ Widget _buildPrayerTimesRow(
           prayerName,
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 16,
             color: isNext ? Colors.white : null,
           ),
         ),
@@ -633,6 +639,7 @@ Widget _buildPrayerTimesRow(
                 prayerTime ?? "--:--",
                 style: TextStyle(
                   fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 16,
                   color: isNext ? Colors.white : null,
                 ),
               ),

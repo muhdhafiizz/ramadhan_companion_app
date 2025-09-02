@@ -32,6 +32,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? _hijriDay;
   String? _hijriMonth;
   String? _hijriYear;
+  DateTime? _lastFetchedDate;
   DateTime _selectedDate = DateTime.now();
   DateTime get selectedDate => _selectedDate;
   HijriDateModel? _hijriDateModel;
@@ -214,10 +215,17 @@ class PrayerTimesProvider extends ChangeNotifier {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    fetchRandomVerse();
-    fetchRandomHadith();
-    await fetchHijriDate();
+    final today = DateTime.now();
 
+    if (_lastFetchedDate == null ||
+        _lastFetchedDate!.day != today.day ||
+        _lastFetchedDate!.month != today.month ||
+        _lastFetchedDate!.year != today.year) {
+      await fetchRandomVerse();
+      await fetchRandomHadith();
+    }
+
+    await fetchHijriDate();
     _initialized = true;
     notifyListeners();
   }
@@ -230,24 +238,22 @@ class PrayerTimesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void fetchRandomVerse() async {
+  Future<void> fetchRandomVerse() async {
     try {
       final verse = await quranService.getRandomVerse();
       _quranDaily = verse;
+      _lastFetchedDate = DateTime.now();
       notifyListeners();
-      print(
-        "${verse.surahName} [${verse.ayahNo}]: ${verse.arabic} — ${verse.english}",
-      );
     } catch (e) {
       print("Error: $e");
     }
   }
 
-  void fetchRandomHadith() async {
+  Future<void> fetchRandomHadith() async {
     try {
       final hadith = await hadithService.fetchRandomHadith();
-      print("Fetched hadith: $hadith");
       _hadithDaily = hadith;
+      _lastFetchedDate = DateTime.now();
       notifyListeners();
     } catch (e) {
       print("Error $e");
