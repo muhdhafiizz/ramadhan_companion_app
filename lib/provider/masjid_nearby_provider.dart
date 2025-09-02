@@ -36,6 +36,23 @@ class MasjidNearbyProvider extends ChangeNotifier {
       originCountry = country;
 
       _masjids = await _masjidService.getNearbyMasjids(coords.lat, coords.lng);
+
+      // 🔥 Sort by nearest distance
+      _masjids.sort((a, b) {
+        final distA = calculateDistance(
+          originLat!,
+          originLng!,
+          a.latitude,
+          a.longitude,
+        );
+        final distB = calculateDistance(
+          originLat!,
+          originLng!,
+          b.latitude,
+          b.longitude,
+        );
+        return distA.compareTo(distB);
+      });
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -54,6 +71,23 @@ class MasjidNearbyProvider extends ChangeNotifier {
       originLng = lng;
 
       _masjids = await _masjidService.getNearbyMasjids(lat, lng);
+
+      // 🔥 Sort by nearest distance
+      _masjids.sort((a, b) {
+        final distA = calculateDistance(
+          originLat!,
+          originLng!,
+          a.latitude,
+          a.longitude,
+        );
+        final distB = calculateDistance(
+          originLat!,
+          originLng!,
+          b.latitude,
+          b.longitude,
+        );
+        return distA.compareTo(distB);
+      });
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -108,11 +142,11 @@ class MasjidNearbyProvider extends ChangeNotifier {
       final name = normalize(account.masjidName);
 
       if (name == query) {
-        return account; 
+        return account;
       }
     }
 
-    return null; 
+    return null;
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

@@ -196,28 +196,30 @@ Widget _buildHijriAndGregorianDate(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                flex: 2,
+              Flexible(
+                // ⬅️ allow content to shrink/wrap
                 child: GestureDetector(
                   onTap: () => _showPrayerTimesDate(context, provider),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear} ",
+                        "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear}",
+                        overflow: TextOverflow.ellipsis, // ⬅️ prevent overflow
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear} ",
-                          ),
-                        ],
+                      Text(
+                        "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear}",
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
                     ],
                   ),
                 ),
               ),
-              Expanded(flex: 2, child: _buildLocationText(provider, context)),
+              const SizedBox(width: 8),
+              Flexible(
+                child: _buildLocationText(provider, context),
+              ),
             ],
           ),
         )
