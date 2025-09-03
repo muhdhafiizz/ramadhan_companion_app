@@ -37,7 +37,6 @@ class MasjidNearbyProvider extends ChangeNotifier {
 
       _masjids = await _masjidService.getNearbyMasjids(coords.lat, coords.lng);
 
-      // 🔥 Sort by nearest distance
       _masjids.sort((a, b) {
         final distA = calculateDistance(
           originLat!,
@@ -72,7 +71,6 @@ class MasjidNearbyProvider extends ChangeNotifier {
 
       _masjids = await _masjidService.getNearbyMasjids(lat, lng);
 
-      // 🔥 Sort by nearest distance
       _masjids.sort((a, b) {
         final distA = calculateDistance(
           originLat!,
