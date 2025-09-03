@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
@@ -36,10 +35,6 @@ class PrayerTimesView extends StatelessWidget {
       if (!provider.shouldAskLocation) provider.initialize();
     });
 
-    final RefreshController refreshController = RefreshController(
-      initialRefresh: false,
-    );
-
     Future<void> refreshData() async {
       final provider = context.read<PrayerTimesProvider>();
 
@@ -48,7 +43,6 @@ class PrayerTimesView extends StatelessWidget {
       }
 
       // await provider.refreshDailyContent();
-      refreshController.refreshCompleted();
     }
 
     return Scaffold(
@@ -62,12 +56,12 @@ class PrayerTimesView extends StatelessWidget {
               });
             }
 
-            return SmartRefresher(
-              controller: refreshController,
-              enablePullDown: true,
+            return RefreshIndicator(
+              backgroundColor: Colors.white,
+              color: AppColors.violet.withOpacity(1),
               onRefresh: refreshData,
-              header: const WaterDropHeader(),
               child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverPersistentHeader(
                     pinned: true,
@@ -79,7 +73,6 @@ class PrayerTimesView extends StatelessWidget {
                           0.0,
                           1.0,
                         );
-
                         return Container(
                           color: Colors.white,
                           child: Stack(
@@ -93,7 +86,6 @@ class PrayerTimesView extends StatelessWidget {
                                   child: _buildWelcomeText(context, provider),
                                 ),
                               ),
-
                               Positioned(
                                 left: 1,
                                 right: 1,
@@ -112,7 +104,6 @@ class PrayerTimesView extends StatelessWidget {
                       },
                     ),
                   ),
-
                   SliverToBoxAdapter(
                     child: Column(
                       children: [
@@ -212,7 +203,7 @@ Widget _buildHijriAndGregorianDate(
                     children: [
                       Text(
                         "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear}",
-                        overflow: TextOverflow.ellipsis, // ⬅️ prevent overflow
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear}",
@@ -669,7 +660,11 @@ Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
       SizedBox(height: 20),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [_buildQuran(context), _buildSedekah(context)],
+        children: [
+          _buildQuran(context),
+          _buildSedekah(context),
+          _buildHadith(context),
+        ],
       ),
     ],
   );
@@ -699,7 +694,7 @@ Widget _buildSadaqahReminder(BuildContext context) {
   }
 
   return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.symmetric(horizontal: 8.0),
     child: GestureDetector(
       onTap: () {
         Navigator.push(
@@ -711,12 +706,12 @@ Widget _buildSadaqahReminder(BuildContext context) {
         width: double.infinity,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.lightViolet.withOpacity(0.9),
+          color: AppColors.violet.withOpacity(0.9),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.violet.withOpacity(1)),
         ),
         child: const Text(
-          'Sadaqah now ',
+          'Sadaqah today ',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -738,6 +733,21 @@ Widget _buildQuran(BuildContext context) {
         Image.asset('assets/icon/quran_icon.png', height: 50, width: 50),
         const SizedBox(height: 5),
         const Text("Quran", style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    ),
+  );
+}
+
+Widget _buildHadith(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => QuranView()));
+    },
+    child: Column(
+      children: [
+        Image.asset('assets/icon/hadith_icon.png', height: 50, width: 50),
+        const SizedBox(height: 5),
+        const Text("Hadith", style: TextStyle(fontWeight: FontWeight.bold)),
       ],
     ),
   );

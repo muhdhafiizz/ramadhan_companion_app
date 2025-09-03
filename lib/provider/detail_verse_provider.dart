@@ -20,13 +20,11 @@ class DailyVerseProvider extends ChangeNotifier {
     final savedRefs = prefs.getStringList("dailyVerses");
 
     if (savedDate == today && savedRefs != null) {
-      // ✅ Use saved verses
       _verseRefs = savedRefs.map((s) {
         final parts = s.split(":");
         return {"surah": int.parse(parts[0]), "ayah": int.parse(parts[1])};
       }).toList();
     } else {
-      // ✅ Generate new verses
       final random = Random();
       _verseRefs = List.generate(5, (_) {
         final surah = random.nextInt(114) + 1;
