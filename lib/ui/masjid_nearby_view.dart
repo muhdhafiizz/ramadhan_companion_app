@@ -96,32 +96,62 @@ Widget _buildAppBar(BuildContext context) {
 Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      ShimmerLoadingWidget(
-        width: double.infinity,
-        height: 220,
-        isCircle: false,
-      ),
-      Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10),
-              ShimmerLoadingWidget(width: 150, height: 20, isCircle: false),
-              SizedBox(height: 5),
-              ShimmerLoadingWidget(width: 100, height: 20, isCircle: false),
-              SizedBox(height: 5),
-              ShimmerLoadingWidget(width: 70, height: 20, isCircle: false),
-            ],
-          ),
-          Spacer(),
-          ShimmerLoadingWidget(width: 50, height: 50, isCircle: true),
-          SizedBox(width: 5),
-          ShimmerLoadingWidget(width: 50, height: 50, isCircle: true),
-        ],
-      ),
-    ],
+    children: List.generate(2, (index) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ShimmerLoadingWidget(
+              width: double.infinity,
+              height: 220,
+              isCircle: false,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SizedBox(height: 10),
+                    ShimmerLoadingWidget(
+                      width: 150,
+                      height: 20,
+                      isCircle: false,
+                    ),
+                    SizedBox(height: 5),
+                    ShimmerLoadingWidget(
+                      width: 100,
+                      height: 20,
+                      isCircle: false,
+                    ),
+                    SizedBox(height: 5),
+                    ShimmerLoadingWidget(
+                      width: 70,
+                      height: 20,
+                      isCircle: false,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                const ShimmerLoadingWidget(
+                  width: 50,
+                  height: 50,
+                  isCircle: true,
+                ),
+                SizedBox(width: 5),
+                const ShimmerLoadingWidget(
+                  width: 50,
+                  height: 50,
+                  isCircle: true,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }),
   );
 }
 

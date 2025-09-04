@@ -53,7 +53,7 @@ class _SurahDetailBody extends StatelessWidget {
               _buildAppBar(context, surahNumber),
               const SizedBox(height: 10),
               CustomTextField(
-                label: "Search related verse",
+                label: "Search verse or verse number",
                 onChanged: provider.search,
               ),
               const SizedBox(height: 10),
