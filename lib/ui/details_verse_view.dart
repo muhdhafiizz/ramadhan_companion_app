@@ -19,21 +19,21 @@ class VerseDetailView extends StatelessWidget {
 
           return Scaffold(
             body: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildAppBar(context, type),
-                    const SizedBox(height: 20),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: type == "quran"
-                            ? _buildQuranDetail(refs)
-                            : _buildHadithDetail(),
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAppBar(context, type),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: type == "quran"
+                          ? _buildQuranDetail(refs)
+                          : _buildHadithDetail(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
           );
         },
       ),
@@ -85,7 +85,11 @@ class VerseDetailView extends StatelessWidget {
             itemBuilder: (context, index) {
               final surah = refs[index]["surah"]!;
               final ayah = refs[index]["ayah"]!;
-              return _buildQuranVerseCard(surah, ayah);
+              return _buildQuranVerseCard(
+                surah,
+                ayah,
+                isFirst: index == 0,
+              );
             },
           ),
         ),
@@ -118,10 +122,15 @@ class VerseDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildQuranVerseCard(int surah, int ayah) {
+  Widget _buildQuranVerseCard(int surah, int ayah, {bool isFirst = false}) {
     return Container(
       width: 350,
-      margin: const EdgeInsets.only(right: 20, top: 12, bottom: 12),
+      margin: EdgeInsets.only(
+        left: isFirst ? 20 : 0,
+        right: 20,
+        top: 15,
+        bottom: 15,
+      ),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,

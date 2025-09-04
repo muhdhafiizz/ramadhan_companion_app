@@ -151,11 +151,13 @@ class QuranDetailProvider extends ChangeNotifier {
     if (_query.isEmpty) {
       _filteredVerses = List.from(_allVerses);
     } else {
-      _filteredVerses = _allVerses
-          .where(
-            (verse) => verse["translation"]!.toLowerCase().contains(_query),
-          )
-          .toList();
+      _filteredVerses = _allVerses.where((verse) {
+        final translation = verse["translation"]?.toLowerCase() ?? "";
+        final verseNumber = verse["number"]
+            .toString();
+
+        return translation.contains(_query) || verseNumber.contains(_query);
+      }).toList();
     }
     notifyListeners();
   }

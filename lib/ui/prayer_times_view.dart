@@ -11,6 +11,7 @@ import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
+import 'package:ramadhan_companion_app/ui/hadith_books_view.dart';
 import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
@@ -462,7 +463,7 @@ Widget _buildDailyQuranVerse(
                     Text(
                       provider.quranDaily!.english,
                       style: const TextStyle(fontSize: 16),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Spacer(),
@@ -741,7 +742,10 @@ Widget _buildQuran(BuildContext context) {
 Widget _buildHadith(BuildContext context) {
   return GestureDetector(
     onTap: () {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => QuranView()));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => HadithBooksView()),
+      );
     },
     child: Column(
       children: [
@@ -868,6 +872,7 @@ Widget _buildBookmark(BuildContext context) {
             if (surahNum == 0 || verseNum == 0) return const SizedBox.shrink();
 
             final surahName = quran.getSurahName(surahNum);
+
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -880,38 +885,42 @@ Widget _buildBookmark(BuildContext context) {
                   ),
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 20, top: 10),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.30),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            surahName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(": $verseNum"),
-                        ],
-                      ),
-                    ],
-                  ),
+              child: Container(
+                margin: EdgeInsets.only(
+                  left: index == 0 ? 20 : 0,
+                  right: index == provider.bookmarks.length - 1
+                      ? 20
+                      : 10, 
+                  top: 10,
+                  bottom: 20,
+                ),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.30),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          surahName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(": $verseNum"),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             );
