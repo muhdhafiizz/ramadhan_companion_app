@@ -23,6 +23,7 @@ class QuranView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CustomTextField(
+                  
                   label: "Search Surah",
                   onChanged: provider.updateQuery,
                 ),

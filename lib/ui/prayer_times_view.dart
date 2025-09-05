@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
@@ -34,6 +35,7 @@ class PrayerTimesView extends StatelessWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!provider.shouldAskLocation) provider.initialize();
+      updatePrayerWidget(provider);
     });
 
     Future<void> refreshData() async {
@@ -41,6 +43,7 @@ class PrayerTimesView extends StatelessWidget {
 
       if (provider.city != null && provider.country != null) {
         await provider.fetchPrayerTimes(provider.city!, provider.country!);
+        await updatePrayerWidget(provider);
       }
 
       // await provider.refreshDailyContent();
@@ -75,7 +78,7 @@ class PrayerTimesView extends StatelessWidget {
                           1.0,
                         );
                         return Container(
-                          color: Colors.white,
+                          color: AppColors.lightGray.withOpacity(1),
                           child: Stack(
                             children: [
                               Positioned(
@@ -888,9 +891,7 @@ Widget _buildBookmark(BuildContext context) {
               child: Container(
                 margin: EdgeInsets.only(
                   left: index == 0 ? 20 : 0,
-                  right: index == provider.bookmarks.length - 1
-                      ? 20
-                      : 10, 
+                  right: index == provider.bookmarks.length - 1 ? 20 : 10,
                   top: 10,
                   bottom: 20,
                 ),
@@ -962,6 +963,7 @@ void _showLocationBottomSheet(
                   _buildInsertText(),
                   const SizedBox(height: 20),
                   CustomTextField(
+                    backgroundColor: AppColors.lightGray.withOpacity(1),
                     label: "City",
                     onChanged: locationProvider.setCity,
                   ),
@@ -969,6 +971,7 @@ void _showLocationBottomSheet(
                   CustomTextField(
                     label: "Country",
                     onChanged: locationProvider.setCountry,
+                    backgroundColor: AppColors.lightGray.withOpacity(1),
                   ),
                   const SizedBox(height: 20),
                   _buildLocateMe(context, provider),
@@ -1244,4 +1247,25 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _HeaderDelegate oldDelegate) => true;
+}
+
+Future<void> updatePrayerWidget(PrayerTimesProvider provider) async {
+  if (provider.times == null || provider.nextPrayerDate == null) return;
+
+  await HomeWidget.saveWidgetData('fajr', provider.times?.fajr ?? "--");
+  await HomeWidget.saveWidgetData('dhuhr', provider.times?.dhuhr ?? "--");
+  await HomeWidget.saveWidgetData('asr', provider.times?.asr ?? "--");
+  await HomeWidget.saveWidgetData('maghrib', provider.times?.maghrib ?? "--");
+  await HomeWidget.saveWidgetData('isha', provider.times?.isha ?? "--");
+
+  await HomeWidget.saveWidgetData('next_prayer', provider.nextPrayerText);
+  await HomeWidget.saveWidgetData(
+    'next_prayer_timestamp',
+    provider.nextPrayerDate!.millisecondsSinceEpoch,
+  );
+
+  await HomeWidget.updateWidget(
+    iOSName: 'PrayerTimeWidget',
+    androidName: 'PrayerTimeWidget',
+  );
 }
