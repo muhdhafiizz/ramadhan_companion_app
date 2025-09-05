@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
@@ -23,11 +24,14 @@ import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await HomeWidget.setAppGroupId('group.com.ramadhan_companion_app.pr');
+
   runApp(
     MultiProvider(
       providers: [
@@ -61,7 +65,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Liter',
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.lightGray.withOpacity(1),
         cupertinoOverrideTheme: const CupertinoThemeData(
           primaryColor: CupertinoColors.activeBlue,
         ),

@@ -32,6 +32,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? _hijriDay;
   String? _hijriMonth;
   String? _hijriYear;
+  DateTime? _nextPrayerDate;
   DateTime? _lastFetchedDate;
   DateTime _selectedDate = DateTime.now();
   DateTime get selectedDate => _selectedDate;
@@ -56,6 +57,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? get hijriDay => _hijriDay;
   String? get hijriMonth => _hijriMonth;
   String? get hijriYear => _hijriYear;
+  DateTime? get nextPrayerDate => _nextPrayerDate;
   PrayerTimesModel? get times => _times;
   HijriDateModel? get hijriDateModel => _hijriDateModel;
   QuranDailyModel? get quranDaily => _quranDaily;
@@ -286,7 +288,7 @@ class PrayerTimesProvider extends ChangeNotifier {
         );
       }).toList();
 
-      MapEntry<String, DateTime>? nextPrayer = prayerTimesList.firstWhere(
+      final nextPrayer = prayerTimesList.firstWhere(
         (entry) => entry.value.isAfter(now),
         orElse: () {
           final parts = prayerMap["Fajr"]!.split(":");
@@ -299,13 +301,16 @@ class PrayerTimesProvider extends ChangeNotifier {
         },
       );
 
+      // 👇 store name and timestamp
+      _nextPrayerText = nextPrayer.key;
+      _nextPrayerDate = nextPrayer.value;
+
       final diff = nextPrayer.value.difference(now);
       final hours = diff.inHours.toString().padLeft(2, '0');
       final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
       final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
 
       _countdownText = "$hours:$minutes:$seconds";
-      _nextPrayerText = nextPrayer.key;
 
       notifyListeners();
     });
