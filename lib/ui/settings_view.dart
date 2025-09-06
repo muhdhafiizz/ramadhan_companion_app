@@ -1,11 +1,12 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
+import 'package:ramadhan_companion_app/ui/submission_status_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -30,7 +31,18 @@ class SettingsView extends StatelessWidget {
                       title: 'List your organization',
                       onTap: () {},
                     ),
-                    _buildListTile(context, title: 'Your receipt', onTap: () {}),
+                    _buildListTile(
+                      context,
+                      title: 'Your receipt',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MySubmissionsPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

@@ -1,40 +1,75 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ramadhan_companion_app/model/sadaqah_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+enum SubmissionStatus { idle, submitting, success, failure }
 
 class SadaqahProvider extends ChangeNotifier {
   SadaqahProvider() {
-    _init();
+    loadSadaqahList();
   }
 
   List<Sadaqah> _allSadaqah = [];
   List<Sadaqah> _filteredSadaqah = [];
   bool _isLoading = false;
   bool _hasShownReminder = false;
+  SubmissionStatus _submissionStatus = SubmissionStatus.idle;
+
+  final orgController = TextEditingController();
+  final linkController = TextEditingController();
+  final bankController = TextEditingController();
+  final accountController = TextEditingController();
 
   List<Sadaqah> get sadaqahList => _filteredSadaqah;
   bool get isLoading => _isLoading;
   bool get hasShownReminder => _hasShownReminder;
-
-  void _init() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadSadaqahList();
-    });
-  }
+  SubmissionStatus get submissionStatus => _submissionStatus;
 
   Future<void> loadSadaqahList() async {
     _isLoading = true;
     notifyListeners();
 
-    final String response = await rootBundle.loadString(
-      'assets/data/sadaqah.json',
-    );
-    final List<dynamic> data = json.decode(response);
-    _allSadaqah = data.map((e) => Sadaqah.fromJson(e)).toList();
-    _filteredSadaqah = _allSadaqah;
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .get();
+
+      _allSadaqah = snapshot.docs
+          .map((doc) => Sadaqah.fromJson(doc.data(), doc.id))
+          .toList();
+
+      _filteredSadaqah = _allSadaqah;
+    } catch (e) {
+      debugPrint("Error loading sadaqah: $e");
+    }
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> addSadaqah(Sadaqah sadaqah) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      final data = sadaqah.toJson();
+      data['submittedBy'] = user?.uid ?? "unknown";
+      data['status'] = "pending";
+
+      final docRef = await FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .add(data);
+
+      _allSadaqah.add(Sadaqah.fromJson(data, docRef.id));
+      _filteredSadaqah = _allSadaqah;
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error adding sadaqah: $e");
+    }
+  }
+
+  void resetSubmissionStatus() {
+    _submissionStatus = SubmissionStatus.idle;
     notifyListeners();
   }
 
