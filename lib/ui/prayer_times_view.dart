@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,17 +8,16 @@ import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
-import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
 import 'package:ramadhan_companion_app/ui/hadith_books_view.dart';
 import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
-import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_detail_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
+import 'package:ramadhan_companion_app/ui/settings_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
@@ -158,18 +156,14 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
             ),
           ],
         ),
-        Row(
-          children: [
-            InkWell(
-              // onTap: () => _showLogoutConfirmation(context, provider),
-              child: const Icon(Icons.settings_outlined),
-            ),
-            SizedBox(width: 8),
-            InkWell(
-              onTap: () => _showLogoutConfirmation(context, provider),
-              child: const Icon(Icons.logout),
-            ),
-          ],
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SettingsView()),
+            );
+          },
+          child: const Icon(Icons.settings_outlined, size: 25,),
         ),
       ],
     ),
@@ -1140,85 +1134,17 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
     showCupertinoSheet(
       context: context,
       pageBuilder: (context) => Material(child: content),
-    );
-  } else {
-    showModalBottomSheet(context: context, builder: (context) => content);
-  }
-}
-
-void _showLogoutConfirmation(
-  BuildContext context,
-  PrayerTimesProvider provider,
-) {
-  if (Platform.isIOS) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        title: const Text('Log out'),
-        message: const Text('Are you sure you want to log out?'),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              provider.logout();
-              context.read<LoginProvider>().resetLoginState();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => LoginView()),
-              );
-            },
-            isDestructiveAction: true,
-            child: const Text('Log out'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-      ),
-    );
+    ).whenComplete(() {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
   } else {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Wrap(
-            children: [
-              const ListTile(
-                title: Text(
-                  'Log out',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                subtitle: Text('Are you sure you want to log out?'),
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text('Log out'),
-                onTap: () {
-                  Navigator.pop(context);
-                  provider.logout();
-                  context.read<LoginProvider>().resetLoginState();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginView()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('Cancel'),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+      isScrollControlled: true,
+      builder: (context) => content,
+    ).whenComplete(() {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
   }
 }
 
