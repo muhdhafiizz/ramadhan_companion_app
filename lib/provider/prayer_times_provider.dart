@@ -301,7 +301,6 @@ class PrayerTimesProvider extends ChangeNotifier {
         },
       );
 
-      // 👇 store name and timestamp
       _nextPrayerText = nextPrayer.key;
       _nextPrayerDate = nextPrayer.value;
 

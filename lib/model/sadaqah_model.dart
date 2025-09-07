@@ -5,8 +5,8 @@ class Sadaqah {
   final String accountNumber;
   final String reference;
   final String url;
-  final String submittedBy; // user id (Firebase Auth UID)
-  final String status;      // pending, approved, rejected
+  final String submittedBy;
+  final String status;
 
   Sadaqah({
     required this.id,

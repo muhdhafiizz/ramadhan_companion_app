@@ -343,7 +343,7 @@ Widget _buildMasjidCard({
               },
 
               child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Colors.white,
                 child: Image.asset(
                   'assets/icon/donation_icon.png',
                   height: 30,
@@ -363,7 +363,7 @@ Widget _buildMasjidCard({
                 );
               },
               child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Colors.white,
                 child: Icon(Icons.share, color: Colors.black),
               ),
             ),

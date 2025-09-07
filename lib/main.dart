@@ -45,7 +45,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => IslamicCalendarProvider()),
         ChangeNotifierProvider(create: (_) => QuranProvider()),
         ChangeNotifierProvider(create: (_) => BookmarkProvider()),
-        ChangeNotifierProvider(create: (_) => SadaqahProvider()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final sadaqahProvider = SadaqahProvider();
+            sadaqahProvider.fetchUserRole();
+            return sadaqahProvider;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => DateProvider()),
         ChangeNotifierProvider(create: (_) => HadithBooksProvider()),
         ChangeNotifierProvider(create: (_) => HadithChaptersProvider()),
