@@ -68,6 +68,7 @@ class LoginProvider extends ChangeNotifier {
         "displayName": userCredential.user?.displayName,
       };
 
+
       _isLoading = false;
       _error = null;
       notifyListeners();

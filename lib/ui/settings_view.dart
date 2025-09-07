@@ -14,14 +14,36 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prayerTimesProvider = context.watch<PrayerTimesProvider>();
+    final sadaqahProvider = context.watch<SadaqahProvider>();
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsetsGeometry.all(12),
+          padding: const EdgeInsets.all(12),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTopNav(context),
+              SizedBox(height: 10),
+              if (sadaqahProvider.role == 'super_admin')
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    border: Border.all(color: Colors.orange),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    sadaqahProvider.role ?? '',
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               Expanded(
                 child: ListView(
                   children: [
@@ -38,7 +60,7 @@ class SettingsView extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => MySubmissionsPage(),
+                            builder: (_) => const MySubmissionsPage(),
                           ),
                         );
                       },
@@ -49,9 +71,12 @@ class SettingsView extends StatelessWidget {
               GestureDetector(
                 onTap: () =>
                     _showLogoutConfirmation(context, prayerTimesProvider),
-                child: Text(
-                  'Log out',
-                  style: TextStyle(decoration: TextDecoration.underline),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: const Text(
+                    'Log out',
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
                 ),
               ),
             ],
@@ -105,6 +130,7 @@ void _showLogoutConfirmation(
             onPressed: () {
               Navigator.pop(context);
               provider.logout();
+              context.read<SadaqahProvider>().resetRole();
               context.read<LoginProvider>().resetLoginState();
               Navigator.pushReplacement(
                 context,
@@ -146,6 +172,7 @@ void _showLogoutConfirmation(
                 onTap: () {
                   Navigator.pop(context);
                   provider.logout();
+                  context.read<SadaqahProvider>().resetRole();
                   context.read<LoginProvider>().resetLoginState();
                   Navigator.pushReplacement(
                     context,

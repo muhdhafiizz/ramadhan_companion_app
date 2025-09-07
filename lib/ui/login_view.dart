@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/signup_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
@@ -125,6 +126,8 @@ Widget _buildLoginButton(
                   emailController.text,
                   passwordController.text,
                 );
+
+                await context.read<SadaqahProvider>().fetchUserRole();
 
                 if (context.mounted) Navigator.pop(context);
 

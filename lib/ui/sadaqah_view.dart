@@ -47,6 +47,8 @@ class SadaqahListView extends StatelessWidget {
                                 child: Text("No organizations available"),
                               )
                             : RefreshIndicator(
+                                backgroundColor: Colors.white,
+                                color: AppColors.violet.withOpacity(1),
                                 onRefresh: () async {
                                   await provider.loadSadaqahList();
                                 },
@@ -235,7 +237,7 @@ Widget _buildContainer() {
   return Container(
     padding: EdgeInsets.all(8),
     decoration: BoxDecoration(
-      color: AppColors.lightGray.withOpacity(1),
+      color: Colors.white,
       borderRadius: BorderRadius.circular(10),
     ),
     child: Column(
@@ -251,13 +253,14 @@ Widget _buildContainer() {
 Widget _buildContainerNotice() {
   return Container(
     decoration: BoxDecoration(
-      border: Border.all(width: 2, color: AppColors.betterGray.withOpacity(1)),
+      color: AppColors.lightViolet.withOpacity(1),
+      border: Border.all(width: 2, color: AppColors.violet.withOpacity(1)),
       borderRadius: BorderRadius.circular(10),
     ),
     padding: EdgeInsets.all(10),
     child: Text(
       'Please take note it will take up to 3-5 business days to display your organization as part of verification matter.',
-      style: TextStyle(fontSize: 14),
+      style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
     ),
   );
 }
@@ -325,70 +328,84 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
-          bottomNavigationBar: Container(
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              bottom: 30,
-              top: 20,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  offset: Offset(0, -1),
-                  blurRadius: 6,
+          resizeToAvoidBottomInset: true,
+          bottomNavigationBar: Consumer<SadaqahProvider>(
+            builder: (context, sadaqahProvider, _) {
+              final onPageTwo =
+                  pageController.hasClients &&
+                  pageController.page?.round() == 1;
+
+              return Container(
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 30,
+                  top: 20,
                 ),
-              ],
-            ),
-            child: CustomButton(
-              onTap: () async {
-                if (pageController.page == 0) {
-                  pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                } else {
-                  final user = FirebaseAuth.instance.currentUser;
-
-                  final sadaqah = Sadaqah(
-                    id: '',
-                    organization: provider.orgController.text.trim(),
-                    bankName: provider.bankController.text.trim(),
-                    accountNumber: provider.accountController.text.trim(),
-                    reference: "Donation",
-                    url: provider.linkController.text.trim(),
-                    submittedBy: user?.uid ?? '', // link to user
-                    status: "pending", // default status
-                  );
-
-                  await provider.addSadaqah(sadaqah);
-
-                  Navigator.pop(context); // close sheet
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("✅ Organization submitted successfully"),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      offset: Offset(0, -1),
+                      blurRadius: 6,
                     ),
-                  );
-                }
-              },
-              backgroundColor: Colors.black,
-              text:
-                  (pageController.hasClients &&
-                      pageController.page?.round() == 1)
-                  ? 'Submit'
-                  : 'Review your details',
-              textColor: Colors.white,
-            ),
+                  ],
+                ),
+                child: CustomButton(
+                  onTap: onPageTwo
+                      ? (sadaqahProvider.isFormValid
+                            ? () async {
+                                final user = FirebaseAuth.instance.currentUser;
+
+                                final sadaqah = Sadaqah(
+                                  id: '',
+                                  organization: sadaqahProvider
+                                      .orgController
+                                      .text
+                                      .trim(),
+                                  bankName: sadaqahProvider.bankController.text
+                                      .trim(),
+                                  accountNumber: sadaqahProvider
+                                      .accountController
+                                      .text
+                                      .trim(),
+                                  reference: "Donation",
+                                  url: sadaqahProvider.linkController.text
+                                      .trim(),
+                                  submittedBy: user?.uid ?? '',
+                                  status: "pending",
+                                );
+
+                                await sadaqahProvider.addSadaqah(sadaqah);
+                                provider.resetForm();
+
+                                Navigator.pop(context);
+                                CustomPillSnackbar.show(
+                                  context,
+                                  message:
+                                      '✅ Organization submitted successfully!',
+                                );
+                              }
+                            : null)
+                      : () {
+                          pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                  backgroundColor: onPageTwo && !sadaqahProvider.isFormValid
+                      ? Colors.grey
+                      : Colors.black,
+                  text: onPageTwo ? 'Submit' : 'Review your details',
+                  textColor: Colors.white,
+                ),
+              );
+            },
           ),
           body: Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
             child: PageView(
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
@@ -438,64 +455,69 @@ void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
                 ),
 
                 // PAGE 2 (Review + Org details)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: const Icon(Icons.arrow_back),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTitleText('Your Organization'),
-                    CustomTextField(
-                      controller: provider.orgController,
-                      label: 'Organization Name',
-                    ),
-
-                    _buildTitleText('Link to your website/ social'),
-                    CustomTextField(
-                      controller: provider.linkController,
-                      label: 'Link',
-                    ),
-
-                    _buildTitleText('Bank Name'),
-                    CustomTextField(
-                      controller: provider.bankController,
-                      label: 'Bank Name',
-                    ),
-
-                    _buildTitleText('Account Number'),
-                    CustomTextField(
-                      controller: provider.accountController,
-                      label: 'Account Number',
-                    ),
-
-                    const SizedBox(height: 20),
-                    Text(
-                      "Selected Plan: ${selectedPlan['subscription']}",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+                SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Icon(Icons.arrow_back),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "RM ${formatCurrency(selectedPlan['amount'].toDouble())} billed ${selectedPlan['billed']} "
-                      "(RM ${formatCurrency(selectedPlan['amountPerMonth'].toDouble())} per month)",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54,
+                      const SizedBox(height: 20),
+                      _buildTitleText('Your Organization'),
+                      CustomTextField(
+                        controller: provider.orgController,
+                        label: 'Organization Name',
                       ),
-                    ),
-                    const Spacer(),
-                    _buildContainerNotice(),
-                  ],
+
+                      _buildTitleText('Link to your website/ social'),
+                      CustomTextField(
+                        controller: provider.linkController,
+                        label: 'Link',
+                        keyboardType: TextInputType.url,
+                      ),
+
+                      _buildTitleText('Bank Name'),
+                      CustomTextField(
+                        controller: provider.bankController,
+                        label: 'Bank Name',
+                      ),
+
+                      _buildTitleText('Account Number'),
+                      CustomTextField(
+                        controller: provider.accountController,
+                        label: 'Account Number',
+                        keyboardType: TextInputType.numberWithOptions(),
+                      ),
+
+                      const SizedBox(height: 20),
+                      Text(
+                        "Selected Plan: ${selectedPlan['subscription']}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "RM ${formatCurrency(selectedPlan['amount'].toDouble())} billed ${selectedPlan['billed']} "
+                        "(RM ${formatCurrency(selectedPlan['amountPerMonth'].toDouble())} per month)",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildContainerNotice(),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -542,7 +564,7 @@ Widget _buildContainerSubscription({
         border: Border.all(
           color: isSelected
               ? AppColors.violet.withOpacity(1)
-              : Colors.transparent,
+              : AppColors.betterGray.withOpacity(1),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(10),

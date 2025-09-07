@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,8 @@ class SignupProvider extends ChangeNotifier {
   String _password = '';
 
   bool get obscurePassword => _obscurePassword;
-  bool get isSignUpEnabled => _email.isNotEmpty && _password.isNotEmpty && _name.isNotEmpty;
+  bool get isSignUpEnabled =>
+      _email.isNotEmpty && _password.isNotEmpty && _name.isNotEmpty;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -20,6 +22,14 @@ class SignupProvider extends ChangeNotifier {
             email: email.trim(),
             password: password.trim(),
           );
+
+      await FirebaseFirestore.instance
+          .collection('users_role')
+          .doc(userCredential.user!.uid) // 👈 use UID instead of random id
+          .set({
+            'email': email.trim(),
+            'role': 'user', // default role
+          });
 
       await userCredential.user?.updateDisplayName(name);
       await userCredential.user?.reload();
@@ -50,7 +60,7 @@ class SignupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateName(String value){
+  void updateName(String value) {
     _name = value;
     notifyListeners();
   }
@@ -64,5 +74,4 @@ class SignupProvider extends ChangeNotifier {
     _password = value;
     notifyListeners();
   }
-
 }

@@ -40,7 +40,6 @@ class HadithProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = "hadiths_${bookSlug}_${chapterId ?? 'all'}_page_$page";
 
-      // ✅ Use cached version if available (unless forced refresh)
       if (!forceRefresh && prefs.containsKey(cacheKey)) {
         final cachedData = prefs.getString(cacheKey);
         if (cachedData != null) {
@@ -55,7 +54,7 @@ class HadithProvider extends ChangeNotifier {
             } else {
               _hadiths.addAll(cachedHadiths);
             }
-            _currentPage = page; // ✅ Only update if not empty
+            _currentPage = page;
           }
           _isLoading = false;
           notifyListeners();
@@ -70,7 +69,6 @@ class HadithProvider extends ChangeNotifier {
       );
 
       if (newHadiths.isEmpty) {
-        // ✅ Stop here, don’t update page
         _isLoading = false;
         notifyListeners();
         return;
