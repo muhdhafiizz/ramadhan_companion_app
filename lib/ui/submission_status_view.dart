@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/model/sadaqah_model.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/webview_view.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_status_badge.dart';
 
@@ -59,94 +64,156 @@ class MySubmissionsPage extends StatelessWidget {
                                 docs[index].id,
                               );
 
-                              return Container(
-                                margin: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.30),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
+                              return GestureDetector(
+                                onTap: () => _showSubmissionDetail(
+                                  context,
+                                  sadaqah.organization,
+                                  sadaqah.bankName,
+                                  sadaqah.accountNumber,
                                 ),
-                                child: ListTile(
-                                  title: Row(
-                                    children: [
-                                      Text(sadaqah.organization),
-                                      const SizedBox(width: 5),
-                                      StatusBadge(status: sadaqah.status),
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
                                     ],
                                   ),
-                                  subtitle: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => WebViewPage(
-                                            url: sadaqah.url,
-                                            title: sadaqah.organization,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                                      child: Text(
-                                        sadaqah.url,
-                                        style: const TextStyle(
-                                          decoration: TextDecoration.underline,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Left: Main info
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(sadaqah.organization),
+                                                const SizedBox(width: 5),
+                                                StatusBadge(
+                                                  status: sadaqah.status,
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => WebViewPage(
+                                                      url: sadaqah.url,
+                                                      title:
+                                                          sadaqah.organization,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                sadaqah.url,
+                                                style: const TextStyle(
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  ),
 
-                                  trailing: provider.isSuperAdmin
-                                      ? Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (sadaqah.status == "pending")
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.check,
-                                                  color: Colors.green,
-                                                ),
-                                                onPressed: () async {
+                                      const SizedBox(width: 12),
+
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          if (provider.isSuperAdmin &&
+                                              sadaqah.status == "pending")
+                                            _buildButton(
+                                              "Approve",
+                                              Colors.green,
+                                              () {
+                                                _showConfirmationModalBottomSheet(
+                                                  context,
+                                                  title:
+                                                      "Are you sure you want to approve this submission?",
+                                                  confirmText: "Approve",
+                                                  onConfirm: () async {
+                                                    final msg = await provider
+                                                        .approveSadaqah(
+                                                          sadaqah.id,
+                                                        );
+                                                    if (context.mounted)
+                                                      CustomPillSnackbar.show(
+                                                        context,
+                                                        message: msg,
+                                                      );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          if (provider.isSuperAdmin)
+                                            _buildButton("Remove", Colors.red, () {
+                                              _showConfirmationModalBottomSheet(
+                                                context,
+                                                title:
+                                                    "Are you sure you want to remove this submission?",
+                                                confirmText: "Remove",
+                                                onConfirm: () async {
                                                   final msg = await provider
-                                                      .approveSadaqah(
+                                                      .removeSadaqah(
                                                         sadaqah.id,
                                                       );
-
-                                                  if (context.mounted) {
+                                                  if (context.mounted)
                                                     CustomPillSnackbar.show(
                                                       context,
                                                       message: msg,
                                                     );
-                                                  }
                                                 },
-                                              ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.delete,
-                                                color: Colors.red,
-                                              ),
-                                              onPressed: () async {
-                                                final msg = await provider
-                                                    .removeSadaqah(sadaqah.id);
-
-                                                if (context.mounted) {
-                                                  CustomPillSnackbar.show(
-                                                    context,
-                                                    message: msg,
-                                                  );
-                                                }
+                                              );
+                                            }),
+                                          if (sadaqah.submittedBy ==
+                                              FirebaseAuth
+                                                  .instance
+                                                  .currentUser
+                                                  ?.uid)
+                                            _buildButton(
+                                              "Unsubscribe",
+                                              AppColors.violet.withOpacity(1),
+                                              () {
+                                                _showConfirmationModalBottomSheet(
+                                                  context,
+                                                  title:
+                                                      "Are you sure you want to unsubscribe?",
+                                                  confirmText: "Unsubscribe",
+                                                  onConfirm: () async {
+                                                    final msg = await provider
+                                                        .unsubscribeSadaqah(
+                                                          sadaqah.id,
+                                                        );
+                                                    if (context.mounted)
+                                                      CustomPillSnackbar.show(
+                                                        context,
+                                                        message: msg,
+                                                      );
+                                                  },
+                                                );
                                               },
                                             ),
-                                          ],
-                                        )
-                                      : null,
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -175,5 +242,155 @@ Widget _buildAppBar(BuildContext context) {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
       ),
     ],
+  );
+}
+
+Widget _buildButton(String text, Color color, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        border: Border.all(color: color),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+}
+
+void _showConfirmationModalBottomSheet(
+  BuildContext context, {
+  required String title,
+  required String confirmText,
+  required VoidCallback onConfirm,
+}) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        title: Text(title),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+            isDestructiveAction: true,
+            child: Text(confirmText),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+      ),
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onConfirm();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
+                  child: Text(
+                    confirmText,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void _showSubmissionDetail(
+  BuildContext context,
+  String title,
+  String bankName,
+  String accountNumber,
+) {
+  showModalBottomSheet(
+    context: context,
+    builder: (_) => Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Organization Name'),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text('Bank Name'),
+          Text(
+            bankName,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text('Account Number'),
+
+          GestureDetector(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: accountNumber));
+
+              Navigator.pop(context);
+
+              CustomPillSnackbar.show(
+                context,
+                message: "✅ Account number copied",
+              );
+            },
+            child: Text(
+              accountNumber,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+        ],
+      ),
+    ),
   );
 }

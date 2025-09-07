@@ -25,8 +25,7 @@ Future<void> scheduleNotification({
       ),
     ),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    matchDateTimeComponents: DateTimeComponents.time, // repeat daily
-    // ⛔️ Removed: uiLocalNotificationDateInterpretation
+    matchDateTimeComponents: DateTimeComponents.time, 
   );
 }
 

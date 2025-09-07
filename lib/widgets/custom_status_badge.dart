@@ -44,7 +44,11 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         _getLabel(),
-        style: TextStyle(color: _getColor(), fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: _getColor(),
+          fontWeight: FontWeight.bold,
+          fontSize: 10,
+        ),
       ),
     );
   }
