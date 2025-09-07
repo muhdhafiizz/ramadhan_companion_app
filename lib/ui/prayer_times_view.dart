@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
+import 'package:ramadhan_companion_app/helper/local_notifications.dart';
+import 'package:ramadhan_companion_app/main.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
@@ -34,6 +37,7 @@ class PrayerTimesView extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!provider.shouldAskLocation) provider.initialize();
       updatePrayerWidget(provider);
+      schedulePrayerNotifications(provider);
     });
 
     Future<void> refreshData() async {
@@ -163,7 +167,7 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
               MaterialPageRoute(builder: (_) => SettingsView()),
             );
           },
-          child: const Icon(Icons.settings_outlined, size: 25,),
+          child: const Icon(Icons.settings_outlined, size: 25),
         ),
       ],
     ),
@@ -1194,4 +1198,33 @@ Future<void> updatePrayerWidget(PrayerTimesProvider provider) async {
     iOSName: 'PrayerTimeWidget',
     androidName: 'PrayerTimeWidget',
   );
+}
+
+Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
+  await flutterLocalNotificationsPlugin.cancelAll();
+  if (provider.times == null) return;
+
+  void schedulePrayer(int id, String name, String time) {
+    final prayerTime = parsePrayerTime(time);
+
+    scheduleNotification(
+      id: id * 10, // unique ID
+      title: "$name Reminder",
+      body: "$name prayer will be in 20 minutes",
+      scheduledDate: prayerTime.subtract(const Duration(minutes: 20)),
+    );
+
+    scheduleNotification(
+      id: id * 10 + 1,
+      title: "Prayer Time",
+      body: "It's time for $name",
+      scheduledDate: prayerTime,
+    );
+  }
+
+  schedulePrayer(1, "Fajr", provider.times!.fajr);
+  schedulePrayer(2, "Dhuhr", provider.times!.dhuhr);
+  schedulePrayer(3, "Asr", provider.times!.asr);
+  schedulePrayer(4, "Maghrib", provider.times!.maghrib);
+  schedulePrayer(5, "Isha", provider.times!.isha);
 }
