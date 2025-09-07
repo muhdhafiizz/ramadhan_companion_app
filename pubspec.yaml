@@ -11,6 +11,7 @@ dependencies:
   cloud_firestore: ^6.0.1
   collection: ^1.19.1
   connectivity_plus: ^6.1.5
+  device_info_plus: ^11.5.0
   firebase_auth: ^6.0.0
   firebase_core: ^4.0.0
   flutter:
@@ -18,6 +19,7 @@ dependencies:
   flutter_compass: ^0.8.1
   flutter_inappwebview: ^6.1.5
   flutter_launcher_icons: ^0.14.4
+  flutter_local_notifications: ^19.4.1
   flutter_native_splash: ^2.4.6
   geocoding: ^4.0.0
   geolocator: ^14.0.2
@@ -37,6 +39,7 @@ dependencies:
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
   string_similarity: ^2.1.1
+  timezone: ^0.10.1
   url_launcher: ^6.3.2
 
 dev_dependencies:

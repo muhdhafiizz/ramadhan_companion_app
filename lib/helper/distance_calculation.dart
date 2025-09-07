@@ -28,4 +28,21 @@ String formatUrl(String url) {
   return url;
 }
 
+DateTime parsePrayerTime(String timeString) {
+  final now = DateTime.now();
+  final parts = timeString.split(":");
+  final hour = int.parse(parts[0]);
+  final minute = int.parse(parts[1]);
+
+  var scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+
+  // If time already passed today, schedule for tomorrow
+  if (scheduled.isBefore(now)) {
+    scheduled = scheduled.add(const Duration(days: 1));
+  }
+
+  return scheduled;
+}
+
+
 
