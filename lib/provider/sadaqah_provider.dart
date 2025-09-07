@@ -69,7 +69,6 @@ class SadaqahProvider extends ChangeNotifier {
       await FirebaseFirestore.instance.collection('sadaqah_orgs').add(data);
 
       await loadSadaqahList();
-      
 
       notifyListeners();
     } catch (e) {
@@ -181,6 +180,35 @@ class SadaqahProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error removing: $e");
       return "Failed to remove";
+    }
+  }
+
+  Future<String> unsubscribeSadaqah(String id) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return "User not logged in";
+
+      final docRef = FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .doc(id);
+      final doc = await docRef.get();
+
+      if (!doc.exists) return "Submission not found";
+
+      final submittedBy = doc.data()?['submittedBy'] ?? '';
+
+      // Only allow unsubscribe if the current user is the one who submitted it
+      if (submittedBy != user.uid) {
+        return "You can only unsubscribe your own submissions";
+      }
+
+      await docRef.delete(); // Remove only the user's submission
+      await loadSadaqahList();
+
+      return "Unsubscribed successfully";
+    } catch (e) {
+      debugPrint("Error unsubscribing: $e");
+      return "Failed to unsubscribe";
     }
   }
 }
