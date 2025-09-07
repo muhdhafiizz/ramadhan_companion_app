@@ -16,6 +16,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_compass: ^0.8.1
+  flutter_inappwebview: ^6.1.5
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.6
   geocoding: ^4.0.0
