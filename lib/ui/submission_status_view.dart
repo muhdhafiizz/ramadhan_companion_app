@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/model/sadaqah_model.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
+import 'package:ramadhan_companion_app/ui/webview_view.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_status_badge.dart';
 
@@ -80,13 +81,28 @@ class MySubmissionsPage extends StatelessWidget {
                                     ],
                                   ),
                                   subtitle: GestureDetector(
-                                    child: Text(
-                                      sadaqah.url,
-                                      style: const TextStyle(
-                                        decoration: TextDecoration.underline,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => WebViewPage(
+                                            url: sadaqah.url,
+                                            title: sadaqah.organization,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                                      child: Text(
+                                        sadaqah.url,
+                                        style: const TextStyle(
+                                          decoration: TextDecoration.underline,
+                                        ),
                                       ),
                                     ),
                                   ),
+
                                   trailing: provider.isSuperAdmin
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,

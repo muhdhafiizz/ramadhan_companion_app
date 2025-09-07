@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
 import 'package:ramadhan_companion_app/model/sadaqah_model.dart';
+import 'package:ramadhan_companion_app/ui/webview_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
@@ -12,7 +13,6 @@ import 'package:ramadhan_companion_app/widgets/custom_reminder.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import '../provider/sadaqah_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SadaqahListView extends StatelessWidget {
   const SadaqahListView({super.key});
@@ -122,18 +122,15 @@ class SadaqahListView extends StatelessWidget {
                                         ),
                                         trailing: GestureDetector(
                                           onTap: () async {
-                                            if (sadaqah.url.isNotEmpty) {
-                                              final url = Uri.parse(
-                                                sadaqah.url,
-                                              );
-                                              if (await canLaunchUrl(url)) {
-                                                await launchUrl(
-                                                  url,
-                                                  mode: LaunchMode
-                                                      .externalApplication,
-                                                );
-                                              }
-                                            }
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => WebViewPage(
+                                                  url: sadaqah.url,
+                                                  title: sadaqah.organization,
+                                                ),
+                                              ),
+                                            );
                                           },
                                           child: CircleAvatar(
                                             backgroundColor: Colors.grey[100],
@@ -228,7 +225,7 @@ Widget _buildSadaqahOrganization(
   SadaqahProvider provider,
 ) {
   return GestureDetector(
-    onTap: () => _showSadaqahField(context, provider),
+    onTap: () => showSadaqahField(context, provider),
     child: CustomReminder(),
   );
 }
@@ -260,7 +257,11 @@ Widget _buildContainerNotice() {
     padding: EdgeInsets.all(10),
     child: Text(
       'Please take note it will take up to 3-5 business days to display your organization as part of verification matter.',
-      style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: 14,
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
     ),
   );
 }
@@ -309,7 +310,7 @@ Widget _buildShimmerLoading() {
   );
 }
 
-void _showSadaqahField(BuildContext context, SadaqahProvider provider) {
+void showSadaqahField(BuildContext context, SadaqahProvider provider) {
   final pageController = PageController();
 
   Map<String, dynamic> selectedPlan = {
