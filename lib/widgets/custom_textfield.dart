@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool isPassword;
   final ValueChanged<String>? onChanged;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final Color? backgroundColor;
 
   const CustomTextField({
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.keyboardType,
     this.backgroundColor,
+    this.textInputAction
   });
 
   @override
@@ -28,6 +30,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
       obscureText: isPassword ? signupProvider.obscurePassword : false,
       cursorColor: Colors.black,
       decoration: InputDecoration(

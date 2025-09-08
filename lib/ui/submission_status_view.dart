@@ -143,7 +143,7 @@ class MySubmissionsPage extends StatelessWidget {
                                               "Approve",
                                               Colors.green,
                                               () {
-                                                _showConfirmationModalBottomSheet(
+                                                showConfirmationModalBottomSheet(
                                                   context,
                                                   title:
                                                       "Are you sure you want to approve this submission?",
@@ -164,7 +164,7 @@ class MySubmissionsPage extends StatelessWidget {
                                             ),
                                           if (provider.isSuperAdmin)
                                             _buildButton("Remove", Colors.red, () {
-                                              _showConfirmationModalBottomSheet(
+                                              showConfirmationModalBottomSheet(
                                                 context,
                                                 title:
                                                     "Are you sure you want to remove this submission?",
@@ -187,28 +187,18 @@ class MySubmissionsPage extends StatelessWidget {
                                                   .instance
                                                   .currentUser
                                                   ?.uid)
-                                            _buildButton(
-                                              "Unsubscribe",
-                                              AppColors.violet.withOpacity(1),
-                                              () {
-                                                _showConfirmationModalBottomSheet(
-                                                  context,
-                                                  title:
-                                                      "Are you sure you want to unsubscribe?",
-                                                  confirmText: "Unsubscribe",
-                                                  onConfirm: () async {
-                                                    final msg = await provider
-                                                        .unsubscribeSadaqah(
-                                                          sadaqah.id,
-                                                        );
-                                                    if (context.mounted)
-                                                      CustomPillSnackbar.show(
-                                                        context,
-                                                        message: msg,
-                                                      );
-                                                  },
-                                                );
+                                            GestureDetector(
+                                              onTap: (){
+                                                print('receipt view');
                                               },
+                                              child: CircleAvatar(
+                                                backgroundColor: AppColors.betterGray.withOpacity(0.3),
+                                                child: Image.asset(
+                                                  'assets/icon/receipt_outlined_icon.png',
+                                                  width: 30,
+                                                  height: 30,
+                                                ),
+                                              ),
                                             ),
                                         ],
                                       ),
@@ -264,7 +254,7 @@ Widget _buildButton(String text, Color color, VoidCallback onTap) {
   );
 }
 
-void _showConfirmationModalBottomSheet(
+void showConfirmationModalBottomSheet(
   BuildContext context, {
   required String title,
   required String confirmText,

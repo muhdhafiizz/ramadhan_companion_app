@@ -17,6 +17,7 @@ import 'package:ramadhan_companion_app/provider/islamic_calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
+import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_provider.dart';
@@ -60,6 +61,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => HadithBooksProvider()),
         ChangeNotifierProvider(create: (_) => HadithChaptersProvider()),
         ChangeNotifierProvider(create: (_) => HadithProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
       child: const MainApp(),
     ),
@@ -70,10 +72,18 @@ void main() async {
   const AndroidInitializationSettings initSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
+  const DarwinInitializationSettings initSettingsIOS =
+      DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+
   const InitializationSettings initSettings = InitializationSettings(
     android: initSettingsAndroid,
+    iOS: initSettingsIOS,
   );
-
+  
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 }
 
