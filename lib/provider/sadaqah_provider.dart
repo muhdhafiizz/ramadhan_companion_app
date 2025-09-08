@@ -42,7 +42,8 @@ class SadaqahProvider extends ChangeNotifier {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('sadaqah_orgs')
-          .where('status', isEqualTo: 'approved')
+          .where('status', isEqualTo: 'paid')
+          .where('paid', isEqualTo: true)
           .get();
 
       _allSadaqah = snapshot.docs
@@ -66,10 +67,21 @@ class SadaqahProvider extends ChangeNotifier {
       data['submittedBy'] = user?.uid ?? "unknown";
       data['status'] = "pending";
 
-      await FirebaseFirestore.instance.collection('sadaqah_orgs').add(data);
+      final docRef = await FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .add(data);
+
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'title': 'New Sadaqah Submission',
+        'message':
+            '${user?.email ?? "A user"} submitted a new organization: ${sadaqah.organization}',
+        'timestamp': FieldValue.serverTimestamp(),
+        'recipientRole': 'super_admin',
+        'read': false,
+        'sadaqahId': docRef.id,
+      });
 
       await loadSadaqahList();
-
       notifyListeners();
     } catch (e) {
       debugPrint("Error adding sadaqah: $e");
@@ -158,10 +170,38 @@ class SadaqahProvider extends ChangeNotifier {
       await FirebaseFirestore.instance
           .collection('sadaqah_orgs')
           .doc(id)
-          .update({'status': 'approved'});
+          .update({'status': 'pending to pay', 'paid': false});
 
-      await loadSadaqahList();
-      return "Approved";
+      final submission = await FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .doc(id)
+          .get();
+
+      final data = submission.data();
+      if (data == null) return "Submission not found";
+
+      final organization = data['organization'] ?? 'organization';
+      final submittedBy = data['submittedBy'];
+      final submitterRole =
+          data['role'] ?? 'user'; // 👈 store role in sadaqah_orgs
+
+      if (submittedBy == null) {
+        return "No user to notify";
+      }
+
+      // ✅ Send notification ONLY to the submitter (whatever their role is)
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'title': 'Sadaqah Payment Required',
+        'message':
+            'Please proceed to pay for the approved organization: $organization',
+        'timestamp': FieldValue.serverTimestamp(),
+        'recipientRole': submitterRole, // could be user or super_admin
+        'recipientId': submittedBy, // 👈 target only the submitter
+        'read': false,
+        'sadaqahId': id,
+      });
+
+      return "Approved & notification sent to submitter";
     } catch (e) {
       debugPrint("Error approving: $e");
       return "Failed to approve";
@@ -183,6 +223,21 @@ class SadaqahProvider extends ChangeNotifier {
     }
   }
 
+  Future<String> paySadaqah(String sadaqahId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('sadaqah_orgs')
+          .doc(sadaqahId)
+          .update({'status': 'paid', 'paid': true});
+
+      await loadSadaqahList();
+      return "Payment successful";
+    } catch (e) {
+      debugPrint("Error paying sadaqah: $e");
+      return "Payment failed";
+    }
+  }
+
   Future<String> unsubscribeSadaqah(String id) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -197,12 +252,11 @@ class SadaqahProvider extends ChangeNotifier {
 
       final submittedBy = doc.data()?['submittedBy'] ?? '';
 
-      // Only allow unsubscribe if the current user is the one who submitted it
       if (submittedBy != user.uid) {
         return "You can only unsubscribe your own submissions";
       }
 
-      await docRef.delete(); // Remove only the user's submission
+      await docRef.delete();
       await loadSadaqahList();
 
       return "Unsubscribed successfully";

@@ -68,6 +68,7 @@ flutter:
     - assets/icon/volume_outlined_icon.png
     - assets/icon/slider_filled_icon.png
     - assets/icon/hadith_icon.png
+    - assets/icon/receipt_outlined_icon.png
 
   fonts:
     - family: Liter

@@ -250,18 +250,13 @@ Widget _buildContainer() {
 Widget _buildContainerNotice() {
   return Container(
     decoration: BoxDecoration(
-      color: AppColors.lightViolet.withOpacity(1),
-      border: Border.all(width: 2, color: AppColors.violet.withOpacity(1)),
+      border: Border.all(width: 2, color: AppColors.betterGray.withOpacity(1)),
       borderRadius: BorderRadius.circular(10),
     ),
     padding: EdgeInsets.all(10),
     child: Text(
-      'Please take note it will take up to 3-5 business days to display your organization as part of verification matter.',
-      style: TextStyle(
-        fontSize: 14,
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-      ),
+      'Please take note it will take up to 1-2 business days to display your organization as part of verification matter.',
+      style: TextStyle(fontSize: 14),
     ),
   );
 }
@@ -312,13 +307,6 @@ Widget _buildShimmerLoading() {
 
 void showSadaqahField(BuildContext context, SadaqahProvider provider) {
   final pageController = PageController();
-
-  Map<String, dynamic> selectedPlan = {
-    "subscription": "Monthly",
-    "billed": "monthly",
-    "amount": 312,
-    "amountPerMonth": 26,
-  };
 
   final content = StatefulBuilder(
     builder: (context, setState) {
@@ -404,123 +392,99 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
               );
             },
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          body: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
 
-            child: PageView(
-              controller: pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                // PAGE 1 (Plan selection)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitleText('🌙 Benefits of Adding Your Organization'),
-                    const SizedBox(height: 12),
-                    _buildContainer(),
-                    const SizedBox(height: 20),
-                    _buildTitleText('Subscription'),
-                    const SizedBox(height: 10),
-                    _buildContainerSubscription(
-                      subscription: 'Annual',
-                      billed: 'annually',
-                      amount: 240,
-                      amountPerMonth: 20,
-                      selectedPlan: selectedPlan['subscription'],
-                      onTap: () => setState(() {
-                        selectedPlan = {
-                          "subscription": "Annual",
-                          "billed": "annually",
-                          "amount": 240,
-                          "amountPerMonth": 20,
-                        };
-                      }),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildContainerSubscription(
-                      subscription: 'Monthly',
-                      billed: 'monthly',
-                      amount: 312,
-                      amountPerMonth: 26,
-                      selectedPlan: selectedPlan['subscription'],
-                      onTap: () => setState(() {
-                        selectedPlan = {
-                          "subscription": "Monthly",
-                          "billed": "monthly",
-                          "amount": 312,
-                          "amountPerMonth": 26,
-                        };
-                      }),
-                    ),
-                  ],
-                ),
-
-                // PAGE 2 (Review + Org details)
-                SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Column(
+              child: PageView(
+                controller: pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // PAGE 1 (Plan selection)
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          pageController.previousPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                        child: const Icon(Icons.arrow_back),
+                      _buildTitleText(
+                        '🌙 Benefits of Adding Your Organization',
                       ),
-                      const SizedBox(height: 20),
-                      _buildTitleText('Your Organization'),
-                      CustomTextField(
-                        controller: provider.orgController,
-                        label: 'Organization Name',
-                      ),
-
-                      _buildTitleText('Link to your website/ social'),
-                      CustomTextField(
-                        controller: provider.linkController,
-                        label: 'Link',
-                        keyboardType: TextInputType.url,
-                      ),
-
-                      _buildTitleText('Bank Name'),
-                      CustomTextField(
-                        controller: provider.bankController,
-                        label: 'Bank Name',
-                      ),
-
-                      _buildTitleText('Account Number'),
-                      CustomTextField(
-                        controller: provider.accountController,
-                        label: 'Account Number',
-                        keyboardType: TextInputType.numberWithOptions(),
-                      ),
-
-                      const SizedBox(height: 20),
-                      Text(
-                        "Selected Plan: ${selectedPlan['subscription']}",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "RM ${formatCurrency(selectedPlan['amount'].toDouble())} billed ${selectedPlan['billed']} "
-                        "(RM ${formatCurrency(selectedPlan['amountPerMonth'].toDouble())} per month)",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildContainerNotice(),
+                      const SizedBox(height: 12),
+                      _buildContainer(),
+                      const SizedBox(height: 30),
+                      _buildOneOffPayment(),
                     ],
                   ),
-                ),
-              ],
+
+                  // PAGE 2 (Review + Org details)
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            pageController.previousPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: const Icon(Icons.arrow_back),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildTitleText('Your Organization'),
+                        CustomTextField(
+                          controller: provider.orgController,
+                          label: 'Organization Name',
+                        ),
+
+                        _buildTitleText('Link to your website/ social'),
+                        CustomTextField(
+                          controller: provider.linkController,
+                          label: 'Link',
+                          keyboardType: TextInputType.url,
+                        ),
+
+                        _buildTitleText('Bank Name'),
+                        CustomTextField(
+                          controller: provider.bankController,
+                          label: 'Bank Name',
+                        ),
+
+                        _buildTitleText('Account Number'),
+                        CustomTextField(
+                          controller: provider.accountController,
+                          label: 'Account Number',
+                          keyboardType: TextInputType.number,
+                        ),
+
+                        const SizedBox(height: 20),
+                        Text(
+                          "One-off",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.violet.withOpacity(1)
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          "RM ${formatCurrency(50)}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+                        _buildContainerNotice(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -546,47 +510,78 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
   }
 }
 
-Widget _buildContainerSubscription({
-  required String subscription,
-  required String billed,
-  required double amount,
-  required double amountPerMonth,
-  required String selectedPlan,
-  required VoidCallback onTap,
-}) {
-  final isSelected = selectedPlan == subscription;
-
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.lightGray.withOpacity(1),
-        border: Border.all(
-          color: isSelected
-              ? AppColors.violet.withOpacity(1)
-              : AppColors.betterGray.withOpacity(1),
-          width: 2,
+Widget _buildOneOffPayment() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+        decoration: BoxDecoration(
+          color: AppColors.violet.withOpacity(0.1),
+          border: Border.all(color: AppColors.violet.withOpacity(1)),
+          borderRadius: BorderRadius.circular(20),
         ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$subscription subscription',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text('RM ${formatCurrency(amountPerMonth)} / month'),
-            ],
+        child: Text(
+          'Early bird promo',
+          style: TextStyle(
+            color: AppColors.violet.withOpacity(1),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
           ),
-          const SizedBox(height: 10),
-          Text('RM ${formatCurrency(amount)} per year, billed $billed'),
-        ],
+        ),
       ),
-    ),
+      SizedBox(height: 20),
+
+      Text('One-off Payment', style: TextStyle(fontSize: 14)),
+      Text(
+        'RM ${formatCurrency(50)}',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+      ),
+    ],
   );
 }
+
+// Widget _buildContainerSubscription({
+//   required String subscription,
+//   required String billed,
+//   required double amount,
+//   required double amountPerMonth,
+//   required String selectedPlan,
+//   required VoidCallback onTap,
+// }) {
+//   final isSelected = selectedPlan == subscription;
+
+//   return GestureDetector(
+//     onTap: onTap,
+//     child: Container(
+//       padding: const EdgeInsets.all(8),
+//       decoration: BoxDecoration(
+//         color: AppColors.lightGray.withOpacity(1),
+//         border: Border.all(
+//           color: isSelected
+//               ? AppColors.violet.withOpacity(1)
+//               : AppColors.betterGray.withOpacity(1),
+//           width: 2,
+//         ),
+//         borderRadius: BorderRadius.circular(10),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(
+//                 '$subscription subscription',
+//                 style: TextStyle(fontWeight: FontWeight.bold),
+//               ),
+//               Text('RM ${formatCurrency(amountPerMonth)} / month'),
+//             ],
+//           ),
+//           const SizedBox(height: 10),
+//           Text('RM ${formatCurrency(amount)} per year, billed $billed'),
+//         ],
+//       ),
+//     ),
+//   );
+// }

@@ -6,6 +6,7 @@ import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
+import 'package:ramadhan_companion_app/ui/notifications_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/submission_status_view.dart';
 
@@ -64,6 +65,18 @@ class SettingsView extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const MySubmissionsPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildListTile(
+                      context,
+                      title: 'Notifications',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsView(),
                           ),
                         );
                       },

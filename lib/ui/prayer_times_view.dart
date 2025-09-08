@@ -11,11 +11,13 @@ import 'package:ramadhan_companion_app/main.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
+import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
 import 'package:ramadhan_companion_app/ui/hadith_books_view.dart';
 import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
 import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
+import 'package:ramadhan_companion_app/ui/notifications_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_detail_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_view.dart';
@@ -148,7 +150,6 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 12),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,6 +161,42 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
             ),
           ],
         ),
+        const Spacer(),
+        Consumer<NotificationsProvider>(
+          builder: (context, notificationsProvider, _) {
+            final unreadCount = notificationsProvider.notifications
+                .where((n) => !(n['read'] ?? false))
+                .length;
+
+            return Stack(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => NotificationsView()),
+                    );
+                  },
+                  child: const Icon(Icons.notifications_outlined, size: 25),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(width: 8),
         InkWell(
           onTap: () {
             Navigator.push(
@@ -173,6 +210,7 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
     ),
   );
 }
+
 
 Widget _buildHijriAndGregorianDate(
   PrayerTimesProvider provider,

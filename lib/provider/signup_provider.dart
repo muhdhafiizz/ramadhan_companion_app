@@ -25,10 +25,10 @@ class SignupProvider extends ChangeNotifier {
 
       await FirebaseFirestore.instance
           .collection('users_role')
-          .doc(userCredential.user!.uid) // 👈 use UID instead of random id
+          .doc(userCredential.user!.uid)
           .set({
             'email': email.trim(),
-            'role': 'user', // default role
+            'role': 'user', 
           });
 
       await userCredential.user?.updateDisplayName(name);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 
 class StatusBadge extends StatelessWidget {
   final String status;
@@ -10,6 +11,12 @@ class StatusBadge extends StatelessWidget {
       case 'approved':
       case 'success':
         return Colors.green;
+      case 'pending to pay':
+      case 'waiting':
+        return Colors.blue;
+      case 'paid':
+      case 'completed':
+        return AppColors.violet.withOpacity(1);
       case 'rejected':
       case 'failed':
         return Colors.red;
@@ -24,6 +31,12 @@ class StatusBadge extends StatelessWidget {
       case 'approved':
       case 'success':
         return "Approved";
+      case 'pending to pay':
+      case 'waiting':
+        return 'Procced to pay';
+      case 'paid':
+      case 'completed':
+        return 'Paid';
       case 'rejected':
       case 'failed':
         return "Rejected";
