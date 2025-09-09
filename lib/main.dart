@@ -83,8 +83,12 @@ void main() async {
     android: initSettingsAndroid,
     iOS: initSettingsIOS,
   );
-  
+
   await flutterLocalNotificationsPlugin.initialize(initSettings);
+  final prayerProvider = PrayerTimesProvider();
+  await prayerProvider.initialize();
+  await schedulePrayerNotifications(prayerProvider);
+  await scheduleSadaqahReminder();
 }
 
 class MainApp extends StatelessWidget {

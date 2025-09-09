@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
@@ -28,6 +29,10 @@ import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'dart:convert';
+import 'dart:math';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:timezone/timezone.dart' as tz;
 
 class PrayerTimesView extends StatelessWidget {
   const PrayerTimesView({super.key});
@@ -39,7 +44,7 @@ class PrayerTimesView extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!provider.shouldAskLocation) provider.initialize();
       updatePrayerWidget(provider);
-      schedulePrayerNotifications(provider);
+      // schedulePrayerNotifications(provider);
     });
 
     Future<void> refreshData() async {
@@ -210,7 +215,6 @@ Widget _buildWelcomeText(BuildContext context, PrayerTimesProvider provider) {
     ),
   );
 }
-
 
 Widget _buildHijriAndGregorianDate(
   PrayerTimesProvider provider,
@@ -1246,10 +1250,11 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
     final prayerTime = parsePrayerTime(time);
 
     scheduleNotification(
-      id: id * 10, // unique ID
+      id: id * 10,
       title: "$name Reminder",
       body: "$name prayer will be in 20 minutes",
       scheduledDate: prayerTime.subtract(const Duration(minutes: 20)),
+      playAdhan: false,
     );
 
     scheduleNotification(
@@ -1257,6 +1262,7 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
       title: "Prayer Time",
       body: "It's time for $name",
       scheduledDate: prayerTime,
+      playAdhan: true,
     );
   }
 
@@ -1265,4 +1271,50 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
   schedulePrayer(3, "Asr", provider.times!.asr);
   schedulePrayer(4, "Maghrib", provider.times!.maghrib);
   schedulePrayer(5, "Isha", provider.times!.isha);
+}
+
+Future<Map<String, dynamic>> loadSadaqahData() async {
+  final jsonString = await rootBundle.loadString('assets/data/sadaqah.json');
+  return json.decode(jsonString);
+}
+
+Future<void> scheduleSadaqahReminder() async {
+  final data = await loadSadaqahData();
+  final sadaqahRefs = [
+    ...data['sadaqahReferences']['quranVerses'],
+    ...data['sadaqahReferences']['hadiths'],
+  ];
+
+  final random = Random();
+  final ref = sadaqahRefs[random.nextInt(sadaqahRefs.length)];
+
+  final String title = "Sadaqah Reminder";
+  final String body =
+      ref['translation'] ?? "Give charity today for the sake of Allah.";
+
+  final now = tz.TZDateTime.now(tz.local);
+  var friday = tz.TZDateTime(tz.local, now.year, now.month, now.day, 12, 0);
+
+  while (friday.weekday != DateTime.friday || friday.isBefore(now)) {
+    friday = friday.add(const Duration(days: 1));
+  }
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    999,
+    title,
+    body,
+    friday,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'sadaqah_channel_id',
+        'Sadaqah Notifications',
+        channelDescription: 'Weekly sadaqah reminders on Fridays',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+  );
 }

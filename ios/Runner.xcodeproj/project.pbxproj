@@ -106,6 +106,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		86A8AFBB2E6F1FF0003197A9 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
 		86CA55112E69D9990091E859 /* PrayerTimeWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (86A8AEBB2E6CB3C1003197A9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = PrayerTimeWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -173,6 +174,7 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				86A8AFBB2E6F1FF0003197A9 /* Resources */,
 				86CA55282E69DA3F0091E859 /* PrayerTimeWidgetExtension.entitlements */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
@@ -257,6 +259,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				86A8AFBB2E6F1FF0003197A9 /* Resources */,
 				86CA55112E69D9990091E859 /* PrayerTimeWidget */,
 			);
 			name = PrayerTimeWidgetExtension;

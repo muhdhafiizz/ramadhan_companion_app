@@ -9,26 +9,35 @@ Future<void> scheduleNotification({
   required String title,
   required String body,
   required DateTime scheduledDate,
+  bool playAdhan = false, 
 }) async {
+  final notificationDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'prayer_channel_id',
+      'Prayer Notifications',
+      channelDescription: 'Notifications for prayer times',
+      importance: Importance.max,
+      priority: Priority.high,
+      sound: playAdhan
+          ? RawResourceAndroidNotificationSound(
+              'adhan_notification',
+            ) 
+          : null, 
+      playSound: true,
+    ),
+    iOS: DarwinNotificationDetails(sound: playAdhan ? 'adhan_notification.mp3' : null),
+  );
+
   await flutterLocalNotificationsPlugin.zonedSchedule(
     id,
     title,
     body,
     tz.TZDateTime.from(scheduledDate, tz.local),
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'prayer_channel_id',
-        'Prayer Notifications',
-        channelDescription: 'Notifications for prayer times',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-    ),
+    notificationDetails,
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    matchDateTimeComponents: DateTimeComponents.time, 
+    matchDateTimeComponents: DateTimeComponents.time,
   );
 }
-
 
 Future<void> ensureExactAlarmPermission() async {
   try {
