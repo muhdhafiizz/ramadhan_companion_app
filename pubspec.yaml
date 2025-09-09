@@ -69,6 +69,7 @@ flutter:
     - assets/icon/slider_filled_icon.png
     - assets/icon/hadith_icon.png
     - assets/icon/receipt_outlined_icon.png
+    - assets/data/hadith_quran_sadaqah.json
 
   fonts:
     - family: Liter

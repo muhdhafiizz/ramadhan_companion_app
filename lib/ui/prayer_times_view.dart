@@ -121,8 +121,7 @@ class PrayerTimesView extends StatelessWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: 30),
-                        _buildIconsRow(context, provider),
-                        const SizedBox(height: 20),
+                        _buildIconsGrid(context, provider),
                         _buildBookmark(context),
                         _buildSadaqahReminder(context),
                         const SizedBox(height: 20),
@@ -690,27 +689,24 @@ Widget _buildInsertText() {
   );
 }
 
-Widget _buildIconsRow(BuildContext context, PrayerTimesProvider provider) {
-  return Column(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildLocateMasjidNearby(context, provider),
-          _buildQiblaFinder(context, provider),
-          _buildIslamicCalendar(context, provider),
-        ],
-      ),
-      SizedBox(height: 20),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildQuran(context),
-          _buildSedekah(context),
-          _buildHadith(context),
-        ],
-      ),
-    ],
+Widget _buildIconsGrid(BuildContext context, PrayerTimesProvider provider) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 20,
+      children: [
+        _buildQuran(context),
+        _buildQiblaFinder(context, provider),
+        _buildLocateMasjidNearby(context, provider),
+        _buildSedekah(context),
+        _buildHadith(context),
+        _buildIslamicCalendar(context, provider),
+      ],
+    ),
   );
 }
 
@@ -1274,7 +1270,9 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
 }
 
 Future<Map<String, dynamic>> loadSadaqahData() async {
-  final jsonString = await rootBundle.loadString('assets/data/sadaqah.json');
+  final jsonString = await rootBundle.loadString(
+    'assets/data/hadith_quran_sadaqah.json',
+  );
   return json.decode(jsonString);
 }
 
