@@ -35,7 +35,9 @@ class PrayerTimesProvider extends ChangeNotifier {
   DateTime? _nextPrayerDate;
   DateTime? _lastFetchedDate;
   DateTime _selectedDate = DateTime.now();
+  DateTime _activeDate = DateTime.now();
   DateTime get selectedDate => _selectedDate;
+  DateTime get activeDate => _activeDate;
   HijriDateModel? _hijriDateModel;
   PrayerTimesModel? _times;
   QuranDailyModel? _quranDaily;
@@ -60,6 +62,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   DateTime? get nextPrayerDate => _nextPrayerDate;
   PrayerTimesModel? get times => _times;
   HijriDateModel? get hijriDateModel => _hijriDateModel;
+  HijriDateModel? get activeHijriDateModel => _hijriDateModel;
   QuranDailyModel? get quranDaily => _quranDaily;
   RandomHadithModel? get hadithDaily => _hadithDaily;
 
@@ -239,6 +242,18 @@ class PrayerTimesProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void confirmActiveDate() async {
+  _activeDate = _selectedDate;
+
+  if (city != null && country != null) {
+    await fetchPrayerTimesByDate(city!, country!, _activeDate);
+    _hijriDateModel = await HijriDateService().getHijriDateByGregorian(_activeDate);
+  }
+
+  notifyListeners();
+}
+
 
   Future<void> fetchRandomVerse() async {
     try {

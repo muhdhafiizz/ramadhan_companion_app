@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:table_calendar/table_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class PrayerTimesView extends StatelessWidget {
@@ -232,7 +235,7 @@ Widget _buildHijriAndGregorianDate(
       ),
     );
   }
-  return provider.hijriDateModel != null
+  return provider.activeHijriDateModel != null
       ? Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
@@ -245,11 +248,16 @@ Widget _buildHijriAndGregorianDate(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${provider.hijriDateModel!.hijriDay} ${provider.hijriDateModel!.hijriMonth} ${provider.hijriDateModel!.hijriYear}",
+                        "${provider.activeHijriDateModel!.hijriDay} "
+                        "${provider.activeHijriDateModel!.hijriMonth} "
+                        "${provider.activeHijriDateModel!.hijriYear}",
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        "${provider.hijriDateModel!.gregorianDay}, ${provider.hijriDateModel!.gregorianDayDate} ${provider.hijriDateModel!.gregorianMonth} ${provider.hijriDateModel!.gregorianYear}",
+                        "${provider.activeHijriDateModel!.gregorianDay}, "
+                        "${provider.activeHijriDateModel!.gregorianDayDate} "
+                        "${provider.activeHijriDateModel!.gregorianMonth} "
+                        "${provider.activeHijriDateModel!.gregorianYear}",
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
                       ),
@@ -1066,16 +1074,18 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                     ),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () async {
-                          final picked = await showDatePicker(
+                        onTap: () {
+                          showModalBottomSheet(
                             context: context,
-                            initialDate: provider.selectedDate,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: _buildCustomCalendar(context),
+                              );
+                            },
                           );
-                          if (picked != null) {
-                            provider.setSelectedDate(picked);
-                          }
                         },
                         child: Center(
                           child: Column(
@@ -1177,6 +1187,8 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
       context: context,
       pageBuilder: (context) => Material(child: content),
     ).whenComplete(() {
+      provider.setSelectedDate(provider.activeDate);
+
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
   } else {
@@ -1185,9 +1197,86 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
       isScrollControlled: true,
       builder: (context) => content,
     ).whenComplete(() {
+      provider.setSelectedDate(provider.activeDate);
+
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
   }
+}
+
+Widget _buildCustomCalendar(BuildContext context) {
+  return Consumer<PrayerTimesProvider>(
+    builder: (context, provider, _) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            height: 400,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0.7), // brighter
+                  Colors.white.withOpacity(0.4),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.8),
+                width: 1.5,
+              ),
+            ),
+            child: TableCalendar(
+              firstDay: DateTime(2000),
+              lastDay: DateTime(2100),
+              focusedDay: provider.selectedDate,
+              startingDayOfWeek: StartingDayOfWeek.monday,
+              calendarFormat: CalendarFormat.month,
+              headerStyle: HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                titleTextStyle: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                leftChevronIcon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                ),
+                rightChevronIcon: const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.black,
+                ),
+              ),
+              calendarStyle: CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: AppColors.lightGray.withOpacity(1),
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: AppColors.violet.withOpacity(1),
+                  shape: BoxShape.circle,
+                ),
+                selectedTextStyle: const TextStyle(color: Colors.white),
+                todayTextStyle: const TextStyle(color: Colors.black),
+                weekendTextStyle: const TextStyle(color: Colors.black87),
+                defaultTextStyle: const TextStyle(color: Colors.black),
+                outsideDaysVisible: false,
+              ),
+              selectedDayPredicate: (day) =>
+                  isSameDay(provider.selectedDate, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                provider.setSelectedDate(selectedDay);
+              },
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
