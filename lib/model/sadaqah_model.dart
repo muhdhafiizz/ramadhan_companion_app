@@ -7,6 +7,7 @@ class Sadaqah {
   final String url;
   final String submittedBy;
   final String status;
+  final String category;
 
   Sadaqah({
     required this.id,
@@ -17,6 +18,7 @@ class Sadaqah {
     required this.url,
     required this.submittedBy,
     required this.status,
+    required this.category
   });
 
   factory Sadaqah.fromJson(Map<String, dynamic> json, String id) {
@@ -29,6 +31,7 @@ class Sadaqah {
       url: json['url'] ?? '',
       submittedBy: json['submittedBy'] ?? '',
       status: json['status'] ?? 'pending',
+      category: json['category'] ?? '',
     );
   }
 
@@ -41,6 +44,7 @@ class Sadaqah {
       'url': url,
       'submittedBy': submittedBy,
       'status': status,
+      'category':category
     };
   }
 }

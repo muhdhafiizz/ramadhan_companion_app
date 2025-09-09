@@ -15,11 +15,14 @@ class SadaqahProvider extends ChangeNotifier {
     accountController.addListener(_onFormChanged);
   }
   String? _role;
+  String _filterCategory = "All";
+  String _formCategory = "All";
   List<Sadaqah> _allSadaqah = [];
   List<Sadaqah> _filteredSadaqah = [];
   bool _isLoading = false;
   bool _hasShownReminder = false;
   bool _isFormValid = false;
+
   SubmissionStatus _submissionStatus = SubmissionStatus.idle;
 
   final orgController = TextEditingController();
@@ -28,7 +31,10 @@ class SadaqahProvider extends ChangeNotifier {
   final accountController = TextEditingController();
 
   String? get role => _role;
+  String get filterCategory => _filterCategory;
+  String get formCategory => _formCategory;
   List<Sadaqah> get sadaqahList => _filteredSadaqah;
+  // List<Sadaqah> get sadaqahList => _filteredSadaqah;
   bool get isLoading => _isLoading;
   bool get hasShownReminder => _hasShownReminder;
   bool get isFormValid => _isFormValid;
@@ -86,6 +92,28 @@ class SadaqahProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error adding sadaqah: $e");
     }
+  }
+
+  void setFilterCategory(String category) {
+    _filterCategory = category;
+    _filterByCategory();
+    notifyListeners();
+  }
+
+  void _filterByCategory() {
+    if (_filterCategory == "All") {
+      _filteredSadaqah = _allSadaqah;
+    } else {
+      _filteredSadaqah = _allSadaqah.where((s) {
+        return s.category.toLowerCase() == _filterCategory.toLowerCase();
+      }).toList();
+    }
+  }
+
+  // 🔹 For form submission (used in bottom sheet)
+  void setFormCategory(String category) {
+    _formCategory = category;
+    notifyListeners();
   }
 
   void _onFormChanged() {
