@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -101,6 +100,7 @@ class PrayerTimesProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     } finally {
+
       _isPrayerTimesLoading = false;
       notifyListeners();
     }
@@ -244,16 +244,17 @@ class PrayerTimesProvider extends ChangeNotifier {
   }
 
   void confirmActiveDate() async {
-  _activeDate = _selectedDate;
+    _activeDate = _selectedDate;
 
-  if (city != null && country != null) {
-    await fetchPrayerTimesByDate(city!, country!, _activeDate);
-    _hijriDateModel = await HijriDateService().getHijriDateByGregorian(_activeDate);
+    if (city != null && country != null) {
+      await fetchPrayerTimesByDate(city!, country!, _activeDate);
+      _hijriDateModel = await HijriDateService().getHijriDateByGregorian(
+        _activeDate,
+      );
+    }
+
+    notifyListeners();
   }
-
-  notifyListeners();
-}
-
 
   Future<void> fetchRandomVerse() async {
     try {

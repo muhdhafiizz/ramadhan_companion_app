@@ -95,20 +95,6 @@ Widget _buildViewButton(
 
   if (sadaqahId == null) return const SizedBox();
 
-  if (sadaqahProvider.role == 'super_admin') {
-    return CustomButton(
-      text: "View",
-      backgroundColor: AppColors.violet.withOpacity(1),
-      textColor: Colors.white,
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => MySubmissionsPage()),
-        );
-      },
-    );
-  }
-
   final currentNotif = notificationsProvider.notifications.firstWhere(
     (n) => n['docId'] == notificationDocId,
     orElse: () => notification,
@@ -116,9 +102,61 @@ Widget _buildViewButton(
 
   final bool alreadyPaidLocal = (currentNotif['paid'] == true);
 
-  if (alreadyPaidLocal) {
-    return const SizedBox();
+  if (sadaqahProvider.role == 'super_admin') {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomButton(
+            text: "View",
+            backgroundColor: Colors.grey.shade200,
+            textColor: Colors.black,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => MySubmissionsPage()),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+        if (!alreadyPaidLocal)
+          Expanded(
+            child: CustomButton(
+              text: "Proceed to Pay",
+              backgroundColor: AppColors.violet.withOpacity(1),
+              textColor: Colors.white,
+              onTap: () async {
+                final msg = await sadaqahProvider.paySadaqah(sadaqahId);
+
+                if (context.mounted) {
+                  CustomPillSnackbar.show(context, message: msg);
+                }
+
+                final success = msg.toLowerCase().contains('success');
+                if (success && notificationDocId != null) {
+                  notificationsProvider.markNotificationPaidLocally(
+                    notificationDocId,
+                  );
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('notifications')
+                        .doc(notificationDocId)
+                        .update({'paid': true});
+                  } catch (e) {
+                    debugPrint(
+                      'Failed to update notification doc paid flag: $e',
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+      ],
+    );
   }
+
+  // 🟣 For normal users → only "Proceed to Pay"
+  if (alreadyPaidLocal) return const SizedBox();
 
   return CustomButton(
     text: "Proceed to Pay",
@@ -131,28 +169,17 @@ Widget _buildViewButton(
         CustomPillSnackbar.show(context, message: msg);
       }
 
-      // If the payment function returned success, update local provider (so UI hides the button)
-      final success = msg.toLowerCase().contains('success'); // robust check
-      if (success) {
-        // 1) Update local copy so UI updates immediately
-        if (notificationDocId != null) {
-          notificationsProvider.markNotificationPaidLocally(notificationDocId);
+      final success = msg.toLowerCase().contains('success');
+      if (success && notificationDocId != null) {
+        notificationsProvider.markNotificationPaidLocally(notificationDocId);
+        try {
+          await FirebaseFirestore.instance
+              .collection('notifications')
+              .doc(notificationDocId)
+              .update({'paid': true});
+        } catch (e) {
+          debugPrint('Failed to update notification doc paid flag: $e');
         }
-
-        // 2) (Optional but recommended) update the notification doc in Firestore
-        // so that other clients (or next provider stream) see it too.
-        if (notificationDocId != null) {
-          try {
-            await FirebaseFirestore.instance
-                .collection('notifications')
-                .doc(notificationDocId)
-                .update({'paid': true});
-          } catch (e) {
-            debugPrint('Failed to update notification doc paid flag: $e');
-          }
-        }
-      } else {
-        // Payment failed: do nothing — button remains
       }
     },
   );

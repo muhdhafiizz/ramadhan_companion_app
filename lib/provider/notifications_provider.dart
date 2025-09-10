@@ -9,6 +9,10 @@ class NotificationsProvider extends ChangeNotifier {
 
   StreamSubscription? _subscription;
 
+  NotificationsProvider(String role, String userId) {
+    startListening(role, userId);
+  }
+
   void startListening(String role, String userId) {
     _subscription?.cancel();
 
