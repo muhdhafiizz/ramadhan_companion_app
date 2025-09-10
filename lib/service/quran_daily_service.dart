@@ -33,4 +33,21 @@ class QuranDailyService {
 
     return QuranDailyModel.fromJson(json.decode(ayahRes.body));
   }
+
+  Future<String?> fetchTafsirAyah(
+    String editionSlug,
+    int surahNumber,
+    int ayahNumber,
+  ) async {
+    final url =
+        'https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/$editionSlug/$surahNumber/$ayahNumber.json';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['text']; 
+    } else {
+      throw Exception('Failed to load tafsir for $surahNumber:$ayahNumber');
+    }
+  }
 }

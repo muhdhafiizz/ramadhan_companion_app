@@ -110,7 +110,6 @@ class SadaqahProvider extends ChangeNotifier {
     }
   }
 
-  // 🔹 For form submission (used in bottom sheet)
   void setFormCategory(String category) {
     _formCategory = category;
     notifyListeners();
@@ -211,20 +210,19 @@ class SadaqahProvider extends ChangeNotifier {
       final organization = data['organization'] ?? 'organization';
       final submittedBy = data['submittedBy'];
       final submitterRole =
-          data['role'] ?? 'user'; // 👈 store role in sadaqah_orgs
+          data['role'] ?? 'user'; 
 
       if (submittedBy == null) {
         return "No user to notify";
       }
 
-      // ✅ Send notification ONLY to the submitter (whatever their role is)
       await FirebaseFirestore.instance.collection('notifications').add({
         'title': 'Sadaqah Payment Required',
         'message':
             'Please proceed to pay for the approved organization: $organization',
         'timestamp': FieldValue.serverTimestamp(),
-        'recipientRole': submitterRole, // could be user or super_admin
-        'recipientId': submittedBy, // 👈 target only the submitter
+        'recipientRole': submitterRole, 
+        'recipientId': submittedBy,
         'read': false,
         'sadaqahId': id,
       });

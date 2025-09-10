@@ -7,6 +7,7 @@ import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_audio_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
+import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class SurahDetailView extends StatelessWidget {
@@ -92,6 +93,8 @@ class _SurahDetailBody extends StatelessWidget {
 
                         final verse = provider.verses[verseIndex];
                         final verseNum = int.parse(verse["number"]!);
+                        final expanded = provider.isExpanded(verseNum);
+                        final tafsirText = provider.getTafsir(verseNum);
 
                         return Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -115,25 +118,67 @@ class _SurahDetailBody extends StatelessWidget {
                                   fontSize: provider.translationFontSize,
                                 ),
                               ),
-                              const SizedBox(height: 5),
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Row(
-                                  children: [
-                                    _buildBookmark(
-                                      context,
-                                      surahNumber,
-                                      verseNum,
+                              const SizedBox(height: 8),
+
+                              // === Actions row ===
+                              Row(
+                                children: [
+                                  _buildBookmark(
+                                    context,
+                                    surahNumber,
+                                    verseNum,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  _buildVerseAudio(
+                                    provider,
+                                    surahNumber,
+                                    verseNum,
+                                  ),
+                                  const Spacer(),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        provider.toggleTafsir(verseNum),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          expanded
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                          color: Colors.purple,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        const Text(
+                                          "Tafsir",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 10),
-                                    _buildVerseAudio(
-                                      provider,
-                                      surahNumber,
-                                      verseNum,
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
+
+                              // === Tafsir content ===
+                              if (expanded)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: tafsirText == null
+                                      ? Center(
+                                          child: _buildShimmerLoading(),
+                                        )
+                                      : Text(
+                                          tafsirText,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                            height: 1.5,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                ),
+
+                              const SizedBox(height: 5),
                               const Divider(),
                             ],
                           ),
@@ -225,6 +270,18 @@ Widget _buildAppBar(BuildContext context, int surahNumber) {
           height: 24,
         ),
       ),
+    ],
+  );
+}
+
+Widget _buildShimmerLoading() {
+  return Column(
+    children: [
+      ShimmerLoadingWidget(height: 20, width: double.infinity),
+      SizedBox(height: 5),
+      ShimmerLoadingWidget(height: 20, width: double.infinity),
+      SizedBox(height: 5),
+      ShimmerLoadingWidget(height: 20, width: double.infinity),
     ],
   );
 }

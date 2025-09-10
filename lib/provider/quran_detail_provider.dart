@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -26,6 +27,14 @@ class QuranDetailProvider extends ChangeNotifier {
   late final StreamSubscription<PlayerState> _playerStateSub;
   late final StreamSubscription<Duration> _durationSub;
   late final StreamSubscription<Duration> _positionSub;
+
+  final Map<int, String> _tafsirCache = {};
+
+  final Set<int> _expandedVerses = {};
+
+  bool isExpanded(int verseNum) => _expandedVerses.contains(verseNum);
+
+  String? getTafsir(int verseNum) => _tafsirCache[verseNum];
 
   bool _isPlaying = false;
   bool _showAppBar = true;
@@ -146,6 +155,31 @@ class QuranDetailProvider extends ChangeNotifier {
     _filteredVerses = List.from(_allVerses);
   }
 
+  Future<void> toggleTafsir(int verseNum) async {
+    if (_expandedVerses.contains(verseNum)) {
+      _expandedVerses.remove(verseNum);
+      notifyListeners();
+      return;
+    }
+
+    _expandedVerses.add(verseNum);
+
+    if (!_tafsirCache.containsKey(verseNum)) {
+      try {
+        final tafsir = await QuranDailyService().fetchTafsirAyah(
+          "en-al-jalalayn",
+          surahNumber,
+          verseNum,
+        );
+        _tafsirCache[verseNum] = tafsir ?? "No tafsir available";
+      } catch (e) {
+        _tafsirCache[verseNum] = "Error loading tafsir";
+      }
+    }
+
+    notifyListeners();
+  }
+
   void search(String query) {
     _query = query.toLowerCase();
     if (_query.isEmpty) {
@@ -153,8 +187,7 @@ class QuranDetailProvider extends ChangeNotifier {
     } else {
       _filteredVerses = _allVerses.where((verse) {
         final translation = verse["translation"]?.toLowerCase() ?? "";
-        final verseNumber = verse["number"]
-            .toString();
+        final verseNumber = verse["number"].toString();
 
         return translation.contains(_query) || verseNumber.contains(_query);
       }).toList();

@@ -129,7 +129,7 @@ class PrayerTimesView extends StatelessWidget {
                         const SizedBox(height: 20),
                         _buildCountdown(provider),
                         const SizedBox(height: 20),
-                        _buildErrorText(provider),
+                        // _buildErrorText(provider),
                         _buildPrayerTimesSection(provider),
                         const SizedBox(height: 10),
                         _dailyVerseCarousel(
@@ -304,7 +304,7 @@ Widget _buildLocationText(PrayerTimesProvider provider, BuildContext context) {
 }
 
 Widget _buildCountdown(PrayerTimesProvider provider) {
-  if ((provider.times == null || provider.error != null) &&
+  if ((provider.times == null) &&
       !provider.isPrayerTimesLoading) {
     return const SizedBox.shrink();
   }
@@ -356,7 +356,7 @@ Widget _buildCountdown(PrayerTimesProvider provider) {
 }
 
 Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
-  if ((provider.times == null || provider.error != null) &&
+  if ((provider.times == null) &&
       !provider.isPrayerTimesLoading) {
     return const SizedBox.shrink();
   }
