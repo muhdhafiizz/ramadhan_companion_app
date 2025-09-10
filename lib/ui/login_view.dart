@@ -127,6 +127,8 @@ Widget _buildLoginButton(
                   passwordController.text,
                 );
 
+                if (!context.mounted) return;
+
                 await context.read<SadaqahProvider>().fetchUserRole();
 
                 if (context.mounted) Navigator.pop(context);

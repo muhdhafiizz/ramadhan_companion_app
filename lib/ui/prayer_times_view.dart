@@ -1400,7 +1400,7 @@ Future<void> scheduleSadaqahReminder() async {
       ),
       iOS: DarwinNotificationDetails(),
     ),
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
   );
 }

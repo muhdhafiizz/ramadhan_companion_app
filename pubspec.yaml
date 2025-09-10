@@ -71,6 +71,7 @@ flutter:
     - assets/icon/hadith_icon.png
     - assets/icon/receipt_outlined_icon.png
     - assets/data/hadith_quran_sadaqah.json
+    - assets/icon/ummah_app_logo.png
 
   fonts:
     - family: Liter
@@ -79,9 +80,13 @@ flutter:
     - family: AmiriQuran
       fonts:
         - asset: assets/font/Amiri,Funnel_Display,Liter,Nunito_Sans,Open_Sans/Amiri/Amiri-Bold.ttf
+    - family: Sans
+      fonts: 
+        - asset: assets/font/SplineSans-VariableFont_wght.ttf
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/app_icon.jpg"
+  image_path: "assets/icon/ummah_app_logo.png"
   min_sdk_android: 21
+  remove_alpha_ios: true
