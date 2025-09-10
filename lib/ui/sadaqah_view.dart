@@ -202,7 +202,7 @@ Widget _buildSearchBar(BuildContext context) {
 Widget _buildCategoryBar(BuildContext context, SadaqahProvider provider) {
   final List<String> categories = [
     'All',
-    'For Gaza',
+    'For Gaza 🇵🇸',
     'Crisis & Emergency',
     'Health & Medical',
     'Children & Youth',
@@ -220,7 +220,7 @@ Widget _buildCategoryBar(BuildContext context, SadaqahProvider provider) {
         final isSelected = provider.filterCategory == category;
 
         return Padding(
-          padding: EdgeInsets.only(left: index == 0 ? 12 : 8, right: 8),
+          padding: EdgeInsets.only(left: index == 0 ? 12 : 4, right: 4),
           child: GestureDetector(
             onTap: () => provider.setFilterCategory(category),
             child: Container(
@@ -614,7 +614,7 @@ void showCategoryBottomSheet(
 ) {
   final List<String> categories = [
     'All',
-    'For Gaza',
+    'For Gaza 🇵🇸',
     'Crisis & Emergency',
     'Health & Medical',
     'Children & Youth',

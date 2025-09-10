@@ -61,7 +61,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => HadithBooksProvider()),
         ChangeNotifierProvider(create: (_) => HadithChaptersProvider()),
         ChangeNotifierProvider(create: (_) => HadithProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
+        ChangeNotifierProvider(
+          create: (context) {
+            final role = context.read<SadaqahProvider>().role ?? 'user';
+            final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+            return NotificationsProvider(role, userId);
+          },
+        ),
       ],
       child: const MainApp(),
     ),
