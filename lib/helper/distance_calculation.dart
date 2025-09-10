@@ -36,7 +36,6 @@ DateTime parsePrayerTime(String timeString) {
 
   var scheduled = DateTime(now.year, now.month, now.day, hour, minute);
 
-  // If time already passed today, schedule for tomorrow
   if (scheduled.isBefore(now)) {
     scheduled = scheduled.add(const Duration(days: 1));
   }
