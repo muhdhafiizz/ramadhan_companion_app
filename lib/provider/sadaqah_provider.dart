@@ -22,6 +22,7 @@ class SadaqahProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasShownReminder = false;
   bool _isFormValid = false;
+  double oneOffAmount = 79.90;
 
   SubmissionStatus _submissionStatus = SubmissionStatus.idle;
 
@@ -39,6 +40,7 @@ class SadaqahProvider extends ChangeNotifier {
   bool get hasShownReminder => _hasShownReminder;
   bool get isFormValid => _isFormValid;
   bool get isSuperAdmin => _role == 'super_admin';
+  int get oneOffAmountInCents => (oneOffAmount * 100).round();
   SubmissionStatus get submissionStatus => _submissionStatus;
 
   Future<void> loadSadaqahList() async {
@@ -209,8 +211,7 @@ class SadaqahProvider extends ChangeNotifier {
 
       final organization = data['organization'] ?? 'organization';
       final submittedBy = data['submittedBy'];
-      final submitterRole =
-          data['role'] ?? 'user'; 
+      final submitterRole = data['role'] ?? 'user';
 
       if (submittedBy == null) {
         return "No user to notify";
@@ -221,7 +222,7 @@ class SadaqahProvider extends ChangeNotifier {
         'message':
             'Please proceed to pay for the approved organization: $organization',
         'timestamp': FieldValue.serverTimestamp(),
-        'recipientRole': submitterRole, 
+        'recipientRole': submitterRole,
         'recipientId': submittedBy,
         'read': false,
         'sadaqahId': id,

@@ -314,7 +314,7 @@ Widget _buildContainerNotice() {
 Widget _buildShimmerLoading() {
   return ListView.builder(
     padding: const EdgeInsets.all(10),
-    itemCount: 4, 
+    itemCount: 4,
     itemBuilder: (context, index) {
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -465,7 +465,7 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
                       const SizedBox(height: 12),
                       _buildContainer(),
                       const SizedBox(height: 30),
-                      _buildOneOffPayment(),
+                      _buildOneOffPayment(context),
                     ],
                   ),
 
@@ -734,7 +734,9 @@ void showCategoryBottomSheet(
   );
 }
 
-Widget _buildOneOffPayment() {
+Widget _buildOneOffPayment(BuildContext context) {
+  final sadaqahProvider = context.watch<SadaqahProvider>();
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -754,12 +756,15 @@ Widget _buildOneOffPayment() {
           ),
         ),
       ),
-      SizedBox(height: 20),
-
-      Text('One-off Payment', style: TextStyle(fontSize: 14)),
+      const SizedBox(height: 20),
+      const Text('One-off Payment', style: TextStyle(fontSize: 14)),
       Text(
-        'RM ${formatCurrency(50)}',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        'RM ${formatCurrency(sadaqahProvider.oneOffAmount)}',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+      ),
+      Text(
+        'RM ${formatCurrency(360.00)}/year',
+        style: const TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.lineThrough),
       ),
     ],
   );

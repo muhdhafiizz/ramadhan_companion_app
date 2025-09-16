@@ -45,7 +45,7 @@ class VerseDetailView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Text(
             verse.arabic,
             style: const TextStyle(
@@ -59,12 +59,12 @@ class VerseDetailView extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Text(verse.english, style: const TextStyle(fontSize: 18)),
         ),
         const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Text(
             "${verse.surahName} : ${verse.ayahNo}",
             style: const TextStyle(fontWeight: FontWeight.w600),
@@ -72,7 +72,7 @@ class VerseDetailView extends StatelessWidget {
         ),
         const SizedBox(height: 30),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: _buildTitleText(type),
         ),
         const SizedBox(height: 10),
@@ -98,27 +98,30 @@ class VerseDetailView extends StatelessWidget {
   }
 
   Widget _buildHadithDetail() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          verse.hadithArabic,
-          style: const TextStyle(
-            fontFamily: 'AmiriQuran',
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            height: 2.5,
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            verse.hadithArabic,
+            style: const TextStyle(
+              fontFamily: 'AmiriQuran',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              height: 2.5,
+            ),
+            textAlign: TextAlign.right,
           ),
-          textAlign: TextAlign.right,
-        ),
-        const SizedBox(height: 20),
-        Text(verse.hadithEnglish, style: const TextStyle(fontSize: 18)),
-        const SizedBox(height: 20),
-        Text(
-          "${verse.bookSlug} : ${verse.volume}",
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ],
+          const SizedBox(height: 20),
+          Text(verse.hadithEnglish, style: const TextStyle(fontSize: 18)),
+          const SizedBox(height: 20),
+          Text(
+            "${verse.bookSlug} : ${verse.volume}",
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
     );
   }
 
@@ -180,17 +183,18 @@ class VerseDetailView extends StatelessWidget {
 
 Widget _buildAppBar(BuildContext context, String type) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Row(
+    padding: const EdgeInsets.only(left: 12.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: const Icon(Icons.arrow_back),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(height: 20),
         Text(
-          type == "quran" ? "Qur'an Verse" : "Hadith",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          type == "quran" ? "Qur'an Verse" : "Hadith Verse",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
         ),
       ],
     ),

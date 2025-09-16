@@ -17,7 +17,6 @@ class NotificationsView extends StatelessWidget {
     final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     provider.startListening(role, userId);
 
-
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -109,17 +108,21 @@ class NotificationsView extends StatelessWidget {
 
 Widget _buildAppBar(BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Row(
+    padding: const EdgeInsets.all(12.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: const Icon(Icons.arrow_back),
+          ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(height: 20),
         const Text(
           'Notifications',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
         ),
       ],
     ),
