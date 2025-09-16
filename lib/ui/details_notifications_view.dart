@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
+import 'package:ramadhan_companion_app/service/chip_collect_service.dart';
 import 'package:ramadhan_companion_app/ui/submission_status_view.dart';
+import 'package:ramadhan_companion_app/ui/webview_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
@@ -163,24 +166,61 @@ Widget _buildViewButton(
     backgroundColor: AppColors.violet.withOpacity(1),
     textColor: Colors.white,
     onTap: () async {
-      final msg = await sadaqahProvider.paySadaqah(sadaqahId);
+      try {
+        final chipService = ChipCollectService();
+        final sadaqahProvider = context.read<SadaqahProvider>();
+        final user = FirebaseAuth.instance.currentUser;
 
-      if (context.mounted) {
-        CustomPillSnackbar.show(context, message: msg);
-      }
+        final clientEmail = user?.email ?? "guest@example.com";
+        final productName = notification['title'] ?? "Sadaqah Donation";
+        final price = sadaqahProvider.oneOffAmountInCents;
 
-      final success = msg.toLowerCase().contains('success');
-      if (success && notificationDocId != null) {
-        notificationsProvider.markNotificationPaidLocally(notificationDocId);
-        try {
-          await FirebaseFirestore.instance
-              .collection('notifications')
-              .doc(notificationDocId)
-              .update({'paid': true});
-        } catch (e) {
-          debugPrint('Failed to update notification doc paid flag: $e');
+        final result = await chipService.createPurchase(
+          clientEmail: clientEmail,
+          productName: productName,
+          price: price,
+        );
+        
+
+        final checkoutUrl = result['data']?['checkout_url'];
+
+        if (checkoutUrl != null && context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  WebViewPage(url: checkoutUrl, title: "Complete Payment"),
+            ),
+          );
+        } else {
+          CustomPillSnackbar.show(context, message: "No checkout URL returned");
+        }
+      } catch (e) {
+        if (context.mounted) {
+          CustomPillSnackbar.show(context, message: "Error: $e");
         }
       }
     },
+
+    // onTap: () async {
+    //   final msg = await sadaqahProvider.paySadaqah(sadaqahId);
+
+    //   if (context.mounted) {
+    //     CustomPillSnackbar.show(context, message: msg);
+    //   }
+
+    //   final success = msg.toLowerCase().contains('success');
+    //   if (success && notificationDocId != null) {
+    //     notificationsProvider.markNotificationPaidLocally(notificationDocId);
+    //     try {
+    //       await FirebaseFirestore.instance
+    //           .collection('notifications')
+    //           .doc(notificationDocId)
+    //           .update({'paid': true});
+    //     } catch (e) {
+    //       debugPrint('Failed to update notification doc paid flag: $e');
+    //     }
+    //   }
+    // },
   );
 }

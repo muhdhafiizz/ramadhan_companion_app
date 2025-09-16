@@ -23,7 +23,7 @@ class SettingsView extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildTopNav(context),
               SizedBox(height: 10),
@@ -104,13 +104,14 @@ class SettingsView extends StatelessWidget {
 }
 
 Widget _buildTopNav(BuildContext context) {
-  return Row(
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       GestureDetector(
         onTap: () => Navigator.pop(context),
         child: const Icon(Icons.arrow_back),
       ),
-      const SizedBox(width: 10),
+      const SizedBox(height: 20),
       const Text(
         "Settings",
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),

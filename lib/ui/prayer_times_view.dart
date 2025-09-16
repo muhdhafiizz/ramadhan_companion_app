@@ -411,7 +411,7 @@ Widget _dailyVerseCarousel(
 ) {
   return Column(
     children: [
-      _buildTitleText("Random Verse"),
+      _buildTitleText("Daily Verse"),
       SizedBox(
         height: 250,
         child: PageView(
@@ -641,19 +641,19 @@ Widget _buildTitleText(String name) {
   );
 }
 
-Widget _buildErrorText(PrayerTimesProvider provider) {
-  return provider.error != null
-      ? Center(
-          child: Text(
-            provider.error!,
-            style: const TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        )
-      : const SizedBox.shrink();
-}
+// Widget _buildErrorText(PrayerTimesProvider provider) {
+//   return provider.error != null
+//       ? Center(
+//           child: Text(
+//             provider.error!,
+//             style: const TextStyle(
+//               color: Colors.red,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//         )
+//       : const SizedBox.shrink();
+// }
 
 Widget _buildPrayerTimesRow(
   String prayerName,

@@ -68,8 +68,7 @@ class HadithChaptersView extends StatelessWidget {
                                 MaterialPageRoute(
                                   builder: (_) => HadithView(
                                     bookSlug: bookSlug,
-                                    chapterId:
-                                        chapter.chapterNumber,
+                                    chapterId: chapter.chapterNumber,
                                   ),
                                 ),
                               );
@@ -90,18 +89,25 @@ class HadithChaptersView extends StatelessWidget {
 }
 
 Widget _buildAppBar(BuildContext context, String bookSlug) {
-  return Row(
-    children: [
-      GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: const Icon(Icons.arrow_back),
-      ),
-      const SizedBox(width: 10),
-      Text(
-        bookSlug,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-      ),
-    ],
+  return Padding(
+    padding: const EdgeInsets.only(left: 12.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: const Icon(Icons.arrow_back),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          bookSlug,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        ),
+      ],
+    ),
   );
 }
 

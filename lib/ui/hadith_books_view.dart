@@ -92,18 +92,22 @@ class HadithBooksView extends StatelessWidget {
 }
 
 Widget _buildAppBar(BuildContext context) {
-  return Row(
-    children: [
-      GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: const Icon(Icons.arrow_back),
-      ),
-      const SizedBox(width: 10),
-      const Text(
-        'Hadiths',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-      ),
-    ],
+  return Padding(
+    padding: const EdgeInsets.only(left: 12.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Icon(Icons.arrow_back),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'Hadiths',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+        ),
+      ],
+    ),
   );
 }
 
