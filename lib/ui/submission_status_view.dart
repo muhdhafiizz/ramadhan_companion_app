@@ -89,7 +89,6 @@ class MySubmissionsPage extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // Left: Main info
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:

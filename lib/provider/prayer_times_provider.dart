@@ -90,17 +90,18 @@ class PrayerTimesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('prayer_method');
+
       _times = await PrayerTimesService().getPrayerTimes(city, country);
       startCountdown();
       _hijriDateModel = await HijriDateService().getTodayHijriDate();
 
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('city', city);
       await prefs.setString('country', country);
     } catch (e) {
       _error = e.toString();
     } finally {
-
       _isPrayerTimesLoading = false;
       notifyListeners();
     }
