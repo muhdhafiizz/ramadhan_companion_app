@@ -61,6 +61,7 @@ class SadaqahListView extends StatelessWidget {
                                   final sadaqah = provider.sadaqahList[index];
                                   return Container(
                                     margin: const EdgeInsets.all(12),
+                                    padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(12),
@@ -72,73 +73,105 @@ class SadaqahListView extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    child: ListTile(
-                                      title: Text(
-                                        sadaqah.organization,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            sadaqah.bankName,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await Clipboard.setData(
-                                                ClipboardData(
-                                                  text: sadaqah.accountNumber,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Left side: Organization + bank info
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                sadaqah.organization,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
                                                 ),
-                                              );
-                                              CustomPillSnackbar.show(
-                                                context,
-                                                message:
-                                                    "✅ Account number copied!",
-                                              );
-                                            },
-                                            child: Text(
-                                              sadaqah.accountNumber,
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                decoration:
-                                                    TextDecoration.underline,
                                               ),
-                                            ),
-                                          ),
-                                          if (sadaqah.reference.isNotEmpty)
-                                            Text(
-                                              "Reference: ${sadaqah.reference}",
-                                            ),
-                                        ],
-                                      ),
-                                      trailing: GestureDetector(
-                                        onTap: () async {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => WebViewPage(
-                                                url: sadaqah.url,
-                                                title: sadaqah.organization,
+                                              Text(
+                                                sadaqah.bankName,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        },
-                                        child: CircleAvatar(
-                                          backgroundColor: Colors.grey[100],
-                                          child: const Icon(
-                                            Icons.arrow_forward,
-                                            color: Colors.black,
+
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  await Clipboard.setData(
+                                                    ClipboardData(
+                                                      text:
+                                                          sadaqah.accountNumber,
+                                                    ),
+                                                  );
+                                                  CustomPillSnackbar.show(
+                                                    context,
+                                                    message:
+                                                        "✅ Account number copied!",
+                                                  );
+                                                },
+                                                child: Text(
+                                                  sadaqah.accountNumber,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+                                              ),
+
+                                              // if (sadaqah.reference.isNotEmpty)
+                                              //   Text(
+                                              //     "Reference: ${sadaqah.reference}",
+                                              //   ),
+                                            ],
                                           ),
                                         ),
-                                      ),
+
+                                        const SizedBox(width: 12),
+
+                                        // Right side: Donate button
+                                        CircleAvatar(
+                                          backgroundColor: AppColors.lightGray
+                                              .withOpacity(1),
+                                          foregroundColor: Colors.black,
+                                          child: IconButton(
+                                            onPressed: () {
+                                              if (sadaqah.url.isNotEmpty) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => WebViewPage(
+                                                      url: sadaqah.url,
+                                                      title:
+                                                          sadaqah.organization,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            icon: Icon(Icons.arrow_forward),
+                                          ),
+                                        ),
+
+                                        // Container(
+                                        //   child: CustomButton(
+                                        //     onTap: () {
+                                        //       showDonateBottomSheet(
+                                        //         context,
+                                        //         sadaqah.organization,
+                                        //       );
+                                        //     },
+                                        //     text: 'Donate now',
+                                        //     borderColor: AppColors.violet
+                                        //         .withOpacity(1),
+                                        //     textColor: AppColors.violet
+                                        //         .withOpacity(1),
+                                        //   ),
+                                        // ),
+                                      ],
                                     ),
                                   );
                                 },
@@ -459,6 +492,16 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                        child: Container(
+                          width: 50,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
                       _buildTitleText(
                         '🌙 Benefits of Adding Your Organization',
                       ),
@@ -473,6 +516,16 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                        child: Container(
+                          width: 50,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
                       GestureDetector(
                         onTap: () {
                           pageController.previousPage(
@@ -554,25 +607,6 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
                                 label: 'Account Number',
                                 keyboardType: TextInputType.number,
                               ),
-
-                              const SizedBox(height: 20),
-                              Text(
-                                "One-off",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.violet.withOpacity(1),
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "RM ${formatCurrency(50)}",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-
                               const SizedBox(height: 20),
                               _buildContainerNotice(),
                             ],
@@ -608,6 +642,435 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
   }
 }
 
+void showDonateBottomSheet(BuildContext context, String organizationName) {
+  final amountController = TextEditingController();
+  String selectedPayment = "FPX";
+  bool addTwoPercent = false;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.grey.shade200,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+    ),
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          double baseAmount =
+              double.tryParse(amountController.text.trim()) ?? 0.0;
+          double extraAmount = addTwoPercent ? baseAmount * 0.02 : 0.0;
+          double totalAmount = baseAmount + extraAmount;
+
+          return Scaffold(
+            bottomNavigationBar: Container(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                bottom: 30,
+                top: 20,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    offset: Offset(0, -1),
+                    blurRadius: 6,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Donation details',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            showDonateDetails(
+                              context,
+                              baseAmount,
+                              addTwoPercent,
+                            );
+                          },
+                          child: Text(
+                            'RM ${totalAmount.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomButton(
+                      text: "Donate ",
+                      backgroundColor: AppColors.violet.withOpacity(1),
+                      textColor: Colors.white,
+                      onTap: () {
+                        if (baseAmount <= 0) {
+                          CustomPillSnackbar.show(
+                            context,
+                            message: "Please enter an amount",
+                          );
+                          return;
+                        }
+
+                        Navigator.pop(context);
+
+                        CustomPillSnackbar.show(
+                          context,
+                          message:
+                              "✅ Donation RM ${totalAmount.toStringAsFixed(2)} "
+                              "via $selectedPayment to $organizationName",
+                        );
+
+                        // 🔗 TODO: Call your payment API here with totalAmount
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            body: Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: MediaQuery.of(context).viewInsets.top + 70,
+                bottom: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with close button
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            "💝 Donate to $organizationName",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Amount Input
+                  const Text(
+                    "Your generous amount",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  CustomTextField(
+                    controller: amountController,
+                    label: "Amount (RM)",
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Radio option for 2% support
+                  GestureDetector(
+                    onTap: () {
+                      showPlatformDetails(context);
+                    },
+                    child: const Text(
+                      "Support the platform",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: BoxBorder.all(color: Colors.grey.shade400),
+                    ),
+                    padding: EdgeInsets.all(8),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("Yes, add 2% extra"),
+                            Radio<bool>(
+                              value: true,
+                              groupValue: addTwoPercent,
+                              onChanged: (val) =>
+                                  setState(() => addTwoPercent = val ?? false),
+                            ),
+                          ],
+                        ),
+                        Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("No"),
+                            Radio<bool>(
+                              value: false,
+                              groupValue: addTwoPercent,
+                              onChanged: (val) =>
+                                  setState(() => addTwoPercent = val ?? false),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (baseAmount > 0)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        "Total: RM ${totalAmount.toStringAsFixed(2)} "
+                        "(${baseAmount.toStringAsFixed(2)} + ${extraAmount.toStringAsFixed(2)})",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  // Payment Type
+                  const Text(
+                    "Payment Method",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => selectedPayment = "FPX");
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: selectedPayment == "FPX"
+                              ? AppColors.violet.withOpacity(1)
+                              : Colors.grey[300]!,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        color: selectedPayment == "FPX"
+                            ? AppColors.violet.withOpacity(0.05)
+                            : Colors.white,
+                      ),
+                      child: Row(
+                        children: [
+                          selectedPayment == 'FPX'
+                              ? Image.asset(
+                                  'assets/icon/fpx_logo.png',
+                                  height: 20,
+                                  width: 20,
+                                )
+                              : const Icon(Icons.abc_outlined),
+                          const SizedBox(width: 10),
+                          const Text("FPX", style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+void showDonateDetails(
+  BuildContext context,
+  double baseAmount,
+  bool addTwoPercent,
+) {
+  double extraAmount = addTwoPercent ? baseAmount * 0.02 : 0.0;
+  double totalAmount = baseAmount + extraAmount;
+
+  showModalBottomSheet(
+    backgroundColor: Colors.white,
+    context: context,
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Donation Breakdown',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 25),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('To Organization'),
+                Text("RM ${baseAmount.toStringAsFixed(2)}"),
+              ],
+            ),
+            SizedBox(height: 10),
+
+            if (addTwoPercent) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Platform Support (2%)'),
+                  Text("RM ${extraAmount.toStringAsFixed(2)}"),
+                ],
+              ),
+            ],
+
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total Donation:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  'RM ${totalAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void showPlatformDetails(BuildContext context) {
+  showModalBottomSheet(
+    backgroundColor: Colors.white,
+    context: context,
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          children: [
+            SizedBox(height: 16),
+            Text(
+              'Your Donation Supports Our App',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            ListTile(
+              leading: Image.asset(
+                'assets/icon/debug_icon.png',
+                height: 30,
+                width: 30,
+              ),
+              title: Text(
+                'Faster Bug Fixes',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'Help us identify and resolve technical issues more quickly',
+              ),
+            ),
+            ListTile(
+              leading: Image.asset(
+                'assets/icon/update_icon.png',
+                height: 30,
+                width: 30,
+              ),
+              title: Text(
+                'Regular Updates',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'Fund ongoing development of new features and improvements',
+              ),
+            ),
+            ListTile(
+              leading: Image.asset(
+                'assets/icon/performance_boost_icon.png',
+                height: 30,
+                width: 30,
+              ),
+              title: Text(
+                'Performance Boost',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'Support optimization efforts to make the app faster and more efficient',
+              ),
+            ),
+            ListTile(
+              leading: Image.asset(
+                'assets/icon/security_icon.png',
+                height: 30,
+                width: 30,
+              ),
+              title: Text(
+                'Enhanced Security',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'Help us maintain and improve security measures to protect user data',
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Every donation helps us dedicate more time and resources to '
+              'maintaining and improving this app for all users.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 void showCategoryBottomSheet(
   BuildContext context,
   Function(String) onCategorySelected,
@@ -636,7 +1099,7 @@ void showCategoryBottomSheet(
         builder: (context, setState) {
           return SafeArea(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5, // ✅ half screen
+              height: MediaQuery.of(context).size.height * 0.5,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -764,7 +1227,10 @@ Widget _buildOneOffPayment(BuildContext context) {
       ),
       Text(
         'RM ${formatCurrency(360.00)}/year',
-        style: const TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.lineThrough),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          decoration: TextDecoration.lineThrough,
+        ),
       ),
     ],
   );

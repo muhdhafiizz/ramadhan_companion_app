@@ -44,7 +44,6 @@ class Sadaqah {
       'url': url,
       'submittedBy': submittedBy,
       'status': status,
-      'category':category
     };
   }
 }

@@ -41,6 +41,7 @@ dependencies:
   string_similarity: ^2.1.1
   table_calendar: ^3.2.0
   timezone: ^0.10.1
+  uni_links: ^0.5.1
   url_launcher: ^6.3.2
 
 dev_dependencies:
@@ -72,6 +73,14 @@ flutter:
     - assets/icon/receipt_outlined_icon.png
     - assets/data/hadith_quran_sadaqah.json
     - assets/icon/ummah_app_logo.png
+    - assets/icon/ummah-1-logo.png
+    - assets/lottie/payment_failed_lottie.json
+    - assets/lottie/payment_success_lottie.json
+    - assets/icon/fpx_logo.png
+    - assets/icon/debug_icon.png
+    - assets/icon/performance_boost_icon.png
+    - assets/icon/security_icon.png
+    - assets/icon/update_icon.png
 
   fonts:
     - family: Liter
@@ -87,6 +96,6 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/ummah_app_logo.png"
+  image_path: "assets/icon/ummah-1-logo.png"
   min_sdk_android: 21
   remove_alpha_ios: true

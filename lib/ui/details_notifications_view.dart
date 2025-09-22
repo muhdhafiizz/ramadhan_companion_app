@@ -95,6 +95,7 @@ Widget _buildViewButton(
   final sadaqahProvider = context.read<SadaqahProvider>();
   final String? sadaqahId = notification['sadaqahId'];
   final String? notificationDocId = notification['docId'];
+  final user = FirebaseAuth.instance.currentUser;
 
   if (sadaqahId == null) return const SizedBox();
 
@@ -104,6 +105,11 @@ Widget _buildViewButton(
   );
 
   final bool alreadyPaidLocal = (currentNotif['paid'] == true);
+
+  // 🔹 For super_admin: always show "View", but NOT "Proceed to Pay"
+  // If super_admin AND also the submitter → allow both
+  final submittedBy = notification['recipientId'];
+  final isSubmitter = submittedBy != null && submittedBy == user?.uid;
 
   if (sadaqahProvider.role == 'super_admin') {
     return Row(
@@ -121,106 +127,111 @@ Widget _buildViewButton(
             },
           ),
         ),
-        const SizedBox(width: 10),
-        if (!alreadyPaidLocal)
+        if (!alreadyPaidLocal && isSubmitter) ...[
+          const SizedBox(width: 10),
           Expanded(
             child: CustomButton(
               text: "Proceed to Pay",
               backgroundColor: AppColors.violet.withOpacity(1),
               textColor: Colors.white,
               onTap: () async {
-                final msg = await sadaqahProvider.paySadaqah(sadaqahId);
+                try {
+                  final chipService = ChipCollectService(useSandbox: true);
+                  final sadaqahProvider = context.read<SadaqahProvider>();
 
-                if (context.mounted) {
-                  CustomPillSnackbar.show(context, message: msg);
-                }
+                  final clientEmail = user?.email ?? "guest@example.com";
+                  final productName =
+                      notification['title'] ?? "Sadaqah Donation";
+                  final price = sadaqahProvider.oneOffAmountInCents;
 
-                final success = msg.toLowerCase().contains('success');
-                if (success && notificationDocId != null) {
-                  notificationsProvider.markNotificationPaidLocally(
-                    notificationDocId,
+                  final result = await chipService.createPurchase(
+                    clientEmail: clientEmail,
+                    productName: productName,
+                    price: price,
                   );
-                  try {
-                    await FirebaseFirestore.instance
-                        .collection('notifications')
-                        .doc(notificationDocId)
-                        .update({'paid': true});
-                  } catch (e) {
-                    debugPrint(
-                      'Failed to update notification doc paid flag: $e',
+
+                  final checkoutUrl = result['checkout_url'];
+
+                  if (checkoutUrl != null && context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WebViewPage(
+                          url: checkoutUrl,
+                          title: "Complete Payment",
+                          notificationDocId: notificationDocId,
+                          sadaqahId: sadaqahId,
+                        ),
+                      ),
                     );
+                  } else {
+                    CustomPillSnackbar.show(
+                      context,
+                      message: "No checkout URL returned",
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    CustomPillSnackbar.show(context, message: "Error: $e");
                   }
                 }
               },
             ),
           ),
+        ],
       ],
     );
   }
 
-  // 🟣 For normal users → only "Proceed to Pay"
-  if (alreadyPaidLocal) return const SizedBox();
+  if (!alreadyPaidLocal && isSubmitter) {
+    return CustomButton(
+      text: "Proceed to Pay",
+      backgroundColor: AppColors.violet.withOpacity(1),
+      textColor: Colors.white,
+      onTap: () async {
+        try {
+          final chipService = ChipCollectService(useSandbox: true);
+          final sadaqahProvider = context.read<SadaqahProvider>();
 
-  return CustomButton(
-    text: "Proceed to Pay",
-    backgroundColor: AppColors.violet.withOpacity(1),
-    textColor: Colors.white,
-    onTap: () async {
-      try {
-        final chipService = ChipCollectService();
-        final sadaqahProvider = context.read<SadaqahProvider>();
-        final user = FirebaseAuth.instance.currentUser;
+          final clientEmail = user?.email ?? "guest@example.com";
+          final productName = notification['title'] ?? "Sadaqah Donation";
+          final price = sadaqahProvider.oneOffAmountInCents;
 
-        final clientEmail = user?.email ?? "guest@example.com";
-        final productName = notification['title'] ?? "Sadaqah Donation";
-        final price = sadaqahProvider.oneOffAmountInCents;
-
-        final result = await chipService.createPurchase(
-          clientEmail: clientEmail,
-          productName: productName,
-          price: price,
-        );
-        
-
-        final checkoutUrl = result['data']?['checkout_url'];
-
-        if (checkoutUrl != null && context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  WebViewPage(url: checkoutUrl, title: "Complete Payment"),
-            ),
+          final result = await chipService.createPurchase(
+            clientEmail: clientEmail,
+            productName: productName,
+            price: price,
           );
-        } else {
-          CustomPillSnackbar.show(context, message: "No checkout URL returned");
+
+          final checkoutUrl = result['checkout_url'];
+
+          if (checkoutUrl != null && context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => WebViewPage(
+                  url: checkoutUrl,
+                  title: "Complete Payment",
+                  notificationDocId: notificationDocId,
+                  sadaqahId: sadaqahId,
+                ),
+              ),
+            );
+          } else {
+            CustomPillSnackbar.show(
+              context,
+              message: "No checkout URL returned",
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            CustomPillSnackbar.show(context, message: "Error: $e");
+          }
         }
-      } catch (e) {
-        if (context.mounted) {
-          CustomPillSnackbar.show(context, message: "Error: $e");
-        }
-      }
-    },
+      },
+    );
+  }
 
-    // onTap: () async {
-    //   final msg = await sadaqahProvider.paySadaqah(sadaqahId);
-
-    //   if (context.mounted) {
-    //     CustomPillSnackbar.show(context, message: msg);
-    //   }
-
-    //   final success = msg.toLowerCase().contains('success');
-    //   if (success && notificationDocId != null) {
-    //     notificationsProvider.markNotificationPaidLocally(notificationDocId);
-    //     try {
-    //       await FirebaseFirestore.instance
-    //           .collection('notifications')
-    //           .doc(notificationDocId)
-    //           .update({'paid': true});
-    //     } catch (e) {
-    //       debugPrint('Failed to update notification doc paid flag: $e');
-    //     }
-    //   }
-    // },
-  );
+  // 🔹 Otherwise, show nothing
+  return const SizedBox();
 }

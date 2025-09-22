@@ -23,6 +23,7 @@ import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/provider/signup_provider.dart';
+import 'package:ramadhan_companion_app/provider/webview_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
@@ -61,6 +62,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => HadithBooksProvider()),
         ChangeNotifierProvider(create: (_) => HadithChaptersProvider()),
         ChangeNotifierProvider(create: (_) => HadithProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentWebViewProvider()),
         ChangeNotifierProvider(
           create: (context) {
             final role = context.read<SadaqahProvider>().role ?? 'user';

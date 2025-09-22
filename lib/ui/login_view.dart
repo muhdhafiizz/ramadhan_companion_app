@@ -120,7 +120,7 @@ Widget _buildLoginButton(
         textColor: Colors.white,
         onTap: provider.isLoginEnabled
             ? () async {
-                provider.showLoadingDialog(context);
+                // provider.showLoadingDialog(context);
 
                 final success = await provider.login(
                   emailController.text,
