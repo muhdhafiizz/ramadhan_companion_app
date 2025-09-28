@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/model/sadaqah_model.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
+import 'package:ramadhan_companion_app/service/chip_collect_service.dart';
+import 'package:ramadhan_companion_app/ui/receipt_view.dart';
 import 'package:ramadhan_companion_app/ui/webview_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
@@ -187,11 +189,36 @@ class MySubmissionsPage extends StatelessWidget {
                                                   .currentUser
                                                   ?.uid)
                                             GestureDetector(
-                                              onTap: (){
-                                                print('receipt view');
+                                              onTap: () async {
+                                                final service =
+                                                    ChipCollectService(useSandbox: true);
+                                                try {
+                                                  // Replace with actual purchase ID you stored in Firestore when creating purchase
+                                                  final receipt = await service
+                                                      .getPurchase(
+                                                        sadaqah.purchaseId ?? "null",
+                                                      );
+
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ReceiptView(
+                                                            receipt: receipt,
+                                                          ),
+                                                    ),
+                                                  );
+                                                } catch (e) {
+                                                  print(
+                                                    "Error fetching receipt: $e",
+                                                  );
+                                                  // Show snackbar if needed
+                                                }
                                               },
                                               child: CircleAvatar(
-                                                backgroundColor: AppColors.betterGray.withOpacity(0.3),
+                                                backgroundColor: AppColors
+                                                    .betterGray
+                                                    .withOpacity(0.3),
                                                 child: Image.asset(
                                                   'assets/icon/receipt_outlined_icon.png',
                                                   width: 30,

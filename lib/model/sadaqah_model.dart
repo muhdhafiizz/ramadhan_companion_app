@@ -8,6 +8,7 @@ class Sadaqah {
   final String submittedBy;
   final String status;
   final String category;
+  final String? purchaseId; // 🔹 new field
 
   Sadaqah({
     required this.id,
@@ -18,7 +19,8 @@ class Sadaqah {
     required this.url,
     required this.submittedBy,
     required this.status,
-    required this.category
+    required this.category,
+    this.purchaseId, // 🔹 optional because not all docs have it
   });
 
   factory Sadaqah.fromJson(Map<String, dynamic> json, String id) {
@@ -32,6 +34,7 @@ class Sadaqah {
       submittedBy: json['submittedBy'] ?? '',
       status: json['status'] ?? 'pending',
       category: json['category'] ?? '',
+      purchaseId: json['purchaseId'], // 🔹 read from Firestore
     );
   }
 
@@ -44,6 +47,8 @@ class Sadaqah {
       'url': url,
       'submittedBy': submittedBy,
       'status': status,
+      'category': category,
+      'purchaseId': purchaseId,
     };
   }
 }
