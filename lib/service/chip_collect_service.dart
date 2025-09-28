@@ -15,9 +15,7 @@ class ChipCollectService {
     required String productName,
     required int price,
   }) async {
-    final apiKey = useSandbox
-        ? ApiKeys.chipTestKey 
-        : ApiKeys.chipLiveKey; 
+    final apiKey = useSandbox ? ApiKeys.chipTestKey : ApiKeys.chipLiveKey;
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -44,6 +42,28 @@ class ChipCollectService {
       return jsonDecode(response.body);
     } else {
       throw Exception("Failed to create purchase: ${response.body}");
+    }
+  }
+
+  Future<Map<String, dynamic>> getPurchase(String purchaseId) async {
+    final apiKey = useSandbox ? ApiKeys.chipTestKey : ApiKeys.chipLiveKey;
+
+    final response = await http.get(
+      Uri.parse("$baseUrl$purchaseId/"),
+      headers: {
+        "Authorization": "Bearer $apiKey",
+        "Content-Type": "application/json",
+      },
+    );
+    print(purchaseId);
+
+    print(response.request);
+    print("Chip Purchase Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch purchase: ${response.body}");
     }
   }
 }

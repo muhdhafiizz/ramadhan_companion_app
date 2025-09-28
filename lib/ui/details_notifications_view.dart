@@ -150,7 +150,13 @@ Widget _buildViewButton(
                     price: price,
                   );
 
+                  final purchaseId = result['id'];
                   final checkoutUrl = result['checkout_url'];
+
+                  await FirebaseFirestore.instance
+                      .collection('sadaqah_orgs')
+                      .doc(sadaqahId)
+                      .update({'purchaseId': purchaseId});
 
                   if (checkoutUrl != null && context.mounted) {
                     Navigator.push(
