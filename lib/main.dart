@@ -17,6 +17,7 @@ import 'package:ramadhan_companion_app/provider/islamic_calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
+import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/qibla_finder_provider.dart';
@@ -63,6 +64,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => HadithChaptersProvider()),
         ChangeNotifierProvider(create: (_) => HadithProvider()),
         ChangeNotifierProvider(create: (_) => PaymentWebViewProvider()),
+        ChangeNotifierProvider(create: (_) => MasjidProgrammeProvider()),
         ChangeNotifierProvider(
           create: (context) {
             final role = context.read<SadaqahProvider>().role ?? 'user';

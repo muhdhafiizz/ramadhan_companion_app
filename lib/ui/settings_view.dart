@@ -3,10 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
+import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
 import 'package:ramadhan_companion_app/ui/notifications_view.dart';
+import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/submission_status_view.dart';
 
@@ -59,7 +61,19 @@ class SettingsView extends StatelessWidget {
                     ),
                     _buildListTile(
                       context,
-                      title: 'Your receipt',
+                      title: 'Add nearby masjid programme',
+                      onTap: () {
+                        final programmeProvider =
+                            Provider.of<MasjidProgrammeProvider>(
+                              context,
+                              listen: false,
+                            );
+                        showProgrammeField(context, programmeProvider);
+                      },
+                    ),
+                    _buildListTile(
+                      context,
+                      title: 'Submission status',
                       onTap: () {
                         Navigator.push(
                           context,

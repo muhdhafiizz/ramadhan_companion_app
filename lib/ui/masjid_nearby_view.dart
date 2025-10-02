@@ -86,7 +86,7 @@ Widget _buildAppBar(BuildContext context) {
       ),
       SizedBox(width: 10),
       Text(
-        "Nearby Masjid",
+        "Nearby Mosque",
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
       ),
     ],
