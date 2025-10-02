@@ -32,7 +32,7 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
                     label: 'Search Mosque',
                     onChanged: provider.filterByMasjid,
                   ),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 10),
                   CustomTextField(
                     label: 'Search Location',
                     onChanged: provider.filterByState,

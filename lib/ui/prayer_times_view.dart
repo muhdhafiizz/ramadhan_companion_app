@@ -143,7 +143,7 @@ class PrayerTimesView extends StatelessWidget {
                         _buildCountdown(provider),
                         const SizedBox(height: 20),
                         _buildPrayerTimesSection(provider),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         _buildMasjidProgramme(context),
                         const SizedBox(height: 10),
                         _dailyVerseCarousel(

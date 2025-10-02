@@ -51,10 +51,16 @@ class SettingsView extends StatelessWidget {
               Expanded(
                 child: ListView(
                   children: [
-                    _buildListTile(context, title: 'Language', onTap: () {}),
+                    _buildListTile(
+                      context,
+                      title: 'Language',
+                      icon: Icons.language_outlined, 
+                      onTap: () {},
+                    ),
                     _buildListTile(
                       context,
                       title: 'List your organization',
+                      icon: Icons.business_outlined,
                       onTap: () {
                         showSadaqahField(context, sadaqahProvider);
                       },
@@ -62,6 +68,7 @@ class SettingsView extends StatelessWidget {
                     _buildListTile(
                       context,
                       title: 'Add nearby masjid programme',
+                      icon: Icons.event_outlined,
                       onTap: () {
                         final programmeProvider =
                             Provider.of<MasjidProgrammeProvider>(
@@ -74,6 +81,8 @@ class SettingsView extends StatelessWidget {
                     _buildListTile(
                       context,
                       title: 'Submission status',
+                      icon:
+                          Icons.assignment_turned_in_outlined,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -86,6 +95,7 @@ class SettingsView extends StatelessWidget {
                     _buildListTile(
                       context,
                       title: 'Notifications',
+                      icon: Icons.notifications_outlined,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -98,6 +108,7 @@ class SettingsView extends StatelessWidget {
                   ],
                 ),
               ),
+
               GestureDetector(
                 onTap: () =>
                     _showLogoutConfirmation(context, prayerTimesProvider),
@@ -138,10 +149,12 @@ Widget _buildListTile(
   BuildContext context, {
   required String title,
   required VoidCallback onTap,
+  required IconData icon,
 }) {
   return ListTile(
+    leading: Icon(icon),
     title: Text(title),
-    trailing: const Icon(Icons.arrow_forward),
+    trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey[400]),
     onTap: onTap,
   );
 }
