@@ -1,5 +1,6 @@
 import 'dart:ui';
-
+import 'package:add_2_calendar/add_2_calendar.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +12,14 @@ import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
 import 'package:ramadhan_companion_app/helper/local_notifications.dart';
 import 'package:ramadhan_companion_app/main.dart';
+import 'package:ramadhan_companion_app/model/masjid_programme_model.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
 import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
+import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/ui/details_masjid_programme_view.dart';
 import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
 import 'package:ramadhan_companion_app/ui/hadith_books_view.dart';
 import 'package:ramadhan_companion_app/ui/islamic_calendar_view.dart';
@@ -28,6 +32,7 @@ import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/settings_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
+import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -35,6 +40,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 class PrayerTimesView extends StatelessWidget {
   const PrayerTimesView({super.key});
@@ -42,11 +49,16 @@ class PrayerTimesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PrayerTimesProvider>();
+    final masjidProgrammeProvider = context.watch<MasjidProgrammeProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!provider.shouldAskLocation) provider.initialize();
       updatePrayerWidget(provider);
       // schedulePrayerNotifications(provider);
+      if (!masjidProgrammeProvider.isLoading &&
+          !masjidProgrammeProvider.allProgrammes.isNotEmpty) {
+        masjidProgrammeProvider.loadProgrammes();
+      }
     });
 
     Future<void> refreshData() async {
@@ -55,6 +67,7 @@ class PrayerTimesView extends StatelessWidget {
       if (provider.city != null && provider.country != null) {
         await provider.fetchPrayerTimes(provider.city!, provider.country!);
         await updatePrayerWidget(provider);
+        await masjidProgrammeProvider.loadProgrammes();
       }
 
       // await provider.refreshDailyContent();
@@ -129,8 +142,9 @@ class PrayerTimesView extends StatelessWidget {
                         const SizedBox(height: 20),
                         _buildCountdown(provider),
                         const SizedBox(height: 20),
-                        // _buildErrorText(provider),
                         _buildPrayerTimesSection(provider),
+                        const SizedBox(height: 10),
+                        _buildMasjidProgramme(context),
                         const SizedBox(height: 10),
                         _dailyVerseCarousel(
                           provider,
@@ -304,8 +318,7 @@ Widget _buildLocationText(PrayerTimesProvider provider, BuildContext context) {
 }
 
 Widget _buildCountdown(PrayerTimesProvider provider) {
-  if ((provider.times == null) &&
-      !provider.isPrayerTimesLoading) {
+  if ((provider.times == null) && !provider.isPrayerTimesLoading) {
     return const SizedBox.shrink();
   }
   if (provider.isPrayerTimesLoading) {
@@ -356,8 +369,7 @@ Widget _buildCountdown(PrayerTimesProvider provider) {
 }
 
 Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
-  if ((provider.times == null) &&
-      !provider.isPrayerTimesLoading) {
+  if ((provider.times == null) && !provider.isPrayerTimesLoading) {
     return const SizedBox.shrink();
   }
 
@@ -400,6 +412,310 @@ Widget _buildPrayerRowWithHighlight(
         provider.isPrayerTimesLoading,
         isNext: isNext,
       ),
+    ),
+  );
+}
+
+Widget _buildMasjidProgramme(BuildContext context) {
+  return Column(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildTitleText("Mosque Programmes"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: CircleAvatar(
+              backgroundColor: AppColors.betterGray.withOpacity(0.3),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetailsMasjidProgrammeView(),
+                    ),
+                  );
+                },
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: AppColors.violet.withOpacity(1),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      Consumer<MasjidProgrammeProvider>(
+        builder: (context, programmeProvider, _) {
+          if (programmeProvider.isLoading) {
+            return _buildShimmerMasjidProgramme();
+          }
+
+          if (programmeProvider.allProgrammes.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text("No programmes yet"),
+            );
+          }
+
+          final programmes = programmeProvider.allProgrammes;
+
+          return SizedBox(
+            height: 350,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: programmes.length,
+              itemBuilder: (context, index) {
+                final programme = programmes[index];
+                return Container(
+                  width: 350,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: EdgeInsets.only(
+                    left: index == 0 ? 12 : 8,
+                    right: index == programmes.length - 1 ? 20 : 10,
+                    top: 10,
+                    bottom: 20,
+                  ),
+                  child: _buildProgrammeCard(context, programme),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+Widget _buildShimmerMasjidProgramme() {
+  return SizedBox(
+    height: 250,
+    child: ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(10),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Container(
+          width: 250,
+          margin: const EdgeInsets.only(right: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.30),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerLoadingWidget(height: 50, width: 50),
+                SizedBox(height: 8),
+                ShimmerLoadingWidget(height: 20, width: 70),
+                SizedBox(height: 8),
+                ShimmerLoadingWidget(height: 20, width: 90),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+Widget _buildProgrammeCard(BuildContext context, MasjidProgramme programme) {
+  final dateTimeFormatted = DateFormat(
+    "d MMM yyyy, h:mm a",
+  ).format(programme.dateTime);
+
+  return Container(
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey.shade300),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (programme.posterBytes != null)
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Image.memory(
+              programme.posterBytes!,
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Text(
+                      "🕌 ${programme.isOnline ? "Online Programme" : programme.masjidName}",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: programme.isOnline
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.blue.withOpacity(0.1),
+                        border: Border.all(
+                          color: programme.isOnline
+                              ? Colors.green
+                              : Colors.blue,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        programme.isOnline ? "Online" : "Offline",
+                        style: TextStyle(
+                          color: programme.isOnline
+                              ? Colors.green
+                              : Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  "📝 ${programme.title}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 4),
+                Text(
+                  "📅 $dateTimeFormatted",
+                  style: const TextStyle(fontSize: 12),
+                ),
+
+                Spacer(),
+
+                /// Location (if offline)
+                if (!programme.isOnline && programme.location != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton(
+                          onTap: () async {
+                            final query = Uri.encodeComponent(
+                              programme.masjidName,
+                            );
+                            final url =
+                                "https://www.google.com/maps/search/?api=1&query=$query";
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(
+                                Uri.parse(url),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          text: 'Navigate me there',
+                          backgroundColor: Colors.black,
+                          textColor: Colors.white,
+                        ),
+                      ),
+
+                      SizedBox(width: 10),
+                      CircleAvatar(
+                        backgroundColor: AppColors.lightGray.withOpacity(1),
+                        child: IconButton(
+                          icon: const Icon(Icons.alarm, color: Colors.black),
+                          onPressed: () {
+                            final event = Event(
+                              title: programme.title,
+                              description:
+                                  "Masjid programme at ${programme.masjidName}",
+                              location: programme.isOnline
+                                  ? "Online"
+                                  : (programme.location ?? ""),
+                              startDate: programme.dateTime,
+                              endDate: programme.dateTime.add(
+                                const Duration(hours: 2),
+                              ),
+                            );
+
+                            Add2Calendar.addEvent2Cal(event);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                /// Join link (if online)
+                if (programme.isOnline && programme.joinLink != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton(
+                          onTap: () async {
+                            final url = Uri.parse(programme.joinLink!);
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          text: 'Join Now',
+                          backgroundColor: Colors.black,
+                          textColor: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      CircleAvatar(
+                        backgroundColor: AppColors.lightGray.withOpacity(1),
+                        child: IconButton(
+                          icon: const Icon(Icons.alarm, color: Colors.black),
+                          onPressed: () {
+                            final event = Event(
+                              title: programme.title,
+                              description:
+                                  "Masjid programme at ${programme.masjidName}",
+                              location: programme.isOnline
+                                  ? "Online"
+                                  : (programme.location ?? ""),
+                              startDate: programme.dateTime,
+                              endDate: programme.dateTime.add(
+                                const Duration(hours: 2),
+                              ),
+                            );
+
+                            Add2Calendar.addEvent2Cal(event);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -641,6 +957,19 @@ Widget _buildTitleText(String name) {
   );
 }
 
+Widget _buildTitleTextBottomSheet(String name) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12.0),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        name,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+      ),
+    ),
+  );
+}
+
 // Widget _buildErrorText(PrayerTimesProvider provider) {
 //   return provider.error != null
 //       ? Center(
@@ -824,7 +1153,7 @@ Widget _buildLocateMasjidNearby(
         Image.asset('assets/icon/masjid_icon.png', height: 50, width: 50),
         const SizedBox(height: 5),
         const Text(
-          "Masjid Nearby",
+          "Mosque Nearby",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ],
@@ -1201,6 +1530,365 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
   }
+}
+
+void showProgrammeField(
+  BuildContext context,
+  MasjidProgrammeProvider provider,
+) {
+  final pageController = PageController();
+
+  final content = StatefulBuilder(
+    builder: (context, setState) {
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          bottomNavigationBar: Consumer<MasjidProgrammeProvider>(
+            builder: (context, programmeProvider, _) {
+              final onPageTwo =
+                  pageController.hasClients &&
+                  pageController.page?.round() == 1;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      offset: Offset(0, -1),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: CustomButton(
+                  onTap: onPageTwo
+                      ? (programmeProvider.isFormValid
+                            ? () async {
+                                await programmeProvider.addProgramme();
+                                programmeProvider.resetForm();
+
+                                Navigator.pop(context);
+                                CustomPillSnackbar.show(
+                                  context,
+                                  message:
+                                      '✅ Programme submitted successfully!',
+                                );
+                              }
+                            : null)
+                      : () {
+                          pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                  backgroundColor: onPageTwo && !programmeProvider.isFormValid
+                      ? Colors.grey
+                      : Colors.black,
+                  text: onPageTwo ? 'Submit' : 'Review your details',
+                  textColor: Colors.white,
+                ),
+              );
+            },
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: PageView(
+              controller: pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                // PAGE 1
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTitleText('🕌  Benefits of Adding Mosque Programme'),
+                    const SizedBox(height: 12),
+                    _buildContainer(),
+                  ],
+                ),
+
+                // PAGE 2 (Form)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: const Icon(Icons.arrow_back),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildTitleTextBottomSheet('Masjid Name'),
+                            CustomTextField(
+                              controller: provider.masjidController,
+                              label: 'Masjid Name',
+                            ),
+
+                            _buildTitleTextBottomSheet('Poster'),
+                            GestureDetector(
+                              onTap: () async {
+                                await provider.pickPoster();
+                              },
+                              child: Consumer<MasjidProgrammeProvider>(
+                                builder: (context, provider, _) {
+                                  return DottedBorder(
+                                    options: RoundedRectDottedBorderOptions(
+                                      color:
+                                          Colors.grey.shade400, // border color
+                                      strokeWidth: 1, // border thickness
+                                      dashPattern: [6, 3], // 6px line, 3px gap
+                                      radius: const Radius.circular(10),
+                                      padding: const EdgeInsets.all(
+                                        0,
+                                      ), // no extra padding around child
+                                    ),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 150,
+
+                                      child: provider.posterBase64 == null
+                                          ? const Center(
+                                              child: Text("Upload a poster"),
+                                            )
+                                          : ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              child: Image.memory(
+                                                base64Decode(
+                                                  provider.posterBase64!,
+                                                ),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            _buildTitleTextBottomSheet('Programme Title'),
+                            CustomTextField(
+                              controller: provider.titleController,
+                              label: 'Title',
+                            ),
+
+                            _buildTitleTextBottomSheet('Date & Time'),
+                            GestureDetector(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2100),
+                                );
+
+                                if (picked != null) {
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  );
+                                  if (time != null) {
+                                    setState(() {
+                                      provider.dateTime = DateTime(
+                                        picked.year,
+                                        picked.month,
+                                        picked.day,
+                                        time.hour,
+                                        time.minute,
+                                      );
+                                    });
+                                  }
+                                }
+                              },
+                              child: Container(
+                                alignment: Alignment.bottomLeft,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  provider.dateTime != null
+                                      ? DateFormat(
+                                          "d MMM yyyy, h:mm a",
+                                        ).format(provider.dateTime!)
+                                      : "Select Date & Time",
+                                  style: TextStyle(
+                                    color: provider.dateTime == null
+                                        ? Colors.grey
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Online Programme"),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      provider.isOnline = !provider.isOnline;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: provider.isOnline
+                                        ? Container(
+                                            width: 16,
+                                            height: 16,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        : const SizedBox(width: 16, height: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (provider.isOnline) ...[
+                              _buildTitleTextBottomSheet('Join Link'),
+                              CustomTextField(
+                                controller: provider.joinLinkController,
+                                label: 'Join Link (Zoom/YouTube)',
+                                keyboardType: TextInputType.url,
+                              ),
+                            ] else ...[
+                              _buildTitleTextBottomSheet('Location'),
+                              CustomTextField(
+                                controller: provider.locationController,
+                                label: 'eg: Shah Alam, Selangor',
+                              ),
+                            ],
+
+                            const SizedBox(height: 20),
+                            _buildContainerReminder(),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // _buildContainerNotice(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  if (Theme.of(context).platform == TargetPlatform.iOS) {
+    showCupertinoSheet(
+      context: context,
+      pageBuilder: (context) => Material(child: content),
+    ).whenComplete(() {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
+  } else {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => content,
+    ).whenComplete(() {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    });
+  }
+}
+
+Widget _buildContainer() {
+  return Container(
+    padding: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      children: [
+        _buildDescriptionText(
+          "Promote your masjid's events to nearby communities, including communal work, after-prayer lectures, Quran classes, and youth programmes.\n\n"
+          "Increase attendance and engagement for kuliah, tazkirah, and special events like qiyamullail or Eid celebrations.\n\n"
+          "Help Muslims discover beneficial activities happening around them.\n\n"
+          "Strengthen community ties through shared learning, worship, and service.\n\n"
+          "Reach younger audiences who rely on mobile apps for updates.\n\n"
+          "Build trust and visibility by being part of a verified Islamic platform.",
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildContainerReminder() {
+  return Container(
+    padding: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: AppColors.violet.withOpacity(1), width: 3),
+    ),
+    child: Column(
+      children: [
+        _buildDescriptionText(
+          "Your programme will be automatically removed after its date.\n\n"
+          "It will take 1-2 days to approve your programme.",
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildDescriptionText(String name) {
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Text(
+      name,
+      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    ),
+  );
 }
 
 Widget _buildCustomCalendar(BuildContext context) {

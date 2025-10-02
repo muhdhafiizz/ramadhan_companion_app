@@ -9,10 +9,12 @@ class StatusBadge extends StatelessWidget {
   Color _getColor() {
     switch (status.toLowerCase()) {
       case 'approved':
+      case 'online':
       case 'success':
         return Colors.green;
       case 'pending to pay':
       case 'waiting':
+      case 'offline':
         return Colors.blue;
       case 'paid':
       case 'completed':
@@ -30,7 +32,7 @@ class StatusBadge extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'approved':
       case 'success':
-        return "Approved";
+        return "✓ Approved";
       case 'pending to pay':
       case 'waiting':
         return 'Procced to pay';
@@ -40,7 +42,10 @@ class StatusBadge extends StatelessWidget {
       case 'rejected':
       case 'failed':
         return "Rejected";
-      case 'pending':
+      case 'online':
+        return "• Online";
+      case 'offline':
+        return "Offline";
       default:
         return "Pending";
     }

@@ -29,6 +29,25 @@ class NotificationsView extends StatelessWidget {
                       itemCount: provider.notifications.length,
                       itemBuilder: (context, index) {
                         final notification = provider.notifications[index];
+
+                        // final ts = notification['timestamp'];
+                        // if (ts != null && ts is Timestamp) {
+                        //   final createdAt = ts.toDate();
+                        //   final oneWeekAgo = DateTime.now().subtract(
+                        //     const Duration(days: 7),
+                        //   );
+
+                        //   // if (createdAt.isBefore(oneWeekAgo)) {
+                        //   //   FirebaseFirestore.instance
+                        //   //       .collection('notifications')
+                        //   //       .doc(
+                        //   //         notification['id'],
+                        //   //       )
+                        //   //       .delete();
+
+                        //   //   return const SizedBox();
+                        //   // }
+                        // }
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
