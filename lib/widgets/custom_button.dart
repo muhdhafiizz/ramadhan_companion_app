@@ -41,42 +41,40 @@ class CustomButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isFilled ? backgroundColor : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: borderColor,
-              width: 2.5,
-            ),
+            border: Border.all(color: borderColor, width: 2.5),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: iconAtEnd
-                ? [
-                    Text(
-                      text ?? '',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        decoration: decoration,
-                      ),
-                    ),
-                    if (iconData != null) ...[
-                      const SizedBox(width: 8),
-                      Icon(iconData, color: textColor),
-                    ],
-                  ]
-                : [
-                    if (iconData != null) ...[
-                      Icon(iconData, color: textColor),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      text ?? '',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        decoration: decoration,
-                      ),
-                    ),
-                  ],
+            children: [
+              if (text?.isEmpty == true && isDisabled) ...[
+                // 🔹 Show spinner instead of text
+                const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                ),
+              ] else ...[
+                if (iconData != null && !iconAtEnd) ...[
+                  Icon(iconData, color: textColor),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  text ?? '',
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    decoration: decoration,
+                  ),
+                ),
+                if (iconData != null && iconAtEnd) ...[
+                  const SizedBox(width: 8),
+                  Icon(iconData, color: textColor),
+                ],
+              ],
+            ],
           ),
         ),
       ),

@@ -115,13 +115,11 @@ Widget _buildLoginButton(
   return Consumer<LoginProvider>(
     builder: (context, provider, _) {
       return CustomButton(
-        text: "Log in",
+        text: provider.isLoading ? "" : "Log in", // 🔹 hide text when loading
         backgroundColor: provider.isLoginEnabled ? Colors.black : Colors.grey,
         textColor: Colors.white,
-        onTap: provider.isLoginEnabled
+        onTap: provider.isLoginEnabled && !provider.isLoading
             ? () async {
-                // provider.showLoadingDialog(context);
-
                 final success = await provider.login(
                   emailController.text,
                   passwordController.text,
@@ -131,8 +129,6 @@ Widget _buildLoginButton(
 
                 await context.read<SadaqahProvider>().fetchUserRole();
 
-                if (context.mounted) Navigator.pop(context);
-
                 if (success && context.mounted) {
                   Navigator.pushReplacement(
                     context,
@@ -141,6 +137,8 @@ Widget _buildLoginButton(
                 }
               }
             : null,
+        // 👇 use iconData slot for loader instead of icon
+        iconData: provider.isLoading ? null : null,
       );
     },
   );
