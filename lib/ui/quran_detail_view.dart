@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
@@ -9,6 +10,7 @@ import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SurahDetailView extends StatelessWidget {
   final int surahNumber;
@@ -128,9 +130,16 @@ class _SurahDetailBody extends StatelessWidget {
                                     surahNumber,
                                     verseNum,
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 5),
                                   _buildVerseAudio(
                                     provider,
+                                    surahNumber,
+                                    verseNum,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  _buildShareButton(
+                                    context,
+                                    verse,
                                     surahNumber,
                                     verseNum,
                                   ),
@@ -164,9 +173,7 @@ class _SurahDetailBody extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: tafsirText == null
-                                      ? Center(
-                                          child: _buildShimmerLoading(),
-                                        )
+                                      ? Center(child: _buildShimmerLoading())
                                       : Text(
                                           tafsirText,
                                           style: const TextStyle(
@@ -294,8 +301,8 @@ Widget _buildBookmark(BuildContext context, int surahNumber, int verseNum) {
       bookmarkProvider.isBookmarked(surahNumber, verseNum)
           ? "assets/icon/bookmark_icon.png"
           : "assets/icon/bookmark_empty_icon.png",
-      width: 24,
-      height: 24,
+      width: 20,
+      height: 20,
     ),
     onPressed: () {
       bookmarkProvider.toggleBookmark(surahNumber, verseNum);
@@ -311,6 +318,30 @@ Widget _buildBookmark(BuildContext context, int surahNumber, int verseNum) {
               message: "❌ Removed from bookmark",
               backgroundColor: Colors.black,
             );
+    },
+  );
+}
+
+Widget _buildShareButton(
+  BuildContext context,
+  Map<String, String> verse,
+  int surahNumber,
+  int verseNum,
+) {
+  return IconButton(
+    icon: Image.asset(
+      'assets/icon/share_outlined_icon_1.png',
+      width: 20,
+      height: 20,
+    ),
+    onPressed: () {
+      final arabicClean = cleanArabic(verse["arabic"]!);
+
+      final textToShare =
+          "$arabicClean\n\n${verse["translation"]}\n\n"
+          "Surah $surahNumber";
+
+      Share.share(textToShare);
     },
   );
 }
