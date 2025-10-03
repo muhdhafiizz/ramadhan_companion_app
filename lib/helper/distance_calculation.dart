@@ -43,5 +43,11 @@ DateTime parsePrayerTime(String timeString) {
   return scheduled;
 }
 
+String cleanArabic(String text) {
+  // Remove any trailing Arabic verse numbers (in Unicode range)
+  return text.replaceAll(RegExp(r'﴾.*﴿'), '').trim();
+}
+
+
 
 
