@@ -339,7 +339,7 @@ Widget _buildShareButton(
 
       final textToShare =
           "$arabicClean\n\n${verse["translation"]}\n\n"
-          "Surah $surahNumber";
+          "Surah $surahNumber : Ayah $verseNum";
 
       Share.share(textToShare);
     },

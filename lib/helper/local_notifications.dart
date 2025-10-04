@@ -34,7 +34,7 @@ Future<void> scheduleNotification({
     body,
     tz.TZDateTime.from(scheduledDate, tz.local),
     notificationDetails,
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     matchDateTimeComponents: DateTimeComponents.time,
   );
 }

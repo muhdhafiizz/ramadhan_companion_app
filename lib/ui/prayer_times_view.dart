@@ -132,6 +132,7 @@ class PrayerTimesView extends StatelessWidget {
                       },
                     ),
                   ),
+
                   SliverToBoxAdapter(
                     child: Column(
                       children: [
@@ -461,7 +462,7 @@ Widget _buildMasjidProgramme(BuildContext context) {
           final programmes = programmeProvider.allProgrammes;
 
           return SizedBox(
-            height: 350,
+            height: 380,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: programmes.length,
@@ -606,10 +607,14 @@ Widget _buildProgrammeCard(BuildContext context, MasjidProgramme programme) {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
+
+                if (programme.isOnline == false)
+                  Text("📍 ${programme.location}"),
 
                 const SizedBox(height: 4),
                 Text(
-                  "📅 $dateTimeFormatted",
+                  "📅  $dateTimeFormatted",
                   style: const TextStyle(fontSize: 12),
                 ),
 

@@ -35,7 +35,7 @@ class StatusBadge extends StatelessWidget {
         return "✓ Approved";
       case 'pending to pay':
       case 'waiting':
-        return 'Procced to pay';
+        return 'Proceed to pay';
       case 'paid':
       case 'completed':
         return 'Paid';
@@ -51,13 +51,20 @@ class StatusBadge extends StatelessWidget {
     }
   }
 
+  bool _hasBorder() {
+    final s = status.toLowerCase();
+    return s == 'online' || s == 'offline';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
         color: _getColor().withOpacity(0.1),
-        border: Border.all(color: _getColor()),
+        border: _hasBorder()
+            ? Border.all(color: _getColor(), width: 1.5)
+            : null,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
