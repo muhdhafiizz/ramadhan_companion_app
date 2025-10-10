@@ -124,9 +124,13 @@ class HadithView extends StatelessWidget {
                                 onTap:
                                     provider.currentHadith == null ||
                                         provider.hadiths.isEmpty ||
-                                        provider.hadiths.last == hadith
+                                        (!provider.hasMore &&
+                                            provider.hadiths.last ==
+                                                provider.currentHadith)
                                     ? null
-                                    : provider.nextHadith,
+                                    : () async {
+                                        await provider.nextHadith(bookSlug);
+                                      },
                                 text: 'Next',
                                 iconAtEnd: true,
                                 decoration: TextDecoration.underline,
@@ -161,10 +165,10 @@ Widget _buildAppBar(
         onTap: () => Navigator.pop(context),
         child: const Icon(Icons.arrow_back),
       ),
-      GestureDetector(
-        onTap: () => _showHadithList(context, provider, bookSlug),
-        child: const Icon(Icons.list_outlined),
-      ),
+      // GestureDetector(
+      //   onTap: () => _showHadithList(context, provider, bookSlug),
+      //   child: const Icon(Icons.list_outlined),
+      // ),
     ],
   );
 }
@@ -208,43 +212,43 @@ Widget _buildShimmerLoading() {
   );
 }
 
-void _showHadithList(
-  BuildContext context,
-  HadithProvider provider,
-  String bookSlug,
-) {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.white,
-    builder: (_) {
-      return Scaffold(
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
-            bottom: 30,
-            top: 20,
-          ),
-          child: CustomButton(
-            onTap: provider.isLoading
-                ? null
-                : () async {
-                    final previousCount = provider.hadiths.length;
-                    await provider.loadMore(bookSlug);
+// void _showHadithList(
+//   BuildContext context,
+//   HadithProvider provider,
+//   String bookSlug,
+// ) {
+//   showModalBottomSheet(
+//     context: context,
+//     backgroundColor: Colors.white,
+//     builder: (_) {
+//       return Scaffold(
+//         bottomNavigationBar: Container(
+//           padding: const EdgeInsets.only(
+//             left: 20,
+//             right: 20,
+//             bottom: 30,
+//             top: 20,
+//           ),
+//           child: CustomButton(
+//             onTap: provider.isLoading
+//                 ? null
+//                 : () async {
+//                     final previousCount = provider.hadiths.length;
+//                     await provider.loadMore(bookSlug);
 
-                    if (provider.hadiths.length == previousCount) {
-                      CustomPillSnackbar.show(
-                        context,
-                        message: 'No more hadiths in this chapter',
-                      );
-                    }
-                  },
-            text: 'Load More',
-            backgroundColor: AppColors.violet.withOpacity(1),
-            textColor: Colors.white,
-          ),
-        ),
-      );
-    },
-  );
-}
+//                     if (provider.hadiths.length == previousCount) {
+//                       CustomPillSnackbar.show(
+//                         context,
+//                         message: 'No more hadiths in this chapter',
+//                       );
+//                     }
+//                   },
+//             text: 'Load More',
+//             backgroundColor: AppColors.violet.withOpacity(1),
+//             textColor: Colors.white,
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }

@@ -66,6 +66,7 @@ class HadithService {
 
     final response = await http.get(url);
 
+    // Success
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
@@ -74,11 +75,21 @@ class HadithService {
         return list.map((h) => HadithModel.fromJson(h)).toList();
       }
 
-      return []; 
-    } else {
-      throw Exception(
-        "Failed to load hadiths [${response.statusCode}]: ${response.body}",
-      );
+      // If API returns 200 but no hadiths array - treat as empty (no more)
+      return [];
     }
+
+    // If API returns 404 or a body that states "not found", treat as end-of-data (return empty)
+    final bodyLower = response.body.toLowerCase();
+    if (response.statusCode == 404 ||
+        bodyLower.contains('not found') ||
+        bodyLower.contains('hadith not found')) {
+      return [];
+    }
+
+    // Other errors -> bubble up
+    throw Exception(
+      "Failed to load hadiths [${response.statusCode}]: ${response.body}",
+    );
   }
 }
