@@ -1,16 +1,18 @@
 import 'dart:typed_data';
 
 class MasjidProgramme {
+  final String id;
   final String masjidName;
   final String title;
   final DateTime dateTime;
   final bool isOnline;
   final String? location;
   final String? joinLink;
-  final String? posterUrl; // Firestore string (Base64 or URL)
-  final Uint8List? posterBytes; // 🔥 cached decoded bytes
+  final String? posterUrl; 
+  final Uint8List? posterBytes;
 
   MasjidProgramme({
+    required this.id,
     required this.masjidName,
     required this.title,
     required this.dateTime,
