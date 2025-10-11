@@ -22,7 +22,6 @@ class HadithProvider extends ChangeNotifier {
   bool get hasMore => _hasMore;
   String? get error => _error;
 
-  /// Loads hadiths from API or cache
   Future<void> loadHadiths(
     String bookSlug, {
     int page = 1,
@@ -44,7 +43,6 @@ class HadithProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = "hadiths_${bookSlug}_${chapterId ?? 'all'}_page_$page";
 
-      // Load from cache if available
       if (!forceRefresh && prefs.containsKey(cacheKey)) {
         final cachedData = prefs.getString(cacheKey);
         if (cachedData != null) {
@@ -70,7 +68,6 @@ class HadithProvider extends ChangeNotifier {
         }
       }
 
-      // Fetch from API
       final newHadiths = await _service.fetchHadiths(
         bookSlug: bookSlug,
         page: page,
@@ -92,7 +89,6 @@ class HadithProvider extends ChangeNotifier {
 
       _currentPage = page;
 
-      // Cache data
       await prefs.setString(
         cacheKey,
         json.encode(newHadiths.map((h) => h.toJson()).toList()),
@@ -106,13 +102,11 @@ class HadithProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Select a specific hadith
   void selectHadith(int index) {
     _selectedIndex = index;
     notifyListeners();
   }
 
-  /// Go to the next hadith, auto-load next page if available
   Future<void> nextHadith(String bookSlug) async {
     try {
       if (_selectedIndex < _hadiths.length - 1) {
@@ -121,18 +115,15 @@ class HadithProvider extends ChangeNotifier {
         final previousCount = _hadiths.length;
         await loadMore(bookSlug);
 
-        // If new items arrived, move forward
         if (_hadiths.length > previousCount) {
           _selectedIndex++;
         } else {
-          // nothing new -> no more pages
           _hasMore = false;
         }
       } else {
         _hasMore = false;
       }
     } catch (e) {
-      // On unexpected error, stop trying further pages
       _error = e.toString();
       _hasMore = false;
     } finally {
@@ -140,7 +131,6 @@ class HadithProvider extends ChangeNotifier {
     }
   }
 
-  /// Go to the previous hadith
   void previousHadith() {
     if (_selectedIndex > 0) {
       _selectedIndex--;
@@ -148,13 +138,11 @@ class HadithProvider extends ChangeNotifier {
     }
   }
 
-  /// Current hadith position like "3/50"
   String get hadithPositionText {
     if (_hadiths.isEmpty) return "0/0";
     return "${_selectedIndex + 1}/${_hadiths.length}";
   }
 
-  /// Loads the next page of hadiths
   Future<void> loadMore(String bookSlug) async {
     if (!_hasMore || _isLoading) return;
     await loadHadiths(bookSlug, page: _currentPage + 1, chapterId: _chapterId);

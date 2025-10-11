@@ -1,5 +1,6 @@
 class PrayerTimesModel {
   final String fajr;
+  final String sunrise;
   final String dhuhr;
   final String asr;
   final String maghrib;
@@ -7,6 +8,7 @@ class PrayerTimesModel {
 
   PrayerTimesModel({
     required this.fajr,
+    required this.sunrise,
     required this.dhuhr,
     required this.asr,
     required this.maghrib,
@@ -17,6 +19,7 @@ class PrayerTimesModel {
     final timings = json['data']['timings'];
     return PrayerTimesModel(
       fajr: timings['Fajr'],
+      sunrise: timings['Sunrise'],
       dhuhr: timings['Dhuhr'],
       asr: timings['Asr'],
       maghrib: timings['Maghrib'],

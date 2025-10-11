@@ -379,6 +379,7 @@ Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
     child: Column(
       children: [
         _buildPrayerRowWithHighlight("Fajr", provider.times?.fajr, provider),
+        _buildPrayerRowWithHighlight("Sunrise", provider.times?.sunrise, provider),
         _buildPrayerRowWithHighlight("Dhuhr", provider.times?.dhuhr, provider),
         _buildPrayerRowWithHighlight("Asr", provider.times?.asr, provider),
         _buildPrayerRowWithHighlight(
@@ -1467,6 +1468,11 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                           true,
                         ),
                         _buildPrayerTimesRow(
+                          "Sunrise",
+                          provider.times!.sunrise,
+                          true,
+                        ),
+                        _buildPrayerTimesRow(
                           "Dhuhr",
                           provider.times!.dhuhr,
                           true,
@@ -1489,6 +1495,7 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                   Column(
                     children: [
                       _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
+                      _buildPrayerTimesRow("Sunrise", provider.times!.sunrise, false),
                       _buildPrayerTimesRow(
                         "Dhuhr",
                         provider.times!.dhuhr,
@@ -2002,6 +2009,7 @@ Future<void> updatePrayerWidget(PrayerTimesProvider provider) async {
   if (provider.times == null || provider.nextPrayerDate == null) return;
 
   await HomeWidget.saveWidgetData('fajr', provider.times?.fajr ?? "--");
+  await HomeWidget.saveWidgetData('sunrise', provider.times?.sunrise ?? "--");
   await HomeWidget.saveWidgetData('dhuhr', provider.times?.dhuhr ?? "--");
   await HomeWidget.saveWidgetData('asr', provider.times?.asr ?? "--");
   await HomeWidget.saveWidgetData('maghrib', provider.times?.maghrib ?? "--");
@@ -2044,6 +2052,7 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
   }
 
   schedulePrayer(1, "Fajr", provider.times!.fajr);
+  schedulePrayer(1, "sunrise", provider.times!.sunrise);
   schedulePrayer(2, "Dhuhr", provider.times!.dhuhr);
   schedulePrayer(3, "Asr", provider.times!.asr);
   schedulePrayer(4, "Maghrib", provider.times!.maghrib);
