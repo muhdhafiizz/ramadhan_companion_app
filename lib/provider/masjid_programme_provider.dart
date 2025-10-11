@@ -31,7 +31,6 @@ class MasjidProgrammeProvider extends ChangeNotifier {
   bool isOnline = false;
   String? posterBase64;
 
-  // 🔹 search queries (instead of selected dropdown values)
   String _masjidQuery = '';
   String _stateQuery = '';
 
@@ -40,7 +39,6 @@ class MasjidProgrammeProvider extends ChangeNotifier {
       titleController.text.trim().isNotEmpty &&
       dateTime != null;
 
-  /// pick and save image locally in provider
   Future<void> pickPoster() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -50,7 +48,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         picked.path,
         minWidth: 600,
         minHeight: 600,
-        quality: 50, // reduce size
+        quality: 50,
       );
       if (compressed != null) {
         posterBase64 = base64Encode(compressed);
@@ -74,6 +72,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         final posterBase64 = data['posterUrl'] as String?;
 
         return MasjidProgramme(
+          id: doc.id,
           masjidName: data['masjidName'] ?? '',
           title: data['title'] ?? '',
           dateTime: DateTime.parse(data['dateTime']),
@@ -92,11 +91,13 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addProgramme() async {
+  Future<String?> addProgramme() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("User not logged in");
 
       final programme = MasjidProgramme(
+        id: '',
         masjidName: masjidController.text.trim(),
         title: titleController.text.trim(),
         dateTime: dateTime!,
@@ -116,23 +117,38 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         "joinLink": programme.joinLink,
         "submittedAt": FieldValue.serverTimestamp(),
         "status": "pending",
-        "submittedBy": user?.uid,
+        "submittedBy": user.uid,
+        if (programme.posterUrl != null) "posterUrl": programme.posterUrl,
       };
 
-      if (programme.posterUrl != null) {
-        data["posterUrl"] = programme.posterUrl;
-      }
+      final docRef = await _firestore.collection('masjidProgrammes').add(data);
 
-      await _firestore.collection('masjidProgrammes').add(data);
+      debugPrint("✅ Programme added with ID: ${docRef.id}");
+
+      await docRef.update({"id": docRef.id});
 
       resetForm();
       notifyListeners();
+
+      return docRef.id;
     } catch (e) {
-      debugPrint("Error adding programme: $e");
+      debugPrint("❌ Error adding programme: $e");
+      return null;
     }
   }
 
-  // 🔹 setters for filters
+  Future<String> removeProgramme(String id) async {
+    try {
+      await _firestore.collection('masjidProgrammes').doc(id).delete();
+      await loadProgrammes();
+      return "Programme removed";
+    } catch (e) {
+      debugPrint("Error removing programme: $e");
+      return "Failed to remove programme";
+    }
+  }
+
+  // 🔹 Filters
   void filterByMasjid(String query) {
     _masjidQuery = query.toLowerCase();
     notifyListeners();
@@ -143,7 +159,6 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🔹 computed filtered list
   List<MasjidProgramme> get filteredProgrammes {
     return _allProgrammes.where((p) {
       final masjidMatch = p.masjidName.toLowerCase().contains(_masjidQuery);

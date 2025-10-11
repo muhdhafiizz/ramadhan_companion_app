@@ -291,7 +291,6 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
   final user = FirebaseAuth.instance.currentUser;
   print("isSuperAdmin: ${provider.isSuperAdmin}");
 
-
   return StreamBuilder(
     stream: provider.isSuperAdmin
         ? FirebaseFirestore.instance.collection('masjidProgrammes').snapshots()
@@ -415,51 +414,141 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
                             Icons.close,
                             Colors.red.withOpacity(0.1),
                             Colors.red,
-                            () async {
-                              // final reasonController = TextEditingController();
-
-                              final result = await _showRejectionReasonSheet(
+                            () {
+                              showConfirmationModalBottomSheet(
                                 context,
+                                title:
+                                    "Are you sure you want to remove this programme?",
+                                confirmText: "Remove",
+                                onConfirm: () async {
+                                  final programmeProvider = context
+                                      .read<MasjidProgrammeProvider>();
+
+                                  final msg = await programmeProvider
+                                      .removeProgramme(programmeId);
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(msg)),
+                                    );
+                                  }
+                                },
                               );
 
-                              if (result != null && result.isNotEmpty) {
-                                final programmeDoc = await FirebaseFirestore
-                                    .instance
-                                    .collection('masjidProgrammes')
-                                    .doc(programmeId)
-                                    .get();
+                              // final result = await _showRejectionReasonSheet(
+                              //   context,
+                              // );
 
-                                final submittedBy = programmeDoc
-                                    .data()?['submittedBy'];
+                              // if (result != null && result.isNotEmpty) {
+                              //   final programmeDoc = await FirebaseFirestore
+                              //       .instance
+                              //       .collection('masjidProgrammes')
+                              //       .doc(programmeId)
+                              //       .get();
 
-                                if (submittedBy != null) {
-                                  await FirebaseFirestore.instance
-                                      .collection('notifications')
-                                      .add({
-                                        'title': "Programme Rejected",
-                                        'message':
-                                            "Your programme '${data['title']}' was rejected. Reason: $result. Please submit a new one.",
-                                        'recipientId': submittedBy,
-                                        'recipientRole': "user",
-                                        'programmeId': programmeId,
-                                        'read': false,
-                                        'timestamp':
-                                            FieldValue.serverTimestamp(),
-                                      });
-                                }
+                              //   final submittedBy = programmeDoc
+                              //       .data()?['submittedBy'];
 
-                                // 🚮 Delete rejected programme to save quota
-                                // await FirebaseFirestore.instance
-                                //     .collection('masjidProgrammes')
-                                //     .doc(programmeId)
-                                //     .delete();
+                              //   if (submittedBy != null) {
+                              //     // Send rejection notification
+                              //     await FirebaseFirestore.instance
+                              //         .collection('notifications')
+                              //         .add({
+                              //           'title': "Programme Rejected",
+                              //           'message':
+                              //               "Your programme '${data['title']}' was rejected. Reason: $result. Please submit a new one.",
+                              //           'recipientId': submittedBy,
+                              //           'recipientRole': "user",
+                              //           'programmeId': programmeId,
+                              //           'read': false,
+                              //           'timestamp':
+                              //               FieldValue.serverTimestamp(),
+                              //         });
+                              //   }
 
-                                await context
-                                    .read<MasjidProgrammeProvider>()
-                                    .loadProgrammes();
-                              }
+                              //   // 🚮 Delete the rejected programme
+                              //   await FirebaseFirestore.instance
+                              //       .collection('masjidProgrammes')
+                              //       .doc(programmeId)
+                              //       .delete();
+
+                              //   // Refresh programme list
+                              //   await context
+                              //       .read<MasjidProgrammeProvider>()
+                              //       .loadProgrammes();
+
+                              //   // Optional: confirmation snackbar
+                              //   ScaffoldMessenger.of(context).showSnackBar(
+                              //     const SnackBar(
+                              //       content: Text(
+                              //         "Programme rejected and removed.",
+                              //       ),
+                              //       backgroundColor: Colors.redAccent,
+                              //     ),
+                              //   );
+                              // }
                             },
                           ),
+                        // ),if (provider.isSuperAdmin)
+                        // _buildButton(
+                        //   Icons.close,
+                        //   Colors.red.withOpacity(0.1),
+                        //   Colors.red,
+                        //   () async {
+                        //     final result = await _showRejectionReasonSheet(
+                        //       context,
+                        //     );
+
+                        //     if (result != null && result.isNotEmpty) {
+                        //       final programmeDoc = await FirebaseFirestore
+                        //           .instance
+                        //           .collection('masjidProgrammes')
+                        //           .doc(programmeId)
+                        //           .get();
+
+                        //       final submittedBy = programmeDoc
+                        //           .data()?['submittedBy'];
+
+                        //       if (submittedBy != null) {
+                        //         // Send rejection notification
+                        //         await FirebaseFirestore.instance
+                        //             .collection('notifications')
+                        //             .add({
+                        //               'title': "Programme Rejected",
+                        //               'message':
+                        //                   "Your programme '${data['title']}' was rejected. Reason: $result. Please submit a new one.",
+                        //               'recipientId': submittedBy,
+                        //               'recipientRole': "user",
+                        //               'programmeId': programmeId,
+                        //               'read': false,
+                        //               'timestamp':
+                        //                   FieldValue.serverTimestamp(),
+                        //             });
+                        //       }
+
+                        //       // 🚮 Delete the rejected programme
+                        //       await FirebaseFirestore.instance
+                        //           .collection('masjidProgrammes')
+                        //           .doc(programmeId)
+                        //           .delete();
+
+                        //       // Refresh programme list
+                        //       await context
+                        //           .read<MasjidProgrammeProvider>()
+                        //           .loadProgrammes();
+
+                        //       // Optional: confirmation snackbar
+                        //       ScaffoldMessenger.of(context).showSnackBar(
+                        //         const SnackBar(
+                        //           content: Text(
+                        //             "Programme rejected and removed.",
+                        //           ),
+                        //           backgroundColor: Colors.redAccent,
+                        //         ),
+                        //       );
+                        //     }
+                        //   },
+                        // ),
                       ],
                     ),
                   ],

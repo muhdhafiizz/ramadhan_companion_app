@@ -55,10 +55,10 @@ class PrayerTimesView extends StatelessWidget {
       if (!provider.shouldAskLocation) provider.initialize();
       updatePrayerWidget(provider);
       // schedulePrayerNotifications(provider);
-      if (!masjidProgrammeProvider.isLoading &&
-          !masjidProgrammeProvider.allProgrammes.isNotEmpty) {
-        masjidProgrammeProvider.loadProgrammes();
-      }
+      // if (!masjidProgrammeProvider.isLoading &&
+      //     !masjidProgrammeProvider.allProgrammes.isNotEmpty) {
+      //   masjidProgrammeProvider.loadProgrammes();
+      // }
     });
 
     Future<void> refreshData() async {
@@ -379,7 +379,11 @@ Widget _buildPrayerTimesSection(PrayerTimesProvider provider) {
     child: Column(
       children: [
         _buildPrayerRowWithHighlight("Fajr", provider.times?.fajr, provider),
-        _buildPrayerRowWithHighlight("Sunrise", provider.times?.sunrise, provider),
+        _buildPrayerRowWithHighlight(
+          "Sunrise",
+          provider.times?.sunrise,
+          provider,
+        ),
         _buildPrayerRowWithHighlight("Dhuhr", provider.times?.dhuhr, provider),
         _buildPrayerRowWithHighlight("Asr", provider.times?.asr, provider),
         _buildPrayerRowWithHighlight(
@@ -454,9 +458,11 @@ Widget _buildMasjidProgramme(BuildContext context) {
           }
 
           if (programmeProvider.allProgrammes.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("No programmes yet"),
+            return Center(
+              child: const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text("No programmes yet."),
+              ),
             );
           }
 
@@ -1495,7 +1501,11 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
                   Column(
                     children: [
                       _buildPrayerTimesRow("Fajr", provider.times!.fajr, false),
-                      _buildPrayerTimesRow("Sunrise", provider.times!.sunrise, false),
+                      _buildPrayerTimesRow(
+                        "Sunrise",
+                        provider.times!.sunrise,
+                        false,
+                      ),
                       _buildPrayerTimesRow(
                         "Dhuhr",
                         provider.times!.dhuhr,
@@ -2052,7 +2062,7 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
   }
 
   schedulePrayer(1, "Fajr", provider.times!.fajr);
-  schedulePrayer(1, "sunrise", provider.times!.sunrise);
+  schedulePrayer(1, "Sunrise", provider.times!.sunrise);
   schedulePrayer(2, "Dhuhr", provider.times!.dhuhr);
   schedulePrayer(3, "Asr", provider.times!.asr);
   schedulePrayer(4, "Maghrib", provider.times!.maghrib);
