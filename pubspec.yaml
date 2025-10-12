@@ -94,6 +94,7 @@ flutter:
     - assets/mock_data/programme_3_mockup.jpg
     - assets/icon/share_outlined_icon.png
     - assets/icon/share_outlined_icon_1.png
+    - assets/images/front-view-homeless-man-holding-cup-with-coins_23-2148760767_1_-removebg-preview.png
 
   fonts:
     - family: Liter

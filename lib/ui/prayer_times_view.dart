@@ -42,6 +42,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class PrayerTimesView extends StatelessWidget {
   const PrayerTimesView({super.key});
@@ -1082,7 +1083,7 @@ Widget _buildSadaqahReminder(BuildContext context) {
   }
 
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    padding: const EdgeInsets.symmetric(horizontal: 12.0),
     child: GestureDetector(
       onTap: () {
         Navigator.push(
@@ -1092,19 +1093,75 @@ Widget _buildSadaqahReminder(BuildContext context) {
       },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.violet.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.violet.withOpacity(1)),
-        ),
-        child: const Text(
-          'Sadaqah today ',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppColors.violet.withOpacity(0.9),
+              AppColors.violet.withOpacity(0.6),
+              const Color(0xFF9C27B0).withOpacity(0.8),
+              const Color(0xFFE040FB).withOpacity(0.8),
+            ],
           ),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.violet.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // 🟣 Left side text
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Sadaqah today',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Voluntarily giving charity in Islam to help others and earn spiritual reward.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Expanded(
+              flex: 1,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(
+                    math.pi,
+                  ),
+                  child: Image.asset(
+                    'assets/images/front-view-homeless-man-holding-cup-with-coins_23-2148760767_1_-removebg-preview.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ),
