@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:add_2_calendar/add_2_calendar.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -1039,23 +1040,41 @@ Widget _buildInsertText() {
 }
 
 Widget _buildIconsGrid(BuildContext context, PrayerTimesProvider provider) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 3,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 20,
-      children: [
-        _buildQuran(context),
-        _buildQiblaFinder(context, provider),
-        _buildLocateMasjidNearby(context, provider),
-        _buildSedekah(context),
-        _buildHadith(context),
-        _buildIslamicCalendar(context, provider),
-      ],
-    ),
+  return Column(
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 20,
+          children: [
+            _buildQuran(context),
+            _buildQiblaFinder(context, provider),
+            _buildLocateMasjidNearby(context, provider),
+            _buildSedekah(context),
+            _buildHadith(context),
+            _buildIslamicCalendar(context, provider),
+          ],
+        ),
+      ),
+      StreamBuilder<List<ConnectivityResult>>(
+        stream: Connectivity().onConnectivityChanged,
+        builder: (context, snapshot) {
+          final hasInternet =
+              snapshot.hasData &&
+              !snapshot.data!.contains(ConnectivityResult.none);
+
+          if (!hasInternet) {
+            return buildNoInternet(context);
+          }
+
+          return SizedBox.shrink();
+        },
+      ),
+    ],
   );
 }
 
@@ -1151,9 +1170,7 @@ Widget _buildSadaqahReminder(BuildContext context) {
                 alignment: Alignment.centerRight,
                 child: Transform(
                   alignment: Alignment.center,
-                  transform: Matrix4.rotationY(
-                    math.pi,
-                  ),
+                  transform: Matrix4.rotationY(math.pi),
                   child: Image.asset(
                     'assets/images/front-view-homeless-man-holding-cup-with-coins_23-2148760767_1_-removebg-preview.png',
                     fit: BoxFit.contain,

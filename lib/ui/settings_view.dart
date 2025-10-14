@@ -53,12 +53,6 @@ class SettingsView extends StatelessWidget {
                   children: [
                     _buildListTile(
                       context,
-                      title: 'Language',
-                      icon: Icons.language_outlined, 
-                      onTap: () {},
-                    ),
-                    _buildListTile(
-                      context,
                       title: 'List your organization',
                       icon: Icons.business_outlined,
                       onTap: () {
@@ -81,8 +75,7 @@ class SettingsView extends StatelessWidget {
                     _buildListTile(
                       context,
                       title: 'Submission status',
-                      icon:
-                          Icons.assignment_turned_in_outlined,
+                      icon: Icons.assignment_turned_in_outlined,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -92,19 +85,19 @@ class SettingsView extends StatelessWidget {
                         );
                       },
                     ),
-                    _buildListTile(
-                      context,
-                      title: 'Notifications',
-                      icon: Icons.notifications_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const NotificationsView(),
-                          ),
-                        );
-                      },
-                    ),
+                    // _buildListTile(
+                    //   context,
+                    //   title: 'Notifications',
+                    //   icon: Icons.notifications_outlined,
+                    //   onTap: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (_) => const NotificationsView(),
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
                   ],
                 ),
               ),
