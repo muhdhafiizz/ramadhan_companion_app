@@ -9,6 +9,7 @@ environment:
 dependencies:
   add_2_calendar: ^3.0.1
   audioplayers: ^6.5.0
+  carousel_slider: ^5.1.1
   cloud_firestore: ^6.0.1
   collection: ^1.19.1
   connectivity_plus: ^6.1.5
@@ -95,6 +96,9 @@ flutter:
     - assets/icon/share_outlined_icon.png
     - assets/icon/share_outlined_icon_1.png
     - assets/images/front-view-homeless-man-holding-cup-with-coins_23-2148760767_1_-removebg-preview.png
+    - assets/lottie/reading_quran_lottie.json
+    - assets/lottie/donate_lottie.json
+    - assets/images/ummah_logo_transparent.png
 
   fonts:
     - family: Liter

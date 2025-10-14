@@ -17,6 +17,8 @@ class LoginProvider extends ChangeNotifier {
   bool get isLoginEnabled => _email.isNotEmpty && _password.isNotEmpty;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final pageController = PageController();
+
 
   void showLoadingDialog(BuildContext context) {
     showDialog(

@@ -5,8 +5,10 @@ import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/signup_view.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class LoginView extends StatelessWidget {
   LoginView({super.key});
@@ -36,9 +38,9 @@ class LoginView extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 40),
-                  _buildLottieView(),
-                  _buildLoginText(),
+                  _appLogo(),
+                  const SizedBox(height: 20),
+                  _buildLottieView(provider),
                   const SizedBox(height: 20),
                   _buildEmailTextfield(emailController, "Email", provider),
                   const SizedBox(height: 10),
@@ -67,14 +69,114 @@ class LoginView extends StatelessWidget {
   }
 }
 
-Widget _buildLottieView() {
-  return Lottie.asset('assets/lottie/mosque_lottie.json');
+Widget _appLogo() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Image.asset(
+        'assets/images/ummah_logo_transparent.png',
+        height: 30,
+        width: 30,
+      ),
+      SizedBox(width: 10),
+      Text(
+        'Ummah',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ),
+    ],
+  );
 }
 
-Widget _buildLoginText() {
-  return Text(
-    "Login now for the best experience",
-    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+Widget _buildLottieView(LoginProvider provider) {
+  final pages = [
+    {
+      'lottie': 'assets/lottie/mosque_lottie.json',
+      'title': 'Pray on time, every time',
+      'subtitle': 'Discover nearby mosques and prayer times easily.',
+    },
+    {
+      'lottie': 'assets/lottie/reading_quran_lottie.json',
+      'title': 'Read & Reflect',
+      'subtitle': 'Access the Quran and daily hadiths to boost your faith.',
+    },
+    {
+      'lottie': 'assets/lottie/donate_lottie.json',
+      'title': 'Give Sadaqah',
+      'subtitle': 'Support local causes and earn lasting rewards.',
+    },
+  ];
+
+  return Column(
+    children: [
+      Container(
+        height: 350,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: PageView.builder(
+          controller: provider.pageController,
+          itemCount: pages.length,
+          itemBuilder: (context, index) {
+            final page = pages[index];
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 250,
+                  child: Lottie.asset(page['lottie']!, fit: BoxFit.contain),
+                ),
+                const SizedBox(height: 16),
+
+                Text(
+                  page['title']!,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    page['subtitle']!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 16),
+
+      SmoothPageIndicator(
+        controller: provider.pageController,
+        count: pages.length,
+        effect: ExpandingDotsEffect(
+          dotColor: Colors.grey.shade300,
+          activeDotColor: AppColors.violet.withOpacity(1),
+          dotHeight: 8,
+          dotWidth: 8,
+        ),
+      ),
+    ],
   );
 }
 
