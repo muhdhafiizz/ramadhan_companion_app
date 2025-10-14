@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:add_2_calendar/add_2_calendar.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -425,6 +425,10 @@ Widget _buildPrayerRowWithHighlight(
 }
 
 Widget _buildMasjidProgramme(BuildContext context) {
+  final provider = context.read<PrayerTimesProvider>();
+  final city = provider.city;
+  final country = provider.country;
+
   return Column(
     children: [
       Row(
@@ -460,15 +464,45 @@ Widget _buildMasjidProgramme(BuildContext context) {
           }
 
           if (programmeProvider.allProgrammes.isEmpty) {
-            return Center(
-              child: const Padding(
+            return const Center(
+              child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text("No programmes yet."),
               ),
             );
           }
 
-          final programmes = programmeProvider.allProgrammes;
+          final programmes = programmeProvider.allProgrammes.where((programme) {
+            if (programme.isOnline) return true;
+            final location = programme.location?.toLowerCase();
+            if (location == null || (city == null && country == null))
+              return false;
+
+            return (city != null && location.contains(city.toLowerCase())) ||
+                (country != null && location.contains(country.toLowerCase()));
+          }).toList();
+
+          if (programmes.isEmpty) {
+            return SizedBox(
+              height: 150,
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Spacer(),
+                    Image.asset(
+                      'assets/icon/empty_data_icon.png',
+                      height: 50,
+                      width: 50,
+                    ),
+                    SizedBox(height: 5),
+                    Text("No local programmes found in your state."),
+                    Spacer(),
+                  ],
+                ),
+              ),
+            );
+          }
 
           return SizedBox(
             height: 380,
@@ -1060,20 +1094,20 @@ Widget _buildIconsGrid(BuildContext context, PrayerTimesProvider provider) {
           ],
         ),
       ),
-      StreamBuilder<List<ConnectivityResult>>(
-        stream: Connectivity().onConnectivityChanged,
-        builder: (context, snapshot) {
-          final hasInternet =
-              snapshot.hasData &&
-              !snapshot.data!.contains(ConnectivityResult.none);
+      // StreamBuilder<List<ConnectivityResult>>(
+      //   stream: Connectivity().onConnectivityChanged,
+      //   builder: (context, snapshot) {
+      //     final hasInternet =
+      //         snapshot.hasData &&
+      //         !snapshot.data!.contains(ConnectivityResult.none);
 
-          if (!hasInternet) {
-            return buildNoInternet(context);
-          }
+      //     if (!hasInternet) {
+      //       return buildNoInternet(context);
+      //     }
 
-          return SizedBox.shrink();
-        },
-      ),
+      //     return SizedBox.shrink();
+      //   },
+      // ),
     ],
   );
 }
@@ -1632,10 +1666,17 @@ void showProgrammeField(
   BuildContext context,
   MasjidProgrammeProvider provider,
 ) {
+  // final prayerTimesProvider = Provider.of<PrayerTimesProvider>(
+  //   context,
+  //   listen: false,
+  // );
   final pageController = PageController();
 
   final content = StatefulBuilder(
     builder: (context, setState) {
+      pageController.addListener(() {
+        setState(() {});
+      });
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
@@ -1762,14 +1803,11 @@ void showProgrammeField(
                                 builder: (context, provider, _) {
                                   return DottedBorder(
                                     options: RoundedRectDottedBorderOptions(
-                                      color:
-                                          Colors.grey.shade400, // border color
-                                      strokeWidth: 1, // border thickness
-                                      dashPattern: [6, 3], // 6px line, 3px gap
+                                      color: Colors.grey.shade400,
+                                      strokeWidth: 1,
+                                      dashPattern: [6, 3],
                                       radius: const Radius.circular(10),
-                                      padding: const EdgeInsets.all(
-                                        0,
-                                      ), // no extra padding around child
+                                      padding: const EdgeInsets.all(0),
                                     ),
                                     child: Container(
                                       width: double.infinity,
@@ -1804,11 +1842,15 @@ void showProgrammeField(
                             _buildTitleTextBottomSheet('Date & Time'),
                             GestureDetector(
                               onTap: () async {
+                                final now = DateTime.now();
                                 final picked = await showDatePicker(
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2100),
+                                  initialDate: now,
+                                  firstDate:
+                                      now, // Prevent selecting past dates
+                                  lastDate: now.add(
+                                    const Duration(days: 7),
+                                  ), // Allow up to 1 week ahead
                                 );
 
                                 if (picked != null) {
@@ -1816,6 +1858,7 @@ void showProgrammeField(
                                     context: context,
                                     initialTime: TimeOfDay.now(),
                                   );
+
                                   if (time != null) {
                                     setState(() {
                                       provider.dateTime = DateTime(
@@ -1852,6 +1895,108 @@ void showProgrammeField(
                                 ),
                               ),
                             ),
+                            // GestureDetector(
+                            //   onTap: () async {
+                            //     await showModalBottomSheet(
+                            //       context: context,
+                            //       isScrollControlled: true,
+                            //       backgroundColor: Colors.transparent,
+                            //       builder: (context) {
+                            //         return Container(
+                            //           padding: const EdgeInsets.all(16),
+                            //           decoration: BoxDecoration(
+                            //             color: Colors.white.withOpacity(0.9),
+                            //             borderRadius:
+                            //                 const BorderRadius.vertical(
+                            //                   top: Radius.circular(25),
+                            //                 ),
+                            //           ),
+                            //           child: Column(
+                            //             mainAxisSize: MainAxisSize.min,
+                            //             children: [
+                            //               const Text(
+                            //                 'Select Date & Time',
+                            //                 style: TextStyle(
+                            //                   fontSize: 18,
+                            //                   fontWeight: FontWeight.bold,
+                            //                 ),
+                            //               ),
+                            //               const SizedBox(height: 10),
+                            //               _buildCustomCalendar(context),
+                            //               const SizedBox(height: 20),
+                            //               _buildCustomTimePicker(
+                            //                 context,
+                            //                 prayerTimesProvider,
+                            //               ),
+                            //               const SizedBox(height: 20),
+                            //               ElevatedButton(
+                            //                 style: ElevatedButton.styleFrom(
+                            //                   backgroundColor:
+                            //                       Colors.deepPurple,
+                            //                   shape: RoundedRectangleBorder(
+                            //                     borderRadius:
+                            //                         BorderRadius.circular(12),
+                            //                   ),
+                            //                 ),
+                            //                 onPressed: () {
+                            //                   final selectedDate =
+                            //                       prayerTimesProvider
+                            //                           .pickerSelectedDate;
+                            //                   final selectedTime =
+                            //                       prayerTimesProvider
+                            //                           .pickerSelectedTime;
+
+                            //                   if (selectedDate != null &&
+                            //                       selectedTime != null) {
+                            //                     provider.dateTime = DateTime(
+                            //                       selectedDate.year,
+                            //                       selectedDate.month,
+                            //                       selectedDate.day,
+                            //                       selectedTime.hour,
+                            //                       selectedTime.minute,
+                            //                     );
+                            //                   }
+
+                            //                   prayerTimesProvider
+                            //                       .clearPickerSelection();
+                            //                   Navigator.pop(context);
+                            //                 },
+
+                            //                 child: const Text("Confirm"),
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         );
+                            //       },
+                            //     );
+                            //   },
+                            //   child: Consumer<PrayerTimesProvider>(
+                            //     builder: (context, provider, _) {
+                            //       return Container(
+                            //         alignment: Alignment.bottomLeft,
+                            //         padding: const EdgeInsets.all(12),
+                            //         decoration: BoxDecoration(
+                            //           border: Border.all(
+                            //             color: Colors.grey.shade300,
+                            //           ),
+                            //           borderRadius: BorderRadius.circular(10),
+                            //         ),
+                            //         child: Text(
+                            //           provider.dateTime != null
+                            //               ? DateFormat(
+                            //                   "d MMM yyyy, h:mm a",
+                            //                 ).format(provider.dateTime!)
+                            //               : "Select Date & Time",
+                            //           style: TextStyle(
+                            //             color: provider.dateTime == null
+                            //                 ? Colors.grey
+                            //                 : Colors.black,
+                            //           ),
+                            //         ),
+                            //       );
+                            //     },
+                            //   ),
+                            // ),
                             SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1987,6 +2132,81 @@ Widget _buildDescriptionText(String name) {
   );
 }
 
+// Widget _buildCustomCalendar(BuildContext context) {
+//   return Consumer<PrayerTimesProvider>(
+//     builder: (context, provider, _) {
+//       return ClipRRect(
+//         borderRadius: BorderRadius.circular(20),
+//         child: BackdropFilter(
+//           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+//           child: Container(
+//             height: 400,
+//             decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(20),
+//               gradient: LinearGradient(
+//                 colors: [
+//                   Colors.white.withOpacity(0.7),
+//                   Colors.white.withOpacity(0.4),
+//                 ],
+//                 begin: Alignment.topLeft,
+//                 end: Alignment.bottomRight,
+//               ),
+//               border: Border.all(
+//                 color: Colors.white.withOpacity(0.8),
+//                 width: 1.5,
+//               ),
+//             ),
+//             child: TableCalendar(
+//               firstDay: DateTime(2000),
+//               lastDay: DateTime(2100),
+//               focusedDay: provider.selectedDate,
+//               startingDayOfWeek: StartingDayOfWeek.monday,
+//               calendarFormat: CalendarFormat.month,
+//               headerStyle: HeaderStyle(
+//                 titleCentered: true,
+//                 formatButtonVisible: false,
+//                 titleTextStyle: const TextStyle(
+//                   color: Colors.black,
+//                   fontSize: 18,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//                 leftChevronIcon: const Icon(
+//                   Icons.arrow_back,
+//                   color: Colors.black,
+//                 ),
+//                 rightChevronIcon: const Icon(
+//                   Icons.arrow_forward,
+//                   color: Colors.black,
+//                 ),
+//               ),
+//               calendarStyle: CalendarStyle(
+//                 todayDecoration: BoxDecoration(
+//                   color: AppColors.lightGray.withOpacity(1),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 selectedDecoration: BoxDecoration(
+//                   color: AppColors.violet.withOpacity(1),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 selectedTextStyle: const TextStyle(color: Colors.white),
+//                 todayTextStyle: const TextStyle(color: Colors.black),
+//                 weekendTextStyle: const TextStyle(color: Colors.black87),
+//                 defaultTextStyle: const TextStyle(color: Colors.black),
+//                 outsideDaysVisible: false,
+//               ),
+//               selectedDayPredicate: (day) =>
+//                   isSameDay(provider.selectedDate, day),
+//               onDaySelected: (selectedDay, focusedDay) {
+//                 provider.setSelectedDate(selectedDay);
+//               },
+//             ),
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }
+
 Widget _buildCustomCalendar(BuildContext context) {
   return Consumer<PrayerTimesProvider>(
     builder: (context, provider, _) {
@@ -2000,7 +2220,7 @@ Widget _buildCustomCalendar(BuildContext context) {
               borderRadius: BorderRadius.circular(20),
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.7), // brighter
+                  Colors.white.withOpacity(0.7),
                   Colors.white.withOpacity(0.4),
                 ],
                 begin: Alignment.topLeft,
@@ -2012,35 +2232,32 @@ Widget _buildCustomCalendar(BuildContext context) {
               ),
             ),
             child: TableCalendar(
-              firstDay: DateTime(2000),
+              firstDay: DateTime.now(), // 🟣 disable past days
               lastDay: DateTime(2100),
               focusedDay: provider.selectedDate,
               startingDayOfWeek: StartingDayOfWeek.monday,
               calendarFormat: CalendarFormat.month,
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
-                titleTextStyle: const TextStyle(
+                titleTextStyle: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
-                leftChevronIcon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                ),
-                rightChevronIcon: const Icon(
+                leftChevronIcon: Icon(Icons.arrow_back, color: Colors.black),
+                rightChevronIcon: Icon(
                   Icons.arrow_forward,
                   color: Colors.black,
                 ),
               ),
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: AppColors.lightGray.withOpacity(1),
+                  color: Colors.grey.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(
-                  color: AppColors.violet.withOpacity(1),
+                  color: Colors.deepPurple,
                   shape: BoxShape.circle,
                 ),
                 selectedTextStyle: const TextStyle(color: Colors.white),
@@ -2048,12 +2265,25 @@ Widget _buildCustomCalendar(BuildContext context) {
                 weekendTextStyle: const TextStyle(color: Colors.black87),
                 defaultTextStyle: const TextStyle(color: Colors.black),
                 outsideDaysVisible: false,
+                disabledTextStyle: TextStyle(
+                  color: Colors.grey.withOpacity(0.4),
+                ),
               ),
-              selectedDayPredicate: (day) =>
-                  isSameDay(provider.selectedDate, day),
-              onDaySelected: (selectedDay, focusedDay) {
-                provider.setSelectedDate(selectedDay);
+              enabledDayPredicate: (day) {
+                // Disable past days
+                return !day.isBefore(
+                  DateTime(
+                    DateTime.now().year,
+                    DateTime.now().month,
+                    DateTime.now().day,
+                  ),
+                );
               },
+              onDaySelected: (selectedDay, focusedDay) {
+                provider.setPickerSelectedDate(selectedDay);
+              },
+              selectedDayPredicate: (day) =>
+                  isSameDay(provider.pickerSelectedDate, day),
             ),
           ),
         ),
@@ -2061,6 +2291,99 @@ Widget _buildCustomCalendar(BuildContext context) {
     },
   );
 }
+
+// Widget _buildCustomTimePicker(
+//   BuildContext context,
+//   PrayerTimesProvider provider,
+//   // MasjidProgrammeProvider masjidProvider
+// ) {
+//   int selectedHour = provider.pickerSelectedTime?.hour ?? TimeOfDay.now().hour;
+//   int selectedMinute =
+//       provider.pickerSelectedTime?.minute ?? TimeOfDay.now().minute;
+
+//   FixedExtentScrollController hourController = FixedExtentScrollController(
+//     initialItem: selectedHour,
+//   );
+//   FixedExtentScrollController minuteController = FixedExtentScrollController(
+//     initialItem: selectedMinute,
+//   );
+
+//   return Container(
+//     height: 200,
+//     decoration: BoxDecoration(
+//       borderRadius: BorderRadius.circular(20),
+//       color: Colors.white.withOpacity(0.8),
+//       boxShadow: [
+//         BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+//       ],
+//     ),
+//     child: Row(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       children: [
+//         // Hours picker
+//         Expanded(
+//           child: ListWheelScrollView.useDelegate(
+//             controller: hourController,
+//             itemExtent: 40,
+//             perspective: 0.005,
+//             onSelectedItemChanged: (index) {
+//               selectedHour = index;
+//               provider.setPickerSelectedTime(
+//                 TimeOfDay(hour: selectedHour, minute: selectedMinute),
+//               );
+//             },
+//             childDelegate: ListWheelChildBuilderDelegate(
+//               builder: (context, index) {
+//                 if (index < 0 || index > 23) return null;
+//                 return Center(
+//                   child: Text(
+//                     index.toString().padLeft(2, '0'),
+//                     style: const TextStyle(
+//                       fontSize: 22,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+//         ),
+//         const Text(
+//           ":",
+//           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//         ),
+//         // Minutes picker
+//         Expanded(
+//           child: ListWheelScrollView.useDelegate(
+//             controller: minuteController,
+//             itemExtent: 40,
+//             perspective: 0.005,
+//             onSelectedItemChanged: (index) {
+//               selectedMinute = index;
+//               provider.setPickerSelectedTime(
+//                 TimeOfDay(hour: selectedHour, minute: selectedMinute),
+//               );
+//             },
+//             childDelegate: ListWheelChildBuilderDelegate(
+//               builder: (context, index) {
+//                 if (index < 0 || index > 59) return null;
+//                 return Center(
+//                   child: Text(
+//                     index.toString().padLeft(2, '0'),
+//                     style: const TextStyle(
+//                       fontSize: 22,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+//         ),
+//       ],
+//     ),
+//   );
+// }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   final double minExtent;

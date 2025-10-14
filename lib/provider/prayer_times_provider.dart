@@ -35,6 +35,9 @@ class PrayerTimesProvider extends ChangeNotifier {
   DateTime? _lastFetchedDate;
   DateTime _selectedDate = DateTime.now();
   DateTime _activeDate = DateTime.now();
+  DateTime? _dateTime;
+  DateTime? _pickerSelectedDate;
+  TimeOfDay? _pickerSelectedTime;
   DateTime get selectedDate => _selectedDate;
   DateTime get activeDate => _activeDate;
   HijriDateModel? _hijriDateModel;
@@ -59,6 +62,9 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? get hijriMonth => _hijriMonth;
   String? get hijriYear => _hijriYear;
   DateTime? get nextPrayerDate => _nextPrayerDate;
+  DateTime? get dateTime => _dateTime;
+  DateTime? get pickerSelectedDate => _pickerSelectedDate;
+  TimeOfDay? get pickerSelectedTime => _pickerSelectedTime;
   PrayerTimesModel? get times => _times;
   HijriDateModel? get hijriDateModel => _hijriDateModel;
   HijriDateModel? get activeHijriDateModel => _hijriDateModel;
@@ -254,6 +260,26 @@ class PrayerTimesProvider extends ChangeNotifier {
       );
     }
 
+    notifyListeners();
+  }
+
+  void setPickerSelectedDate(DateTime date) {
+    _pickerSelectedDate = date;
+    notifyListeners();
+  }
+
+  void setPickerSelectedTime(TimeOfDay time) {
+    _pickerSelectedTime = time;
+    notifyListeners();
+  }
+
+  void clearPickerSelection() {
+    _pickerSelectedDate = null;
+    _pickerSelectedTime = null;
+  }
+
+  set dateTime(DateTime? value) {
+    _dateTime = value;
     notifyListeners();
   }
 
