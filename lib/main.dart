@@ -1,13 +1,10 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
-import 'package:ramadhan_companion_app/helper/local_notifications.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
@@ -117,20 +114,7 @@ class MainApp extends StatelessWidget {
           primaryColor: CupertinoColors.activeBlue,
         ),
       ),
-      home: StreamBuilder<List<ConnectivityResult>>(
-        stream: Connectivity().onConnectivityChanged,
-        builder: (context, snapshot) {
-          final hasInternet =
-              snapshot.hasData &&
-              !snapshot.data!.contains(ConnectivityResult.none);
-
-          if (!hasInternet) {
-            return _buildNoInternet(context);
-          }
-
-          return const AuthWrapper();
-        },
-      ),
+      home: const AuthWrapper(),
     );
   }
 }
@@ -155,34 +139,15 @@ class AuthWrapper extends StatelessWidget {
   }
 }
 
-Widget _buildNoInternet(BuildContext context) {
-  return Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: Column(
-          children: [
-            Lottie.asset('assets/lottie/no_internet_lottie.json'),
-            Text("No internet connection"),
-            Spacer(),
-            GestureDetector(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => PrayerTimesView()),
-                );
-              },
-              child: Text(
-                "Go offline →",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+Widget buildNoInternet(BuildContext context) {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(8),
+    color: Colors.red,
+    child: const Text(
+      'No internet connection',
+      textAlign: TextAlign.center,
+      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
     ),
   );
 }

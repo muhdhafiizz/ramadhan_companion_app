@@ -17,7 +17,7 @@ import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_status_badge.dart';
-import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
+// import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
 
 class MySubmissionsPage extends StatelessWidget {
   const MySubmissionsPage({super.key});
@@ -708,62 +708,62 @@ void _showSubmissionDetail(
   );
 }
 
-Future<String?> _showRejectionReasonSheet(BuildContext context) async {
-  final reasonController = TextEditingController();
+// Future<String?> _showRejectionReasonSheet(BuildContext context) async {
+//   final reasonController = TextEditingController();
 
-  return await showModalBottomSheet<String>(
-    backgroundColor: Colors.white,
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (context) {
-      return Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Reject Submission",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 20),
+//   return await showModalBottomSheet<String>(
+//     backgroundColor: Colors.white,
+//     context: context,
+//     isScrollControlled: true,
+//     shape: const RoundedRectangleBorder(
+//       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+//     ),
+//     builder: (context) {
+//       return Padding(
+//         padding: EdgeInsets.only(
+//           left: 16,
+//           right: 16,
+//           top: 16,
+//           bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+//         ),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             const Text(
+//               "Reject Submission",
+//               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+//             ),
+//             const SizedBox(height: 20),
 
-            // Reason input
-            CustomTextField(
-              label: 'Reason for rejection',
-              controller: reasonController,
-              backgroundColor: AppColors.lightGray.withOpacity(1),
-            ),
+//             // Reason input
+//             CustomTextField(
+//               label: 'Reason for rejection',
+//               controller: reasonController,
+//               backgroundColor: AppColors.lightGray.withOpacity(1),
+//             ),
 
-            const SizedBox(height: 20),
+//             const SizedBox(height: 20),
 
-            // Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CustomButton(
-                  onTap: () => Navigator.pop(context),
-                  text: 'Cancel',
-                ),
-                CustomButton(
-                  onTap: () =>
-                      Navigator.pop(context, reasonController.text.trim()),
-                  text: 'Reject',
-                  backgroundColor: Colors.red.withOpacity(0.1),
-                  textColor: Colors.red,
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+//             // Buttons
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.end,
+//               children: [
+//                 CustomButton(
+//                   onTap: () => Navigator.pop(context),
+//                   text: 'Cancel',
+//                 ),
+//                 CustomButton(
+//                   onTap: () =>
+//                       Navigator.pop(context, reasonController.text.trim()),
+//                   text: 'Reject',
+//                   backgroundColor: Colors.red.withOpacity(0.1),
+//                   textColor: Colors.red,
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
