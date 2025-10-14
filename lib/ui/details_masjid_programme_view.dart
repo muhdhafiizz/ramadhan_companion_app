@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/model/masjid_programme_model.dart';
+import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_textfield.dart';
@@ -15,15 +16,39 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MasjidProgrammeProvider>();
-    final programmes = provider.filteredProgrammes;
+    final prayerProvider = context.watch<PrayerTimesProvider>();
+
+    final userCity = prayerProvider.city?.toLowerCase();
+    final userCountry = prayerProvider.country?.toLowerCase();
+
+    // 🔹 Filter programmes by search + location
+    final allProgrammes = provider.filteredProgrammes;
+
+    final programmes = allProgrammes.where((programme) {
+      if (programme.isOnline) return true;
+      final location = programme.location?.toLowerCase();
+      if (location == null || (userCity == null && userCountry == null))
+        return false;
+
+      final normalizedLocation = location.replaceAll(',', '').split(' ');
+      final normalizedUser = ('$userCity $userCountry')
+          .replaceAll(',', '')
+          .split(' ');
+
+      final hasMatch = normalizedUser.any(
+        (word) =>
+            word.isNotEmpty &&
+            normalizedLocation.any((locWord) => locWord.contains(word)),
+      );
+
+      return hasMatch;
+    }).toList();
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildAppBar(context),
-
-            // 🔹 Filter Inputs Row
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -32,7 +57,7 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
                     label: 'Search Mosque',
                     onChanged: provider.filterByMasjid,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   CustomTextField(
                     label: 'Search Location',
                     onChanged: provider.filterByState,
@@ -46,7 +71,7 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : programmes.isEmpty
-                  ? const Center(child: Text("No programmes found"))
+                  ? const Center(child: Text("No programmes found nearby"))
                   : ListView.builder(
                       itemCount: programmes.length,
                       itemBuilder: (context, index) {

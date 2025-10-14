@@ -7,7 +7,6 @@ import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
-import 'package:ramadhan_companion_app/ui/notifications_view.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/submission_status_view.dart';

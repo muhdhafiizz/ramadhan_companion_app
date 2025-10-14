@@ -99,6 +99,8 @@ flutter:
     - assets/lottie/reading_quran_lottie.json
     - assets/lottie/donate_lottie.json
     - assets/images/ummah_logo_transparent.png
+    - assets/images/mosque_2_image.jpg
+    - assets/icon/empty_data_icon.png
 
   fonts:
     - family: Liter
