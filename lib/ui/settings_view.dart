@@ -7,6 +7,7 @@ import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/ui/login_view.dart';
+import 'package:ramadhan_companion_app/ui/notifications_settings_view.dart';
 import 'package:ramadhan_companion_app/ui/prayer_times_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/submission_status_view.dart';
@@ -84,19 +85,19 @@ class SettingsView extends StatelessWidget {
                         );
                       },
                     ),
-                    // _buildListTile(
-                    //   context,
-                    //   title: 'Notifications',
-                    //   icon: Icons.notifications_outlined,
-                    //   onTap: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (_) => const NotificationsView(),
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
+                    _buildListTile(
+                      context,
+                      title: 'Notifications',
+                      icon: Icons.notifications_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsSettingsView(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
