@@ -77,15 +77,30 @@ class SadaqahProvider extends ChangeNotifier {
       data['submittedBy'] = user?.uid ?? "unknown";
       data['status'] = "pending";
 
+      // Add the new Sadaqah entry
       final docRef = await FirebaseFirestore.instance
           .collection('sadaqah_orgs')
           .add(data);
 
+      final now = DateTime.now();
+      final cutoff = now.subtract(const Duration(days: 7));
+
+      // 🔹 Clean old notifications older than 7 days
+      final oldNotifications = await FirebaseFirestore.instance
+          .collection('notifications')
+          .where('timestamp', isLessThan: Timestamp.fromDate(cutoff))
+          .get();
+
+      for (var doc in oldNotifications.docs) {
+        await doc.reference.delete();
+      }
+
+      // 🔹 Add new notification for super_admin
       await FirebaseFirestore.instance.collection('notifications').add({
         'title': 'New Sadaqah Submission',
         'message':
             '${user?.email ?? "A user"} submitted a new organization: ${sadaqah.organization}',
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': Timestamp.fromDate(now),
         'recipientRole': 'super_admin',
         'read': false,
         'sadaqahId': docRef.id,
