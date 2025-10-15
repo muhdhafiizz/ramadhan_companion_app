@@ -179,7 +179,6 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     }
   }
 
-  // 🔹 Filters
   void filterByMasjid(String query) {
     _masjidQuery = query.toLowerCase();
     notifyListeners();
