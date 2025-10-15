@@ -137,14 +137,45 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> removeProgramme(String id) async {
+  Future<String> removeProgramme(String id, {String? reason}) async {
     try {
+      final programmeDoc = await _firestore
+          .collection('masjidProgrammes')
+          .doc(id)
+          .get();
+
+      if (!programmeDoc.exists) {
+        return "Programme not found";
+      }
+
+      final data = programmeDoc.data();
+      final submittedBy = data?['submittedBy'];
+      final title = data?['title'] ?? 'Programme';
+
+      await _firestore.collection('masjidProgrammes').doc(id).update({
+        'status': 'rejected',
+        'rejection_reason': reason ?? 'No reason provided',
+      });
+
+      if (submittedBy != null) {
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'title': "Programme Rejected",
+          'message':
+              "Your programme '$title' was rejected. Reason: ${reason ?? 'No reason provided'}. Please submit a new one.",
+          'recipientId': submittedBy,
+          'recipientRole': "user",
+          'programmeId': id,
+          'read': false,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
       await _firestore.collection('masjidProgrammes').doc(id).delete();
+
       await loadProgrammes();
-      return "Programme removed";
+      return "Programme rejected and user notified";
     } catch (e) {
-      debugPrint("Error removing programme: $e");
-      return "Failed to remove programme";
+      debugPrint("Error rejecting programme: $e");
+      return "Failed to reject programme";
     }
   }
 

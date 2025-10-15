@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,28 +30,11 @@ class SettingsView extends StatelessWidget {
             children: [
               _buildTopNav(context),
               SizedBox(height: 10),
-              if (sadaqahProvider.role == 'super_admin')
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    border: Border.all(color: Colors.orange),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    sadaqahProvider.role ?? '',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               Expanded(
                 child: ListView(
                   children: [
+                    _buildEmailandRole(sadaqahProvider),
+                    SizedBox(height: 10),
                     _buildListTile(
                       context,
                       title: 'List your organization',
@@ -135,6 +119,71 @@ Widget _buildTopNav(BuildContext context) {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
       ),
     ],
+  );
+}
+
+Widget _buildEmailandRole(SadaqahProvider sadaqahProvider) {
+  final role = sadaqahProvider.role ?? 'user';
+  final user = FirebaseAuth.instance.currentUser;
+
+  final isSuperAdmin = role == 'super_admin';
+
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          blurRadius: 5,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          user?.displayName ?? "--",
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          user?.email ?? "No email",
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSuperAdmin
+                ? Colors.orange.withOpacity(0.1)
+                : Colors.green.withOpacity(0.1),
+            border: Border.all(
+              color: isSuperAdmin ? Colors.orange : Colors.green,
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            role,
+            style: TextStyle(
+              color: isSuperAdmin ? Colors.orange : Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 

@@ -27,7 +27,7 @@ class MySubmissionsPage extends StatelessWidget {
     final provider = context.watch<SadaqahProvider>();
 
     return DefaultTabController(
-      length: 2, // 👈 Always 2 tabs now
+      length: 2,
       child: Scaffold(
         body: SafeArea(
           child: Padding(
@@ -289,7 +289,6 @@ Widget _buildSadaqahList(SadaqahProvider provider) {
 
 Widget _buildProgrammeList(SadaqahProvider provider) {
   final user = FirebaseAuth.instance.currentUser;
-  print("isSuperAdmin: ${provider.isSuperAdmin}");
 
   return StreamBuilder(
     stream: provider.isSuperAdmin
@@ -415,140 +414,129 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
                             Colors.red.withOpacity(0.1),
                             Colors.red,
                             () {
-                              showConfirmationModalBottomSheet(
-                                context,
-                                title:
-                                    "Are you sure you want to remove this programme?",
-                                confirmText: "Remove",
-                                onConfirm: () async {
-                                  final programmeProvider = context
-                                      .read<MasjidProgrammeProvider>();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(16),
+                                  ),
+                                ),
+                                builder: (context) {
+                                  final TextEditingController reasonController =
+                                      TextEditingController();
 
-                                  final msg = await programmeProvider
-                                      .removeProgramme(programmeId);
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(
+                                        context,
+                                      ).viewInsets.bottom,
+                                      left: 16,
+                                      right: 16,
+                                      top: 20,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Reject Programme",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        const Text(
+                                          "Please provide a reason for rejecting this programme:",
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        TextField(
+                                          controller: reasonController,
+                                          maxLines: 3,
+                                          decoration: InputDecoration(
+                                            hintText:
+                                                "Enter rejection reason...",
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text("Cancel"),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                              ),
+                                              onPressed: () async {
+                                                final reason = reasonController
+                                                    .text
+                                                    .trim();
 
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(msg)),
-                                    );
-                                  }
+                                                if (reason.isEmpty) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        "Please provide a rejection reason.",
+                                                      ),
+                                                    ),
+                                                  );
+                                                  return;
+                                                }
+
+                                                Navigator.pop(
+                                                  context,
+                                                ); 
+
+                                                final programmeProvider = context
+                                                    .read<
+                                                      MasjidProgrammeProvider
+                                                    >();
+
+                                                final msg = await programmeProvider
+                                                    .removeProgramme(
+                                                      programmeId,
+                                                      reason:
+                                                          reason, 
+                                                    );
+
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(msg),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: const Text("Reject"),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                      ],
+                                    ),
+                                  );
                                 },
                               );
-
-                              // final result = await _showRejectionReasonSheet(
-                              //   context,
-                              // );
-
-                              // if (result != null && result.isNotEmpty) {
-                              //   final programmeDoc = await FirebaseFirestore
-                              //       .instance
-                              //       .collection('masjidProgrammes')
-                              //       .doc(programmeId)
-                              //       .get();
-
-                              //   final submittedBy = programmeDoc
-                              //       .data()?['submittedBy'];
-
-                              //   if (submittedBy != null) {
-                              //     // Send rejection notification
-                              //     await FirebaseFirestore.instance
-                              //         .collection('notifications')
-                              //         .add({
-                              //           'title': "Programme Rejected",
-                              //           'message':
-                              //               "Your programme '${data['title']}' was rejected. Reason: $result. Please submit a new one.",
-                              //           'recipientId': submittedBy,
-                              //           'recipientRole': "user",
-                              //           'programmeId': programmeId,
-                              //           'read': false,
-                              //           'timestamp':
-                              //               FieldValue.serverTimestamp(),
-                              //         });
-                              //   }
-
-                              //   // 🚮 Delete the rejected programme
-                              //   await FirebaseFirestore.instance
-                              //       .collection('masjidProgrammes')
-                              //       .doc(programmeId)
-                              //       .delete();
-
-                              //   // Refresh programme list
-                              //   await context
-                              //       .read<MasjidProgrammeProvider>()
-                              //       .loadProgrammes();
-
-                              //   // Optional: confirmation snackbar
-                              //   ScaffoldMessenger.of(context).showSnackBar(
-                              //     const SnackBar(
-                              //       content: Text(
-                              //         "Programme rejected and removed.",
-                              //       ),
-                              //       backgroundColor: Colors.redAccent,
-                              //     ),
-                              //   );
-                              // }
                             },
                           ),
-                        // ),if (provider.isSuperAdmin)
-                        // _buildButton(
-                        //   Icons.close,
-                        //   Colors.red.withOpacity(0.1),
-                        //   Colors.red,
-                        //   () async {
-                        //     final result = await _showRejectionReasonSheet(
-                        //       context,
-                        //     );
-
-                        //     if (result != null && result.isNotEmpty) {
-                        //       final programmeDoc = await FirebaseFirestore
-                        //           .instance
-                        //           .collection('masjidProgrammes')
-                        //           .doc(programmeId)
-                        //           .get();
-
-                        //       final submittedBy = programmeDoc
-                        //           .data()?['submittedBy'];
-
-                        //       if (submittedBy != null) {
-                        //         // Send rejection notification
-                        //         await FirebaseFirestore.instance
-                        //             .collection('notifications')
-                        //             .add({
-                        //               'title': "Programme Rejected",
-                        //               'message':
-                        //                   "Your programme '${data['title']}' was rejected. Reason: $result. Please submit a new one.",
-                        //               'recipientId': submittedBy,
-                        //               'recipientRole': "user",
-                        //               'programmeId': programmeId,
-                        //               'read': false,
-                        //               'timestamp':
-                        //                   FieldValue.serverTimestamp(),
-                        //             });
-                        //       }
-
-                        //       // 🚮 Delete the rejected programme
-                        //       await FirebaseFirestore.instance
-                        //           .collection('masjidProgrammes')
-                        //           .doc(programmeId)
-                        //           .delete();
-
-                        //       // Refresh programme list
-                        //       await context
-                        //           .read<MasjidProgrammeProvider>()
-                        //           .loadProgrammes();
-
-                        //       // Optional: confirmation snackbar
-                        //       ScaffoldMessenger.of(context).showSnackBar(
-                        //         const SnackBar(
-                        //           content: Text(
-                        //             "Programme rejected and removed.",
-                        //           ),
-                        //           backgroundColor: Colors.redAccent,
-                        //         ),
-                        //       );
-                        //     }
-                        //   },
-                        // ),
                       ],
                     ),
                   ],
