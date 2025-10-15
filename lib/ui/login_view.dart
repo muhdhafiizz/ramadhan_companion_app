@@ -50,6 +50,7 @@ class LoginView extends StatelessWidget {
                     provider,
                   ),
                   const SizedBox(height: 20),
+                  _buildForgotPassword(context, emailController),
                   if (provider.error != null)
                     Text(
                       provider.error!,
@@ -209,6 +210,34 @@ Widget _buildPasswordTextfield(
   );
 }
 
+Widget _buildForgotPassword(
+  BuildContext context,
+  TextEditingController emailController,
+) {
+  return Consumer<LoginProvider>(
+    builder: (context, provider, _) {
+      return GestureDetector(
+        onTap: provider.isForgotPasswordLoading
+            ? null
+            : () => provider.sendPasswordReset(context, emailController.text),
+        child: provider.isForgotPasswordLoading
+            ? const SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Text(
+                'Forgot password',
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+      );
+    },
+  );
+}
+
 Widget _buildLoginButton(
   BuildContext context,
   TextEditingController emailController,
@@ -217,7 +246,7 @@ Widget _buildLoginButton(
   return Consumer<LoginProvider>(
     builder: (context, provider, _) {
       return CustomButton(
-        text: provider.isLoading ? "" : "Log in", // 🔹 hide text when loading
+        text: provider.isLoading ? "" : "Log in",
         backgroundColor: provider.isLoginEnabled ? Colors.black : Colors.grey,
         textColor: Colors.white,
         onTap: provider.isLoginEnabled && !provider.isLoading
@@ -239,7 +268,6 @@ Widget _buildLoginButton(
                 }
               }
             : null,
-        // 👇 use iconData slot for loader instead of icon
         iconData: provider.isLoading ? null : null,
       );
     },

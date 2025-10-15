@@ -75,7 +75,7 @@ Widget _buildContainer(
   BuildContext context,
 ) {
   return Container(
-    height: 400,
+    height: 420,
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: AppColors.lightGray.withOpacity(1),
@@ -132,10 +132,7 @@ Widget _buildSignupText() {
         ),
         const Text(
           "Setup your account to be part of community.",
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ],
     ),
@@ -218,21 +215,20 @@ Widget _buildSignupButton(
   return Consumer<SignupProvider>(
     builder: (context, provider, _) {
       return CustomButton(
-        text: "Sign Up",
+        text: provider.isLoading ? "" : "Sign Up",
         backgroundColor: provider.isSignUpEnabled ? Colors.black : Colors.grey,
         textColor: Colors.white,
-        onTap: provider.isSignUpEnabled
+        onTap: provider.isSignUpEnabled && !provider.isLoading
             ? () async {
-                showLoadingDialog(context);
                 final success = await provider.signup(
                   nameController.text,
                   emailController.text,
                   passwordController.text,
                 );
 
-                if (context.mounted) Navigator.pop(context);
+                if (!context.mounted) return;
 
-                if (success && context.mounted) {
+                if (success) {
                   await showDialog(
                     context: context,
                     barrierDismissible: true,
@@ -240,10 +236,14 @@ Widget _buildSignupButton(
                       message: "Signed up successfully!",
                     ),
                   );
-                  if (context.mounted) Navigator.pop(context);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 }
               }
             : null,
+        iconData: provider.isLoading ? null : null,
       );
     },
   );

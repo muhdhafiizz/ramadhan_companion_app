@@ -8,15 +8,20 @@ class SignupProvider extends ChangeNotifier {
   String _name = '';
   String _email = '';
   String _password = '';
+  bool _isLoading = false;
 
   bool get obscurePassword => _obscurePassword;
   bool get isSignUpEnabled =>
       _email.isNotEmpty && _password.isNotEmpty && _name.isNotEmpty;
+  bool get isLoading => _isLoading;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<bool> signup(String name, String email, String password) async {
     try {
+      _isLoading = true;
+      notifyListeners();
+
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(
             email: email.trim(),
@@ -26,17 +31,20 @@ class SignupProvider extends ChangeNotifier {
       await FirebaseFirestore.instance
           .collection('users_role')
           .doc(userCredential.user!.uid)
-          .set({
-            'email': email.trim(),
-            'role': 'user', 
-          });
+          .set({'email': email.trim(), 'role': 'user'});
 
       await userCredential.user?.updateDisplayName(name);
       await userCredential.user?.reload();
+
       error = null;
+      _isLoading = false;
       notifyListeners();
+
       return true;
     } on FirebaseAuthException catch (e) {
+      _isLoading = false;
+      notifyListeners();
+
       if (e.code == 'weak-password') {
         error = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
@@ -46,11 +54,13 @@ class SignupProvider extends ChangeNotifier {
       } else {
         error = e.message ?? 'An unknown error occurred.';
       }
-      notifyListeners();
+
       return false;
     } catch (e) {
-      error = 'Something went wrong. Please try again.';
+      _isLoading = false;
       notifyListeners();
+
+      error = 'Something went wrong. Please try again.';
       return false;
     }
   }

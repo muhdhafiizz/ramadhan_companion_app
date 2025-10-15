@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ramadhan_companion_app/widgets/custom_loading_dialog.dart';
 
 class LoginProvider extends ChangeNotifier {
   bool _isLoading = false;
+  bool _isForgotPasswordLoading = false;
   String? _error;
   Map<String, dynamic>? _user;
   bool _obscurePassword = true;
@@ -11,6 +11,7 @@ class LoginProvider extends ChangeNotifier {
   String _password = '';
 
   bool get isLoading => _isLoading;
+  bool get isForgotPasswordLoading => _isForgotPasswordLoading;
   bool get obscurePassword => _obscurePassword;
   String? get error => _error;
   Map<String, dynamic>? get user => _user;
@@ -18,16 +19,6 @@ class LoginProvider extends ChangeNotifier {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final pageController = PageController();
-
-
-  void showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.2),
-      builder: (_) => const LoadingDialog(),
-    );
-  }
 
   void resetLoginState() {
     _email = '';
@@ -98,6 +89,55 @@ class LoginProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<void> sendPasswordReset(BuildContext context, String email) async {
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email first.')),
+      );
+      return;
+    }
+
+    try {
+      _isForgotPasswordLoading = true;
+      notifyListeners();
+
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+
+      _isForgotPasswordLoading = false;
+      notifyListeners();
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password reset link sent to $email'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      _isForgotPasswordLoading = false;
+      notifyListeners();
+
+      String message = 'Something went wrong';
+      if (e.code == 'user-not-found') {
+        message = 'No user found with this email.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Invalid email address.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      _isForgotPasswordLoading = false;
+      notifyListeners();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An unexpected error occurred.')),
+      );
     }
   }
 }
