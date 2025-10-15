@@ -71,7 +71,25 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : programmes.isEmpty
-                  ? const Center(child: Text("No programmes found nearby"))
+                  ? SizedBox(
+                      height: 150,
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Spacer(),
+                            Image.asset(
+                              'assets/icon/empty_data_icon.png',
+                              height: 50,
+                              width: 50,
+                            ),
+                            SizedBox(height: 5),
+                            Text("No local programmes found in your state."),
+                            Spacer(),
+                          ],
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: programmes.length,
                       itemBuilder: (context, index) {

@@ -464,10 +464,23 @@ Widget _buildMasjidProgramme(BuildContext context) {
           }
 
           if (programmeProvider.allProgrammes.isEmpty) {
-            return const Center(
+            return SizedBox(
+              height: 150,
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text("No programmes yet."),
+                child: Column(
+                  children: [
+                    Spacer(),
+                    Image.asset(
+                      'assets/icon/empty_data_icon.png',
+                      height: 50,
+                      width: 50,
+                    ),
+                    SizedBox(height: 5),
+                    Text("No local programmes found in your state."),
+                    Spacer(),
+                  ],
+                ),
               ),
             );
           }
