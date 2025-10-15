@@ -25,7 +25,7 @@ Future<void> scheduleNotification({
           : null, 
       playSound: true,
     ),
-    iOS: DarwinNotificationDetails(sound: playAdhan ? 'adhan_notification.mp3' : null),
+    iOS: DarwinNotificationDetails(sound: playAdhan ? 'adhan_notification.caf' : null),
   );
 
   await flutterLocalNotificationsPlugin.zonedSchedule(

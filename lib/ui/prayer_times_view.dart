@@ -2526,3 +2526,15 @@ Future<void> scheduleSadaqahReminder() async {
     matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
   );
 }
+
+
+Future<void> cancelPrayerNotifications() async {
+  // If you gave prayer notifications IDs like 1–99, cancel those only
+  for (int id = 1; id <= 100; id++) {
+    await flutterLocalNotificationsPlugin.cancel(id);
+  }
+}
+
+Future<void> cancelSadaqahNotifications() async {
+  await flutterLocalNotificationsPlugin.cancel(999);
+}
