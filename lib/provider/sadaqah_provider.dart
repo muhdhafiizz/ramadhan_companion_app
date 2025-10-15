@@ -15,6 +15,7 @@ class SadaqahProvider extends ChangeNotifier {
     accountController.addListener(_onFormChanged);
   }
   String? _role;
+  String? _email;
   String _filterCategory = "All";
   String _formCategory = "All";
   List<Sadaqah> _allSadaqah = [];
@@ -32,6 +33,7 @@ class SadaqahProvider extends ChangeNotifier {
   final accountController = TextEditingController();
 
   String? get role => _role;
+  String? get email => _email;
   String get filterCategory => _filterCategory;
   String get formCategory => _formCategory;
   List<Sadaqah> get sadaqahList => _filteredSadaqah;
@@ -176,6 +178,7 @@ class SadaqahProvider extends ChangeNotifier {
     if (user == null) return;
 
     try {
+      _email = user.email;
       final doc = await FirebaseFirestore.instance
           .collection('users_role')
           .doc(user.uid)
