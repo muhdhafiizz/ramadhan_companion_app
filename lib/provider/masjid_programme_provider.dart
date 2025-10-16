@@ -30,7 +30,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
   DateTime? dateTime;
   bool isOnline = false;
   String? posterBase64;
-  double oneOffAmount = 6.90;
+  // double oneOffAmount = 6.90;
 
   String _masjidQuery = '';
   String _stateQuery = '';
@@ -39,7 +39,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
       masjidController.text.trim().isNotEmpty &&
       titleController.text.trim().isNotEmpty &&
       dateTime != null;
-  int get oneOffAmountInCents => (oneOffAmount * 100).round();
+  // int get oneOffAmountInCents => (oneOffAmount * 100).round();
 
   Future<void> pickPoster() async {
     final picker = ImagePicker();
@@ -72,8 +72,8 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         final programmeTime = DateTime.parse(data['dateTime']);
         String status = data['status'] ?? 'pending';
 
-        // Automatically mark expired programmes 2h after dateTime
-        if (programmeTime.add(const Duration(hours: 2)).isBefore(now)) {
+        // Automatically mark expired programmes 1h after dateTime
+        if (programmeTime.add(const Duration(hours: 1)).isBefore(now)) {
           status = 'expired';
           doc.reference.update({'status': 'expired'});
         }
