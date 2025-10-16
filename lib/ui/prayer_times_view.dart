@@ -589,7 +589,11 @@ Widget _buildShimmerMasjidProgramme() {
   );
 }
 
-Widget _buildProgrammeCard(BuildContext context, MasjidProgramme programme) {
+Widget _buildProgrammeCard(
+  BuildContext context,
+  MasjidProgramme programme, {
+  bool isSuperAdmin = false,
+}) {
   final dateTimeFormatted = DateFormat(
     "d MMM yyyy, h:mm a",
   ).format(programme.dateTime);
@@ -622,6 +626,27 @@ Widget _buildProgrammeCard(BuildContext context, MasjidProgramme programme) {
                 const SizedBox(height: 6),
                 Row(
                   children: [
+                    if (isSuperAdmin && programme.status == 'expired')
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          border: Border.all(color: Colors.red),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "Expired",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+
                     Text(
                       "🕌 ${programme.isOnline ? "Online Programme" : programme.masjidName}",
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -1769,6 +1794,8 @@ void showProgrammeField(
                     _buildTitleText('🕌  Benefits of Adding Mosque Programme'),
                     const SizedBox(height: 12),
                     _buildContainer(),
+                    const SizedBox(height: 12),
+                    _buildOneOffPayment(context),
                   ],
                 ),
 
@@ -2093,6 +2120,39 @@ void showProgrammeField(
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
   }
+}
+
+Widget _buildOneOffPayment(BuildContext context) {
+  final programmeProvider = context.watch<MasjidProgrammeProvider>();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('One-off Payment', style: TextStyle(fontSize: 14)),
+      Text(
+        'RM ${formatCurrency(programmeProvider.oneOffAmount)}',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+      ),
+      SizedBox(height: 10),
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppColors.violet.withOpacity(0.1),
+          border: Border.all(color: AppColors.violet.withOpacity(1)),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          'Your payment supports app maintenance and improvements.',
+          style: TextStyle(
+            color: AppColors.violet.withOpacity(1),
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ],
+  );
 }
 
 Widget _buildContainer() {
@@ -2526,7 +2586,6 @@ Future<void> scheduleSadaqahReminder() async {
     matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
   );
 }
-
 
 Future<void> cancelPrayerNotifications() async {
   // If you gave prayer notifications IDs like 1–99, cancel those only

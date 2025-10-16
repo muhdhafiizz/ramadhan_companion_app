@@ -23,7 +23,7 @@ class SadaqahProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasShownReminder = false;
   bool _isFormValid = false;
-  double oneOffAmount = 79.90;
+  double oneOffAmount = 21.90;
 
   SubmissionStatus _submissionStatus = SubmissionStatus.idle;
 
@@ -77,7 +77,6 @@ class SadaqahProvider extends ChangeNotifier {
       data['submittedBy'] = user?.uid ?? "unknown";
       data['status'] = "pending";
 
-      // Add the new Sadaqah entry
       final docRef = await FirebaseFirestore.instance
           .collection('sadaqah_orgs')
           .add(data);
@@ -85,7 +84,6 @@ class SadaqahProvider extends ChangeNotifier {
       final now = DateTime.now();
       final cutoff = now.subtract(const Duration(days: 7));
 
-      // 🔹 Clean old notifications older than 7 days
       final oldNotifications = await FirebaseFirestore.instance
           .collection('notifications')
           .where('timestamp', isLessThan: Timestamp.fromDate(cutoff))
@@ -95,7 +93,6 @@ class SadaqahProvider extends ChangeNotifier {
         await doc.reference.delete();
       }
 
-      // 🔹 Add new notification for super_admin
       await FirebaseFirestore.instance.collection('notifications').add({
         'title': 'New Sadaqah Submission',
         'message':
