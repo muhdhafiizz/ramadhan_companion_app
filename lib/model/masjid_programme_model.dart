@@ -8,8 +8,9 @@ class MasjidProgramme {
   final bool isOnline;
   final String? location;
   final String? joinLink;
-  final String? posterUrl; 
+  final String? posterUrl;
   final Uint8List? posterBytes;
+  final String status;
 
   MasjidProgramme({
     required this.id,
@@ -21,5 +22,7 @@ class MasjidProgramme {
     this.joinLink,
     this.posterUrl,
     this.posterBytes,
+    this.status = 'pending',
   });
 }
+

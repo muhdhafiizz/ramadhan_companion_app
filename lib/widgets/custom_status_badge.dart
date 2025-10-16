@@ -22,6 +22,8 @@ class StatusBadge extends StatelessWidget {
       case 'rejected':
       case 'failed':
         return Colors.red;
+      case 'expired':
+        return Colors.pink;
       case 'pending':
       default:
         return Colors.orange;
@@ -42,6 +44,8 @@ class StatusBadge extends StatelessWidget {
       case 'rejected':
       case 'failed':
         return "Rejected";
+      case 'expired':
+        return "Expired";
       case 'online':
         return "• Online";
       case 'offline':

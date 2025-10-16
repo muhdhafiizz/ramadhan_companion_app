@@ -30,6 +30,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
   DateTime? dateTime;
   bool isOnline = false;
   String? posterBase64;
+  double oneOffAmount = 6.90;
 
   String _masjidQuery = '';
   String _stateQuery = '';
@@ -38,6 +39,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
       masjidController.text.trim().isNotEmpty &&
       titleController.text.trim().isNotEmpty &&
       dateTime != null;
+  int get oneOffAmountInCents => (oneOffAmount * 100).round();
 
   Future<void> pickPoster() async {
     final picker = ImagePicker();
@@ -62,27 +64,39 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final snapshot = await _firestore
-          .collection('masjidProgrammes')
-          .where('status', isEqualTo: 'approved')
-          .get();
+      final snapshot = await _firestore.collection('masjidProgrammes').get();
+      final now = DateTime.now();
 
       _allProgrammes = snapshot.docs.map((doc) {
         final data = doc.data();
+        final programmeTime = DateTime.parse(data['dateTime']);
+        String status = data['status'] ?? 'pending';
+
+        // Automatically mark expired programmes 2h after dateTime
+        if (programmeTime.add(const Duration(hours: 2)).isBefore(now)) {
+          status = 'expired';
+          doc.reference.update({'status': 'expired'});
+        }
+
         final posterBase64 = data['posterUrl'] as String?;
 
         return MasjidProgramme(
           id: doc.id,
           masjidName: data['masjidName'] ?? '',
           title: data['title'] ?? '',
-          dateTime: DateTime.parse(data['dateTime']),
+          dateTime: programmeTime,
           isOnline: data['isOnline'] ?? false,
           location: data['location'],
           joinLink: data['joinLink'],
           posterUrl: posterBase64,
           posterBytes: posterBase64 != null ? base64Decode(posterBase64) : null,
+          status: status,
         );
       }).toList();
+
+      _allProgrammes = _allProgrammes
+          .where((p) => p.status != 'expired')
+          .toList();
     } catch (e) {
       debugPrint("Error loading programmes: $e");
     }
