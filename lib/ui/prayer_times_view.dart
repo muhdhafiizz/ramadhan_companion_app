@@ -1037,7 +1037,7 @@ Widget _buildTitleText(String name) {
       alignment: Alignment.centerLeft,
       child: Text(
         name,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       ),
     ),
   );
@@ -1794,8 +1794,8 @@ void showProgrammeField(
                     _buildTitleText('🕌  Benefits of Adding Mosque Programme'),
                     const SizedBox(height: 12),
                     _buildContainer(),
-                    const SizedBox(height: 12),
-                    _buildOneOffPayment(context),
+                    // const SizedBox(height: 12),
+                    // _buildOneOffPayment(context),
                   ],
                 ),
 
@@ -2092,8 +2092,6 @@ void showProgrammeField(
                         ),
                       ),
                     ),
-
-                    // _buildContainerNotice(),
                   ],
                 ),
               ],
@@ -2122,38 +2120,38 @@ void showProgrammeField(
   }
 }
 
-Widget _buildOneOffPayment(BuildContext context) {
-  final programmeProvider = context.watch<MasjidProgrammeProvider>();
+// Widget _buildOneOffPayment(BuildContext context) {
+//   final programmeProvider = context.watch<MasjidProgrammeProvider>();
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text('One-off Payment', style: TextStyle(fontSize: 14)),
-      Text(
-        'RM ${formatCurrency(programmeProvider.oneOffAmount)}',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-      ),
-      SizedBox(height: 10),
-      Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-        decoration: BoxDecoration(
-          color: AppColors.violet.withOpacity(0.1),
-          border: Border.all(color: AppColors.violet.withOpacity(1)),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          'Your payment supports app maintenance and improvements.',
-          style: TextStyle(
-            color: AppColors.violet.withOpacity(1),
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    ],
-  );
-}
+//   return Column(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     children: [
+//       const Text('One-off Payment', style: TextStyle(fontSize: 14)),
+//       Text(
+//         'RM ${formatCurrency(programmeProvider.oneOffAmount)}',
+//         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+//       ),
+//       SizedBox(height: 10),
+//       Container(
+//         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+//         decoration: BoxDecoration(
+//           color: AppColors.violet.withOpacity(0.1),
+//           border: Border.all(color: AppColors.violet.withOpacity(1)),
+//           borderRadius: BorderRadius.circular(20),
+//         ),
+//         child: Text(
+//           'Your payment supports app maintenance and improvements.',
+//           style: TextStyle(
+//             color: AppColors.violet.withOpacity(1),
+//             fontWeight: FontWeight.w500,
+//             fontSize: 12,
+//           ),
+//           textAlign: TextAlign.center,
+//         ),
+//       ),
+//     ],
+//   );
+// }
 
 Widget _buildContainer() {
   return Container(
