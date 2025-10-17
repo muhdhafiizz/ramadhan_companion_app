@@ -289,262 +289,210 @@ Widget _buildSadaqahList(SadaqahProvider provider) {
 
 Widget _buildProgrammeList(SadaqahProvider provider) {
   final user = FirebaseAuth.instance.currentUser;
+  String selectedStatus = 'All';
 
-  return StreamBuilder(
-    stream: provider.isSuperAdmin
-        ? FirebaseFirestore.instance.collection('masjidProgrammes').snapshots()
-        : FirebaseFirestore.instance
-              .collection('masjidProgrammes')
-              .where('submittedBy', isEqualTo: user?.uid)
-              .snapshots(),
-    builder: (context, snapshot) {
-      if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
-      }
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return Column(
+        children: [
+          // 🔹 Search Bar
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //   child: TextField(
+          //     controller: searchController,
+          //     onChanged: (_) => setState(() {}), // rebuild on search
+          //     decoration: InputDecoration(
+          //       hintText: 'Search by masjid location...',
+          //       prefixIcon: const Icon(Icons.search),
+          //       border: OutlineInputBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
-      final docs = snapshot.data!.docs;
-      if (docs.isEmpty) {
-        return const Center(child: Text("No programme submissions yet."));
-      }
-
-      return ListView.builder(
-        itemCount: docs.length,
-        itemBuilder: (context, index) {
-          final data = docs[index].data();
-          final programmeId = docs[index].id;
-
-          // final programmeDate = DateTime.tryParse(data['dateTime'] ?? '');
-          // if (programmeDate != null && programmeDate.isBefore(DateTime.now())) {
-          //   // 🚮 Delete expired programme
-          //   FirebaseFirestore.instance
-          //       .collection('masjidProgrammes')
-          //       .doc(programmeId)
-          //       .delete();
-
-          //   return const SizedBox();
-          // }
-
-          return Container(
-            margin: const EdgeInsets.all(10),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+          // 🔹 Filter Dropdown
+          if (provider.isSuperAdmin)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: DropdownButtonFormField<String>(
+                value: selectedStatus,
+                decoration: InputDecoration(
+                  labelText: "Filter by Status",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: data['posterUrl'] != null
-                      ? Image.memory(
-                          base64Decode(data['posterUrl']),
-                          height: 150,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          height: 150,
-                          width: double.infinity,
-                          color: Colors.grey.shade300,
-                          child: const Icon(Icons.image, size: 50),
-                        ),
                 ),
-                SizedBox(height: 5),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ---- LEFT SECTION (Details) ----
-                    Expanded(
+                items: const [
+                  DropdownMenuItem(value: 'All', child: Text('All')),
+                  DropdownMenuItem(value: 'approved', child: Text('Approved')),
+                  DropdownMenuItem(value: 'expired', child: Text('Expired')),
+                  DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                ],
+                onChanged: (value) =>
+                    setState(() => selectedStatus = value ?? 'All'),
+              ),
+            ),
+
+          // 🔹 Programme List
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: provider.isSuperAdmin
+                  ? FirebaseFirestore.instance
+                        .collection('masjidProgrammes')
+                        .snapshots()
+                  : FirebaseFirestore.instance
+                        .collection('masjidProgrammes')
+                        .where('submittedBy', isEqualTo: user?.uid)
+                        .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                List<DocumentSnapshot> docs = snapshot.data!.docs;
+
+                // // Apply search filter
+                // final query = searchController.text.trim().toLowerCase();
+                // if (query.isNotEmpty) {
+                //   docs = docs.where((doc) {
+                //     final data = doc.data() as Map<String, dynamic>;
+                //     final masjidName = (data['masjidName'] ?? '')
+                //         .toString()
+                //         .toLowerCase();
+                //     final location = (data['location'] ?? '')
+                //         .toString()
+                //         .toLowerCase();
+                //     return masjidName.contains(query) ||
+                //         location.contains(query);
+                //   }).toList();
+                // }
+
+                // Apply status filter
+                if (selectedStatus != 'All') {
+                  docs = docs.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return data['status'] == selectedStatus;
+                  }).toList();
+                }
+
+                if (docs.isEmpty) {
+                  return const Center(
+                    child: Text("No matching programmes found."),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    final programmeId = docs[index].id;
+
+                    return Container(
+                      margin: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Poster image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: data['posterUrl'] != null
+                                ? Image.memory(
+                                    base64Decode(data['posterUrl']),
+                                    height: 150,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    height: 150,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(Icons.image, size: 50),
+                                  ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Title and status
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(data['title'] ?? 'Untitled'),
-                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  data['title'] ?? 'Untitled',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                               StatusBadge(status: data['status']),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text("Mosque: ${data['masjidName'] ?? ''}"),
+
+                          // Masjid name + location
+                          Text("Masjid: ${data['masjidName'] ?? ''}"),
+                          Text("Location: ${data['location'] ?? 'N/A'}"),
                           Text("Date: ${data['dateTime'] ?? ''}"),
+
                           if (data['isOnline'] == true)
-                            StatusBadge(status: 'online')
+                            const StatusBadge(status: 'online')
                           else
-                            StatusBadge(status: 'offline'),
+                            const StatusBadge(status: 'offline'),
+
+                          const SizedBox(height: 10),
+
+                          // Approve / Reject Buttons
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (provider.isSuperAdmin &&
+                                  data['status'] == "pending")
+                                _buildButton(
+                                  Icons.check,
+                                  Colors.green.withOpacity(0.1),
+                                  Colors.green,
+                                  () async {
+                                    await FirebaseFirestore.instance
+                                        .collection('masjidProgrammes')
+                                        .doc(programmeId)
+                                        .update({'status': 'approved'});
+                                    await context
+                                        .read<MasjidProgrammeProvider>()
+                                        .loadProgrammes();
+                                  },
+                                ),
+                              if (provider.isSuperAdmin)
+                                _buildButton(
+                                  Icons.close,
+                                  Colors.red.withOpacity(0.1),
+                                  Colors.red,
+                                  () {
+                                    // reject logic here
+                                  },
+                                ),
+                            ],
+                          ),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // ---- RIGHT SECTION (Buttons) ----
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (provider.isSuperAdmin &&
-                            data['status'] == "pending")
-                          _buildButton(
-                            Icons.check,
-                            Colors.green.withOpacity(0.1),
-                            Colors.green,
-                            () async {
-                              await FirebaseFirestore.instance
-                                  .collection('masjidProgrammes')
-                                  .doc(programmeId)
-                                  .update({'status': 'approved'});
-                              await context
-                                  .read<MasjidProgrammeProvider>()
-                                  .loadProgrammes();
-                            },
-                          ),
-                        if (provider.isSuperAdmin)
-                          _buildButton(
-                            Icons.close,
-                            Colors.red.withOpacity(0.1),
-                            Colors.red,
-                            () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
-                                ),
-                                builder: (context) {
-                                  final TextEditingController reasonController =
-                                      TextEditingController();
-
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(
-                                        context,
-                                      ).viewInsets.bottom,
-                                      left: 16,
-                                      right: 16,
-                                      top: 20,
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Reject Programme",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        const Text(
-                                          "Please provide a reason for rejecting this programme:",
-                                          style: TextStyle(
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        TextField(
-                                          controller: reasonController,
-                                          maxLines: 3,
-                                          decoration: InputDecoration(
-                                            hintText:
-                                                "Enter rejection reason...",
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: const Text("Cancel"),
-                                            ),
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
-                                              ),
-                                              onPressed: () async {
-                                                final reason = reasonController
-                                                    .text
-                                                    .trim();
-
-                                                if (reason.isEmpty) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        "Please provide a rejection reason.",
-                                                      ),
-                                                    ),
-                                                  );
-                                                  return;
-                                                }
-
-                                                Navigator.pop(
-                                                  context,
-                                                ); 
-
-                                                final programmeProvider = context
-                                                    .read<
-                                                      MasjidProgrammeProvider
-                                                    >();
-
-                                                final msg = await programmeProvider
-                                                    .removeProgramme(
-                                                      programmeId,
-                                                      reason:
-                                                          reason, 
-                                                    );
-
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(msg),
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                              child: const Text("Reject"),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 12),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                    );
+                  },
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       );
     },
   );

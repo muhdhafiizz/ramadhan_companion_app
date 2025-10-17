@@ -434,7 +434,7 @@ Widget _buildMasjidProgramme(BuildContext context) {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildTitleText("Mosque Programmes"),
+          _buildTitleText("Mosque Programmes Near You"),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: CircleAvatar(
@@ -1311,7 +1311,7 @@ Widget _buildLocateMasjidNearby(
         Image.asset('assets/icon/masjid_icon.png', height: 50, width: 50),
         const SizedBox(height: 5),
         const Text(
-          "Mosque Nearby",
+          "Nearby Mosque",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ],
