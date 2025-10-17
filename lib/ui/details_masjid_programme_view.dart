@@ -58,10 +58,10 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
                     onChanged: provider.filterByMasjid,
                   ),
                   const SizedBox(height: 10),
-                  CustomTextField(
-                    label: 'Search Location',
-                    onChanged: provider.filterByState,
-                  ),
+                  // CustomTextField(
+                  //   label: 'Search Location',
+                  //   onChanged: provider.filterByState,
+                  // ),
                 ],
               ),
             ),
