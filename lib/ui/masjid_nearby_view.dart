@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_nearby_provider.dart';
-import 'package:ramadhan_companion_app/secrets/api_keys.dart';
+import 'package:ramadhan_companion_app/widgets/app_colors.dart';
+import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/shimmer_loading.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class MasjidNearbyScreen extends StatelessWidget {
   final String city;
@@ -61,6 +61,8 @@ class MasjidNearbyScreen extends StatelessWidget {
                             context: context,
                             name: masjid.name,
                             photoReference: masjid.photoReference,
+                            town: masjid.city,
+                            state: masjid.state,
                             distanceKm: distance,
                             ratings: masjid.rating ?? 0,
                             latitude: masjid.latitude,
@@ -97,49 +99,25 @@ Widget _buildAppBar(BuildContext context) {
 Widget _buildShimmerLoading() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: List.generate(2, (index) {
+    children: List.generate(4, (index) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ShimmerLoadingWidget(
-              width: double.infinity,
-              height: 220,
-              isCircle: false,
-            ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
+            ShimmerLoadingWidget(width: 150, height: 20, isCircle: false),
+            SizedBox(height: 5),
+            ShimmerLoadingWidget(width: 100, height: 20, isCircle: false),
+            SizedBox(height: 5),
+            ShimmerLoadingWidget(width: 70, height: 20, isCircle: false),
+            SizedBox(height: 15),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    SizedBox(height: 10),
-                    ShimmerLoadingWidget(
-                      width: 150,
-                      height: 20,
-                      isCircle: false,
-                    ),
-                    SizedBox(height: 5),
-                    ShimmerLoadingWidget(
-                      width: 100,
-                      height: 20,
-                      isCircle: false,
-                    ),
-                    SizedBox(height: 5),
-                    ShimmerLoadingWidget(
-                      width: 70,
-                      height: 20,
-                      isCircle: false,
-                    ),
-                  ],
-                ),
-                const Spacer(),
                 const ShimmerLoadingWidget(
-                  width: 50,
-                  height: 50,
-                  isCircle: true,
+                  width: 70,
+                  height: 20,
+                  isCircle: false,
                 ),
                 SizedBox(width: 5),
                 const ShimmerLoadingWidget(
@@ -161,259 +139,153 @@ Widget _buildMasjidCard({
   required String name,
   required List<String> photoReference,
   required double distanceKm,
+  required String town,
+  required String state,
   required double ratings,
   required double latitude,
   required double longitude,
   required MasjidNearbyProvider provider,
 }) {
-  final pageController = PageController();
-
   return Padding(
     padding: const EdgeInsets.only(bottom: 20.0),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: Stack(
-        children: [
-          // 🔹 Background Image (PageView if multiple)
-          SizedBox(
-            height: 240,
-            width: double.infinity,
-            child: photoReference.isNotEmpty
-                ? PageView.builder(
-                    controller: pageController,
-                    itemCount: photoReference.length,
-                    itemBuilder: (context, index) {
-                      return Image.network(
-                        "https://maps.googleapis.com/maps/api/place/photo"
-                        "?maxwidth=1000"
-                        "&photoreference=${photoReference[index]}"
-                        "&key=${ApiKeys.masjidNearbyKey}",
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      );
-                    },
-                  )
-                : Image.asset('assets/icon/app_icon.jpg', fit: BoxFit.cover),
-          ),
-
-          // 🔹 Page Indicator (floating on image)
-          if (photoReference.isNotEmpty)
-            Positioned(
-              top: 12,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SmoothPageIndicator(
-                  controller: pageController,
-                  count: photoReference.length,
-                  effect: const WormEffect(
-                    dotHeight: 8,
-                    dotWidth: 8,
-                    activeDotColor: Colors.white,
-                    dotColor: Colors.white54,
-                  ),
-                ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 🔹 Masjid Info
+            Text(
+              name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.black,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "${distanceKm.toStringAsFixed(2)} km away",
+              style: const TextStyle(color: Colors.black38, fontSize: 13),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "📍 $town, $state",
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
               ),
             ),
+            const SizedBox(height: 14),
 
-          // 🔹 Blurry Glass Section at Bottom
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(20),
-              ),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.0),
-                        Colors.black.withOpacity(0.5),
-                      ],
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 🔹 Left Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "${distanceKm.toStringAsFixed(2)} km away",
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Text(
-                                  ratings.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(Icons.star, size: 15, color: Colors.amber),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+            // 🔹 Buttons Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CustomButton(
+                  onTap: () async {
+                    final accounts = await provider.loadMasjidAccounts(context);
+                    final matched = provider.findClosestMatch(name, accounts);
 
-                      // 🔹 Right Buttons
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final accounts = await provider
-                                  .loadMasjidAccounts(context);
-                              final matched = provider.findClosestMatch(
-                                name,
-                                accounts,
-                              );
-
-                              showModalBottomSheet(
-                                context: context,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
-                                ),
-                                builder: (_) {
-                                  if (matched != null) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 16,
-                                        right: 16,
-                                        top: 16,
-                                        bottom:
-                                            MediaQuery.of(
-                                              context,
-                                            ).viewInsets.bottom +
-                                            20,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            matched.masjidName,
-                                            style: const TextStyle(
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 20),
-                                          Text(
-                                            matched.bankName,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          const Text("Account Number"),
-                                          const SizedBox(height: 5),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await Clipboard.setData(
-                                                ClipboardData(
-                                                  text: matched.accNum,
-                                                ),
-                                              );
-
-                                              Navigator.pop(context);
-
-                                              CustomPillSnackbar.show(
-                                                context,
-                                                message:
-                                                    "✅ Account number copied",
-                                              );
-                                            },
-                                            child: Text(
-                                              matched.accNum,
-                                              style: const TextStyle(
-                                                decoration:
-                                                    TextDecoration.underline,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  } else {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(20),
-                                      child: Text(
-                                        "No donation info found for this masjid",
-                                      ),
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 22,
-                              child: Icon(
-                                Icons.volunteer_activism,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: () {
-                              _showNavigationOptions(
-                                context,
-                                name,
-                                latitude,
-                                longitude,
-                                provider,
-                              );
-                            },
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 22,
-                              child: Icon(Icons.share, color: Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    _showAccountDetails(context, matched);
+                  },
+                  iconData: Icons.volunteer_activism_outlined,
+                  text: 'Earn Jannah',
+                  textColor: Colors.white,
+                  backgroundColor: AppColors.violet.withOpacity(1),
                 ),
-              ),
+                const SizedBox(width: 10),
+                CustomButton(
+                  onTap: () => _showNavigationOptions(
+                    context,
+                    name,
+                    latitude,
+                    longitude,
+                    provider,
+                  ),
+                  iconData: Icons.map_outlined,
+                  text: 'Go there',
+                  borderColor: AppColors.violet.withOpacity(1),
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
+  );
+}
+
+void _showAccountDetails(BuildContext context, dynamic matched) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) {
+      if (matched != null) {
+        return Container(
+          width: double.infinity, // ✅ full width
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                matched.masjidName,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(matched.bankName, style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 10),
+              const Text("Account Number"),
+              const SizedBox(height: 5),
+              GestureDetector(
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: matched.accNum));
+                  Navigator.pop(context);
+                  CustomPillSnackbar.show(
+                    context,
+                    message: "✅ Account number copied",
+                  );
+                },
+                child: Text(
+                  matched.accNum,
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        return const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("No donation info found for this masjid"),
+        );
+      }
+    },
   );
 }
 

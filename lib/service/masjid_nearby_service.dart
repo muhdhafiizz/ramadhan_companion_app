@@ -5,31 +5,43 @@ import 'package:ramadhan_companion_app/model/masjid_nearby_model.dart';
 import 'package:ramadhan_companion_app/secrets/api_keys.dart';
 
 class MasjidNearbyService {
-  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
+  static const String _geoapifyBaseUrl = 'https://api.geoapify.com/v2/places';
+  static const String _geocodeBaseUrl =
+      'https://api.geoapify.com/v1/geocode/search';
 
+  /// Get latitude and longitude from city + country using Geoapify geocoding
   Future<LatLng> getLatLngFromAddress(String city, String country) async {
     final address = Uri.encodeComponent("$city, $country");
     final url = Uri.parse(
-      "https://maps.googleapis.com/maps/api/geocode/json?address=$address&key=${ApiKeys.masjidNearbyKey}",
+      "$_geocodeBaseUrl?text=$address&apiKey=${ApiKeys.geoapifyKey}",
     );
 
     final response = await http.get(url);
     final data = json.decode(response.body);
 
-    if (data["status"] == "OK") {
-      final location = data["results"][0]["geometry"]["location"];
-      return LatLng(location["lat"], location["lng"]);
+    if (response.statusCode == 200 && data["features"].isNotEmpty) {
+      final coords = data["features"][0]["geometry"]["coordinates"];
+      // Geoapify returns [lon, lat]
+      return LatLng(coords[1], coords[0]);
     } else {
-      throw Exception("Failed to get coordinates: ${data["status"]}");
+      throw Exception(
+        "Failed to get coordinates: ${data["error"] ?? 'Unknown error'}",
+      );
     }
   }
 
+  /// Fetch nearby masjids (Geoapify category: religion.place_of_worship.islam)
   Future<List<MasjidNearbyModel>> getNearbyMasjids(
     double lat,
     double lng,
   ) async {
+    final radiusMeters = 5000; // 5km radius
+
     final url = Uri.parse(
-      "$_baseUrl/nearbysearch/json?location=$lat,$lng&radius=5000&type=mosque&key=${ApiKeys.masjidNearbyKey}",
+      "$_geoapifyBaseUrl?categories=religion.place_of_worship.islam"
+      "&filter=circle:$lng,$lat,$radiusMeters"
+      "&limit=20"
+      "&apiKey=${ApiKeys.geoapifyKey}",
     );
 
     debugPrint("Fetching nearby masjids from: $url");
@@ -37,26 +49,40 @@ class MasjidNearbyService {
     final response = await http.get(url);
     final data = json.decode(response.body);
 
-    if (data["status"] != "OK") {
-      throw Exception("Failed to fetch masjids: ${data["status"]}");
+    if (response.statusCode != 200 || data["features"] == null) {
+      throw Exception(
+        "Failed to fetch masjids: ${data["error"] ?? 'Unknown error'}",
+      );
     }
 
-    final results = data["results"] as List;
+    final results = data["features"] as List;
 
     List<MasjidNearbyModel> masjids = [];
-    for (var place in results) {
-      String placeId = place["place_id"];
-      List<String> photos = await _fetchPlacePhotos(placeId);
+    for (var feature in results) {
+      final props = feature["properties"];
+      final geometry = feature["geometry"]["coordinates"];
+      final wikidataId =
+          props["wiki_and_media"]?["wikidata"] ?? props["wikidata"];
+
+      String? imageUrl;
+      if (wikidataId != null) {
+        imageUrl = await getWikimediaImage(wikidataId);
+      }
 
       masjids.add(
         MasjidNearbyModel(
-          id: placeId,
-          name: place["name"],
-          address: place["vicinity"] ?? "Unknown Address",
-          latitude: place["geometry"]["location"]["lat"],
-          longitude: place["geometry"]["location"]["lng"],
-          photoReference: photos,
-          rating: place["rating"]?.toDouble(),
+          id: props["place_id"] ?? "",
+          name: props["name"] ?? "Unknown Masjid",
+          address: props["formatted"] ?? "Unknown Address",
+          city: props["suburb"] ?? props["town"] ?? "",
+          state: props["city"] ?? props["state"] ?? "",
+          latitude: geometry[1],
+          longitude: geometry[0],
+          photoReference: imageUrl != null
+              ? [imageUrl]
+              : [], // ✅ use Wikimedia image
+          rating: null,
+          wikidataId: wikidataId,
         ),
       );
     }
@@ -64,20 +90,29 @@ class MasjidNearbyService {
     return masjids;
   }
 
-  Future<List<String>> _fetchPlacePhotos(String placeId) async {
-    final url = Uri.parse(
-      "$_baseUrl/details/json?place_id=$placeId&fields=photos&key=${ApiKeys.masjidNearbyKey}",
-    );
+  Future<String?> getWikimediaImage(String wikidataId) async {
+    try {
+      final url = Uri.parse(
+        "https://www.wikidata.org/wiki/Special:EntityData/$wikidataId.json",
+      );
+      final response = await http.get(url);
 
-    final response = await http.get(url);
-    final data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final entity = data["entities"][wikidataId];
 
-    if (data["status"] != "OK") {
-      return [];
+        final claims = entity["claims"];
+        if (claims != null &&
+            claims["P18"] != null &&
+            claims["P18"].isNotEmpty) {
+          final imageName = claims["P18"][0]["mainsnak"]["datavalue"]["value"];
+          final encoded = Uri.encodeComponent(imageName);
+          return "https://commons.wikimedia.org/wiki/Special:FilePath/$encoded";
+        }
+      }
+    } catch (e) {
+      debugPrint("⚠️ Wikimedia fetch failed: $e");
     }
-
-    final photos = data["result"]["photos"] as List<dynamic>?;
-
-    return photos?.map((p) => p["photo_reference"] as String).toList() ?? [];
+    return null;
   }
 }

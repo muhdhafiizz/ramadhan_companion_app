@@ -901,5 +901,17 @@
     "accNum": "562012345687",
     "bankName": "MBB",
     "state": "Selayang"
+  },
+  {
+    "masjidName": "Masjid Al-Islah",
+    "accNum": "562666051282",
+    "bankName": "MBB",
+    "state": "Seri Kembangan"
+  },
+  {
+    "masjidName": "Masjid UNITEN",
+    "accNum": "16010000727718",
+    "bankName": "MUAM",
+    "state": "Sepang"
   }
 ]
