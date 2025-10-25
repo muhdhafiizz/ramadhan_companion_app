@@ -425,7 +425,7 @@ Widget _buildPrayerRowWithHighlight(
 }
 
 Widget _buildMasjidProgramme(BuildContext context) {
-  final provider = context.read<PrayerTimesProvider>();
+  final provider = context.watch<PrayerTimesProvider>();
   final city = provider.city;
   final country = provider.country;
 
@@ -491,9 +491,28 @@ Widget _buildMasjidProgramme(BuildContext context) {
             if (location == null || (city == null && country == null))
               return false;
 
-            return (city != null && location.contains(city.toLowerCase())) ||
-                (country != null && location.contains(country.toLowerCase()));
+            final normalizedLocation = location.replaceAll(',', '').split(' ');
+            final normalizedUser = ('$city $country')
+                .replaceAll(',', '')
+                .toLowerCase()
+                .split(' ');
+
+            final hasMatch = normalizedUser.any(
+              (word) =>
+                  word.isNotEmpty &&
+                  normalizedLocation.any((locWord) => locWord.contains(word)),
+            );
+
+            print('📍 Checking programme: ${programme.title}');
+            print('   Location: $location');
+            print('   Normalized Location: $normalizedLocation');
+            print('   Normalized User: $normalizedUser');
+            print('   Has match: $hasMatch');
+
+            return hasMatch;
           }).toList();
+
+          print('✅ Matched ${programmes.length} programmes for this location.');
 
           if (programmes.isEmpty) {
             return SizedBox(
@@ -1224,7 +1243,7 @@ Widget _buildSadaqahReminder(BuildContext context) {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Voluntarily giving charity in Islam to help others and earn spiritual reward.',
+                      'A small act today can change a life and multiply your reward in the Hereafter.',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

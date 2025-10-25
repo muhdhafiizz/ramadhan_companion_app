@@ -2,37 +2,44 @@ class MasjidNearbyModel {
   final String id;
   final String name;
   final String address;
+  final String city;
+  final String state;
   final double latitude;
   final double longitude;
   final List<String> photoReference;
   final double? rating;
+  final String? wikidataId; // 👈 add this
 
   MasjidNearbyModel({
     required this.id,
     required this.name,
     required this.address,
+    required this.city,
+    required this.state,
     required this.latitude,
     required this.longitude,
     required this.photoReference,
     this.rating,
+    this.wikidataId,
   });
 
   factory MasjidNearbyModel.fromJson(Map<String, dynamic> json) {
     return MasjidNearbyModel(
-      id: json["place_id"],
-      name: json["name"],
-      address: json["vicinity"] ?? "Unknown Address",
-      latitude: json["geometry"]["location"]["lat"],
-      longitude: json["geometry"]["location"]["lng"],
-      photoReference:
-          (json['photos'] as List<dynamic>?)
-              ?.map((p) => p['photo_reference'] as String)
-              .toList() ??
-          [],
-      rating: json["rating"]?.toDouble(),
+      id: json["place_id"] ?? "",
+      name: json["name"] ?? "Unknown Masjid",
+      address: json["formatted"] ?? "Unknown Address",
+      city: json["city"] ?? json["suburb"] ?? json["town"] ?? "",
+      state: json["state"] ?? "",
+      latitude: json["lat"] ?? 0,
+      longitude: json["lon"] ?? 0,
+      photoReference: [],
+      rating: null,
+      wikidataId: json["wiki_and_media"]?["wikidata"] ??
+          json["wikidata"], // 👈 capture Wikidata ID
     );
   }
 }
+
 
 class LatLng {
   final double lat;

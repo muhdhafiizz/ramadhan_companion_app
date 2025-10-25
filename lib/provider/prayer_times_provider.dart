@@ -208,9 +208,12 @@ class PrayerTimesProvider extends ChangeNotifier {
         throw Exception("Could not determine address from coordinates");
       }
       final placemark = placemarks.first;
-      final area = placemark.locality ?? placemark.thoroughfare ?? "";
-      final city = placemark.locality ?? placemark.subAdministrativeArea ?? "";
+      final area = placemark.thoroughfare ?? placemark.subAdministrativeArea ?? "";
+      final city = placemark.locality ?? "";
       final country = placemark.country ?? "";
+      print(placemark.locality);
+      print(placemark.subAdministrativeArea);
+      print(placemark.thoroughfare);
 
       final fullLocation = area.isNotEmpty ? "$area, $city" : city;
 
