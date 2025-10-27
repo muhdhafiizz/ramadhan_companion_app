@@ -75,92 +75,100 @@ class PrayerTimesView extends StatelessWidget {
       // await provider.refreshDailyContent();
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Consumer2<PrayerTimesProvider, CarouselProvider>(
-          builder: (context, provider, carouselProvider, _) {
-            if (provider.shouldAskLocation) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _showLocationBottomSheet(context, provider);
-                provider.setLocationAsked();
-              });
-            }
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final overlayStyle = isDarkMode
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
 
-            return RefreshIndicator(
-              backgroundColor: Colors.white,
-              color: AppColors.violet.withOpacity(1),
-              onRefresh: refreshData,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _HeaderDelegate(
-                      minExtent: 50,
-                      maxExtent: 90,
-                      builder: (context, shrinkOffset, overlapsContent) {
-                        final progress = (shrinkOffset / (90 - 40)).clamp(
-                          0.0,
-                          1.0,
-                        );
-                        return Container(
-                          color: AppColors.lightGray.withOpacity(1),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                top: 12 - (progress * 40),
-                                left: 1,
-                                right: 1,
-                                child: Opacity(
-                                  opacity: 1 - progress,
-                                  child: _buildWelcomeText(context, provider),
-                                ),
-                              ),
-                              Positioned(
-                                left: 1,
-                                right: 1,
-                                bottom: 8,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - progress)),
-                                  child: _buildHijriAndGregorianDate(
-                                    provider,
-                                    context,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
+        body: SafeArea(
+          child: Consumer2<PrayerTimesProvider, CarouselProvider>(
+            builder: (context, provider, carouselProvider, _) {
+              if (provider.shouldAskLocation) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _showLocationBottomSheet(context, provider);
+                  provider.setLocationAsked();
+                });
+              }
+
+              return RefreshIndicator(
+                backgroundColor: Colors.white,
+                color: AppColors.violet.withOpacity(1),
+                onRefresh: refreshData,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _HeaderDelegate(
+                        minExtent: 50,
+                        maxExtent: 90,
+                        builder: (context, shrinkOffset, overlapsContent) {
+                          final progress = (shrinkOffset / (90 - 40)).clamp(
+                            0.0,
+                            1.0,
+                          );
+                          return Container(
+                            color: AppColors.lightGray.withOpacity(1),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  top: 12 - (progress * 40),
+                                  left: 1,
+                                  right: 1,
+                                  child: Opacity(
+                                    opacity: 1 - progress,
+                                    child: _buildWelcomeText(context, provider),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                                Positioned(
+                                  left: 1,
+                                  right: 1,
+                                  bottom: 8,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 20 * (1 - progress)),
+                                    child: _buildHijriAndGregorianDate(
+                                      provider,
+                                      context,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
 
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 30),
-                        _buildIconsGrid(context, provider),
-                        _buildBookmark(context),
-                        _buildSadaqahReminder(context),
-                        const SizedBox(height: 20),
-                        _buildCountdown(provider),
-                        const SizedBox(height: 20),
-                        _buildPrayerTimesSection(provider),
-                        const SizedBox(height: 20),
-                        _buildMasjidProgramme(context),
-                        const SizedBox(height: 10),
-                        _dailyVerseCarousel(
-                          provider,
-                          carouselProvider,
-                          context,
-                        ),
-                      ],
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          _buildIconsGrid(context, provider),
+                          _buildBookmark(context),
+                          _buildSadaqahReminder(context),
+                          const SizedBox(height: 20),
+                          _buildCountdown(provider),
+                          const SizedBox(height: 20),
+                          _buildPrayerTimesSection(provider),
+                          const SizedBox(height: 20),
+                          _buildMasjidProgramme(context),
+                          const SizedBox(height: 10),
+                          _dailyVerseCarousel(
+                            provider,
+                            carouselProvider,
+                            context,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1700,7 +1708,8 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context, builder: (context) => Material(child: content),
+      context: context,
+      builder: (context) => Material(child: content),
     ).whenComplete(() {
       provider.setSelectedDate(provider.activeDate);
 
@@ -1905,11 +1914,8 @@ void showProgrammeField(
                                 final picked = await showDatePicker(
                                   context: context,
                                   initialDate: now,
-                                  firstDate:
-                                      now, 
-                                  lastDate: now.add(
-                                    const Duration(days: 7),
-                                  ),
+                                  firstDate: now,
+                                  lastDate: now.add(const Duration(days: 7)),
                                 );
 
                                 if (picked != null) {
@@ -2021,7 +2027,8 @@ void showProgrammeField(
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context, builder: (context) => Material(child: content),
+      context: context,
+      builder: (context) => Material(child: content),
     ).whenComplete(() {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
@@ -2219,56 +2226,43 @@ Widget _buildCustomCalendar(BuildContext context) {
               ),
             ),
             child: TableCalendar(
-              firstDay: DateTime.now(), // 🟣 disable past days
+              firstDay: DateTime(2000),
               lastDay: DateTime(2100),
-              focusedDay: provider.selectedDate,
+              focusedDay: provider.focusedDate, // ✅ track current visible month
               startingDayOfWeek: StartingDayOfWeek.monday,
               calendarFormat: CalendarFormat.month,
+
               headerStyle: const HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
-                titleTextStyle: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
                 leftChevronIcon: Icon(Icons.arrow_back, color: Colors.black),
                 rightChevronIcon: Icon(
                   Icons.arrow_forward,
                   color: Colors.black,
                 ),
               ),
+
               calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
                 selectedDecoration: BoxDecoration(
                   color: Colors.deepPurple,
                   shape: BoxShape.circle,
                 ),
-                selectedTextStyle: const TextStyle(color: Colors.white),
-                todayTextStyle: const TextStyle(color: Colors.black),
-                weekendTextStyle: const TextStyle(color: Colors.black87),
-                defaultTextStyle: const TextStyle(color: Colors.black),
-                outsideDaysVisible: false,
-                disabledTextStyle: TextStyle(
-                  color: Colors.grey.withOpacity(0.4),
+                todayDecoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.2),
+                  shape: BoxShape.circle,
                 ),
+                outsideDaysVisible: false,
               ),
-              enabledDayPredicate: (day) {
-                // Disable past days
-                return !day.isBefore(
-                  DateTime(
-                    DateTime.now().year,
-                    DateTime.now().month,
-                    DateTime.now().day,
-                  ),
-                );
-              },
+
               onDaySelected: (selectedDay, focusedDay) {
                 provider.setPickerSelectedDate(selectedDay);
+                provider.setFocusedDate(focusedDay);
               },
+
+              onPageChanged: (focusedDay) {
+                provider.setFocusedDate(focusedDay);
+              },
+
               selectedDayPredicate: (day) =>
                   isSameDay(provider.pickerSelectedDate, day),
             ),

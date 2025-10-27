@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/provider/login_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
@@ -23,99 +24,107 @@ class SettingsView extends StatelessWidget {
     final prayerTimesProvider = context.watch<PrayerTimesProvider>();
     final sadaqahProvider = context.watch<SadaqahProvider>();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTopNav(context),
-              SizedBox(height: 10),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildEmailandRole(sadaqahProvider),
-                    SizedBox(height: 10),
-                    _buildListTile(
-                      context,
-                      title: 'List your organization',
-                      icon: Icons.business_outlined,
-                      onTap: () {
-                        showSadaqahField(context, sadaqahProvider);
-                      },
-                    ),
-                    _buildListTile(
-                      context,
-                      title: 'Add nearby masjid programme',
-                      icon: Icons.event_outlined,
-                      onTap: () {
-                        final programmeProvider =
-                            Provider.of<MasjidProgrammeProvider>(
-                              context,
-                              listen: false,
-                            );
-                        showProgrammeField(context, programmeProvider);
-                      },
-                    ),
-                    _buildListTile(
-                      context,
-                      title: 'Submission status',
-                      icon: Icons.assignment_turned_in_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MySubmissionsPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildListTile(
-                      context,
-                      title: 'Notifications',
-                      icon: Icons.notifications_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const NotificationsSettingsView(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildListTile(
-                      context,
-                      title: 'Write a feedback',
-                      icon: Icons.feedback_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const WebViewPage(
-                              url: 'https://forms.gle/d5iGkj6y32JaptDf7',
-                              title: 'Feedback',
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final overlayStyle = isDarkMode
+        ? SystemUiOverlayStyle
+              .light
+        : SystemUiOverlayStyle.dark; 
 
-              GestureDetector(
-                onTap: () =>
-                    _showLogoutConfirmation(context, prayerTimesProvider),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: const Text(
-                    'Log out',
-                    style: TextStyle(decoration: TextDecoration.underline),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTopNav(context),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      _buildEmailandRole(sadaqahProvider),
+                      const SizedBox(height: 10),
+                      _buildListTile(
+                        context,
+                        title: 'List your organization',
+                        icon: Icons.business_outlined,
+                        onTap: () {
+                          showSadaqahField(context, sadaqahProvider);
+                        },
+                      ),
+                      _buildListTile(
+                        context,
+                        title: 'Add nearby masjid programme',
+                        icon: Icons.event_outlined,
+                        onTap: () {
+                          final programmeProvider =
+                              Provider.of<MasjidProgrammeProvider>(
+                                context,
+                                listen: false,
+                              );
+                          showProgrammeField(context, programmeProvider);
+                        },
+                      ),
+                      _buildListTile(
+                        context,
+                        title: 'Submission status',
+                        icon: Icons.assignment_turned_in_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MySubmissionsPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildListTile(
+                        context,
+                        title: 'Notifications',
+                        icon: Icons.notifications_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsSettingsView(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildListTile(
+                        context,
+                        title: 'Write a feedback',
+                        icon: Icons.feedback_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const WebViewPage(
+                                url: 'https://forms.gle/d5iGkj6y32JaptDf7',
+                                title: 'Feedback',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                GestureDetector(
+                  onTap: () =>
+                      _showLogoutConfirmation(context, prayerTimesProvider),
+                  child: const Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Text(
+                      'Log out',
+                      style: TextStyle(decoration: TextDecoration.underline),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

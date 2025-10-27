@@ -37,6 +37,8 @@ class PrayerTimesProvider extends ChangeNotifier {
   DateTime _activeDate = DateTime.now();
   DateTime? _dateTime;
   DateTime? _pickerSelectedDate;
+  DateTime _focusedDate = DateTime.now();
+
   TimeOfDay? _pickerSelectedTime;
   DateTime get selectedDate => _selectedDate;
   DateTime get activeDate => _activeDate;
@@ -63,6 +65,7 @@ class PrayerTimesProvider extends ChangeNotifier {
   String? get hijriYear => _hijriYear;
   DateTime? get nextPrayerDate => _nextPrayerDate;
   DateTime? get dateTime => _dateTime;
+  DateTime get focusedDate => _focusedDate;
   DateTime? get pickerSelectedDate => _pickerSelectedDate;
   TimeOfDay? get pickerSelectedTime => _pickerSelectedTime;
   PrayerTimesModel? get times => _times;
@@ -208,7 +211,8 @@ class PrayerTimesProvider extends ChangeNotifier {
         throw Exception("Could not determine address from coordinates");
       }
       final placemark = placemarks.first;
-      final area = placemark.thoroughfare ?? placemark.subAdministrativeArea ?? "";
+      final area =
+          placemark.thoroughfare ?? placemark.subAdministrativeArea ?? "";
       final city = placemark.locality ?? "";
       final country = placemark.country ?? "";
       print(placemark.locality);
@@ -257,6 +261,11 @@ class PrayerTimesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setFocusedDate(DateTime date) {
+    _focusedDate = date;
+    notifyListeners();
+  }
+
   void confirmActiveDate() async {
     _activeDate = _selectedDate;
 
@@ -270,8 +279,15 @@ class PrayerTimesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPickerSelectedDate(DateTime date) {
+  void setPickerSelectedDate(DateTime date) async {
     _pickerSelectedDate = date;
+    _selectedDate = date;
+
+    if (city != null && country != null) {
+      await fetchPrayerTimesByDate(city!, country!, date);
+      _hijriDateModel = await HijriDateService().getHijriDateByGregorian(date);
+    }
+
     notifyListeners();
   }
 

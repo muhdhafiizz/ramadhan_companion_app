@@ -26,172 +26,180 @@ class SadaqahListView extends StatelessWidget {
       }
     });
 
-    return Scaffold(
-      body: SafeArea(
-        child: Consumer<SadaqahProvider>(
-          builder: (context, provider, child) {
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildAppBar(context),
-                    const SizedBox(height: 10),
-                    _buildSearchBar(context),
-                    const SizedBox(height: 10),
-                    _buildCategoryBar(context, provider),
-                    const SizedBox(height: 10),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final overlayStyle = isDarkMode
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
 
-                    Expanded(
-                      child: provider.isLoading
-                          ? _buildShimmerLoading()
-                          : provider.sadaqahList.isEmpty
-                          ? const Center(
-                              child: Text("No organizations available"),
-                            )
-                          : RefreshIndicator(
-                              backgroundColor: Colors.white,
-                              color: AppColors.violet.withOpacity(1),
-                              onRefresh: () async {
-                                await provider.loadSadaqahList();
-                              },
-                              child: ListView.builder(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: provider.sadaqahList.length,
-                                itemBuilder: (context, index) {
-                                  final sadaqah = provider.sadaqahList[index];
-                                  return Container(
-                                    margin: const EdgeInsets.all(12),
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.30),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 6),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Left side: Organization + bank info
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                sadaqah.organization,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                ),
-                                              ),
-                                              Text(
-                                                sadaqah.bankName,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-
-                                              GestureDetector(
-                                                onTap: () async {
-                                                  await Clipboard.setData(
-                                                    ClipboardData(
-                                                      text:
-                                                          sadaqah.accountNumber,
-                                                    ),
-                                                  );
-                                                  CustomPillSnackbar.show(
-                                                    context,
-                                                    message:
-                                                        "✅ Account number copied!",
-                                                  );
-                                                },
-                                                child: Text(
-                                                  sadaqah.accountNumber,
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    decoration: TextDecoration
-                                                        .underline,
-                                                  ),
-                                                ),
-                                              ),
-
-                                              // if (sadaqah.reference.isNotEmpty)
-                                              //   Text(
-                                              //     "Reference: ${sadaqah.reference}",
-                                              //   ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        const SizedBox(width: 12),
-
-                                        // Right side: Donate button
-                                        CircleAvatar(
-                                          backgroundColor: AppColors.lightGray
-                                              .withOpacity(1),
-                                          foregroundColor: Colors.black,
-                                          child: IconButton(
-                                            onPressed: () {
-                                              if (sadaqah.url.isNotEmpty) {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) => WebViewPage(
-                                                      url: sadaqah.url,
-                                                      title:
-                                                          sadaqah.organization,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            icon: Icon(Icons.arrow_forward),
-                                          ),
-                                        ),
-
-                                        // Container(
-                                        //   child: CustomButton(
-                                        //     onTap: () {
-                                        //       showDonateBottomSheet(
-                                        //         context,
-                                        //         sadaqah.organization,
-                                        //       );
-                                        //     },
-                                        //     text: 'Donate now',
-                                        //     borderColor: AppColors.violet
-                                        //         .withOpacity(1),
-                                        //     textColor: AppColors.violet
-                                        //         .withOpacity(1),
-                                        //   ),
-                                        // ),
-                                      ],
-                                    ),
-                                  );
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
+        body: SafeArea(
+          child: Consumer<SadaqahProvider>(
+            builder: (context, provider, child) {
+              return Stack(
+                children: [
+                  Column(
+                    children: [
+                      _buildAppBar(context),
+                      const SizedBox(height: 10),
+                      _buildSearchBar(context),
+                      const SizedBox(height: 10),
+                      _buildCategoryBar(context, provider),
+                      const SizedBox(height: 10),
+      
+                      Expanded(
+                        child: provider.isLoading
+                            ? _buildShimmerLoading()
+                            : provider.sadaqahList.isEmpty
+                            ? const Center(
+                                child: Text("No organizations available"),
+                              )
+                            : RefreshIndicator(
+                                backgroundColor: Colors.white,
+                                color: AppColors.violet.withOpacity(1),
+                                onRefresh: () async {
+                                  await provider.loadSadaqahList();
                                 },
+                                child: ListView.builder(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  itemCount: provider.sadaqahList.length,
+                                  itemBuilder: (context, index) {
+                                    final sadaqah = provider.sadaqahList[index];
+                                    return Container(
+                                      margin: const EdgeInsets.all(12),
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.30),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Left side: Organization + bank info
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  sadaqah.organization,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  sadaqah.bankName,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+      
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    await Clipboard.setData(
+                                                      ClipboardData(
+                                                        text:
+                                                            sadaqah.accountNumber,
+                                                      ),
+                                                    );
+                                                    CustomPillSnackbar.show(
+                                                      context,
+                                                      message:
+                                                          "✅ Account number copied!",
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    sadaqah.accountNumber,
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                    ),
+                                                  ),
+                                                ),
+      
+                                                // if (sadaqah.reference.isNotEmpty)
+                                                //   Text(
+                                                //     "Reference: ${sadaqah.reference}",
+                                                //   ),
+                                              ],
+                                            ),
+                                          ),
+      
+                                          const SizedBox(width: 12),
+      
+                                          // Right side: Donate button
+                                          CircleAvatar(
+                                            backgroundColor: AppColors.lightGray
+                                                .withOpacity(1),
+                                            foregroundColor: Colors.black,
+                                            child: IconButton(
+                                              onPressed: () {
+                                                if (sadaqah.url.isNotEmpty) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => WebViewPage(
+                                                        url: sadaqah.url,
+                                                        title:
+                                                            sadaqah.organization,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              icon: Icon(Icons.arrow_forward),
+                                            ),
+                                          ),
+      
+                                          // Container(
+                                          //   child: CustomButton(
+                                          //     onTap: () {
+                                          //       showDonateBottomSheet(
+                                          //         context,
+                                          //         sadaqah.organization,
+                                          //       );
+                                          //     },
+                                          //     text: 'Donate now',
+                                          //     borderColor: AppColors.violet
+                                          //         .withOpacity(1),
+                                          //     textColor: AppColors.violet
+                                          //         .withOpacity(1),
+                                          //   ),
+                                          // ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                    ),
-                  ],
-                ),
-
-                // ),
-                if (provider.hasShownReminder)
-                  Positioned(
-                    bottom: 20,
-                    left: 12,
-                    right: 12,
-                    child: _buildSadaqahOrganization(context, provider),
+                      ),
+                    ],
                   ),
-              ],
-            );
-          },
+      
+                  // ),
+                  if (provider.hasShownReminder)
+                    Positioned(
+                      bottom: 20,
+                      left: 12,
+                      right: 12,
+                      child: _buildSadaqahOrganization(context, provider),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -626,7 +634,8 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context, builder: (context) => Material(child: content),
+      context: context,
+      builder: (context) => Material(child: content),
     ).whenComplete(() {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
