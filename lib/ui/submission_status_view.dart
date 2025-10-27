@@ -207,11 +207,12 @@ Widget _buildSadaqahList(SadaqahProvider provider) {
                                 final msg = await provider.approveSadaqah(
                                   sadaqah.id,
                                 );
-                                if (context.mounted)
+                                if (context.mounted) {
                                   CustomPillSnackbar.show(
                                     context,
                                     message: msg,
                                   );
+                                }
                               },
                             );
                           },
@@ -231,24 +232,25 @@ Widget _buildSadaqahList(SadaqahProvider provider) {
                                 final msg = await provider.removeSadaqah(
                                   sadaqah.id,
                                 );
-                                if (context.mounted)
+                                if (context.mounted) {
                                   CustomPillSnackbar.show(
                                     context,
                                     message: msg,
                                   );
+                                }
                               },
                             );
                           },
                         ),
                       if (sadaqah.submittedBy ==
-                          FirebaseAuth.instance.currentUser?.uid)
+                              FirebaseAuth.instance.currentUser?.uid &&
+                          sadaqah.status == 'paid')
                         GestureDetector(
                           onTap: () async {
                             final service = ChipCollectService(
                               useSandbox: true,
                             );
                             try {
-                              // Replace with actual purchase ID you stored in Firestore when creating purchase
                               final receipt = await service.getPurchase(
                                 sadaqah.purchaseId ?? "null",
                               );
@@ -262,7 +264,6 @@ Widget _buildSadaqahList(SadaqahProvider provider) {
                               );
                             } catch (e) {
                               print("Error fetching receipt: $e");
-                              // Show snackbar if needed
                             }
                           },
                           child: CircleAvatar(
@@ -296,28 +297,12 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
     builder: (context, setState) {
       return Column(
         children: [
-          // 🔹 Search Bar
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //   child: TextField(
-          //     controller: searchController,
-          //     onChanged: (_) => setState(() {}), // rebuild on search
-          //     decoration: InputDecoration(
-          //       hintText: 'Search by masjid location...',
-          //       prefixIcon: const Icon(Icons.search),
-          //       border: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(12),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-
           // 🔹 Filter Dropdown
           if (provider.isSuperAdmin)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: DropdownButtonFormField<String>(
-                value: selectedStatus,
+                initialValue: selectedStatus,
                 decoration: InputDecoration(
                   labelText: "Filter by Status",
                   border: OutlineInputBorder(
@@ -460,27 +445,83 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
                             children: [
                               if (provider.isSuperAdmin &&
                                   data['status'] == "pending")
-                                _buildButton(
-                                  Icons.check,
-                                  Colors.green.withOpacity(0.1),
+                                _buildGestureContainer(
                                   Colors.green,
-                                  () async {
-                                    await FirebaseFirestore.instance
-                                        .collection('masjidProgrammes')
-                                        .doc(programmeId)
-                                        .update({'status': 'approved'});
-                                    await context
-                                        .read<MasjidProgrammeProvider>()
-                                        .loadProgrammes();
+                                  Colors.green,
+                                  'Approve',
+                                  Colors.green.withOpacity(0.1),
+                                  onTap: () async {
+                                    final programmeId = docs[index].id;
+                                    final programmeData = data;
+
+                                    try {
+                                      // 🔹 Step 1: Mark as "pending to pay"
+                                      await FirebaseFirestore.instance
+                                          .collection('masjidProgrammes')
+                                          .doc(programmeId)
+                                          .update({
+                                            'status': 'pending to pay',
+                                            'paid': false,
+                                          });
+
+                                      // 🔹 Step 2: Fetch submitter info
+                                      final submittedBy =
+                                          programmeData['submittedBy'];
+                                      final masjidName =
+                                          programmeData['masjidName'] ??
+                                          'the masjid';
+                                      final submitterRole =
+                                          programmeData['role'] ?? 'user';
+
+                                      if (submittedBy != null) {
+                                        // 🔹 Step 3: Send notification
+                                        await FirebaseFirestore.instance
+                                            .collection('notifications')
+                                            .add({
+                                              'title':
+                                                  'Masjid Programme Payment Required',
+                                              'message':
+                                                  'Please proceed to pay for your approved masjid programme: $masjidName',
+                                              'timestamp':
+                                                  FieldValue.serverTimestamp(),
+                                              'recipientRole': submitterRole,
+                                              'recipientId': submittedBy,
+                                              'read': false,
+                                              'programmeId': programmeId,
+                                            });
+                                      }
+
+                                      CustomPillSnackbar.show(
+                                        context,
+                                        message:
+                                            "✅ Programme marked as 'pending to pay' and submitter notified.",
+                                      );
+
+                                      await context
+                                          .read<MasjidProgrammeProvider>()
+                                          .loadProgrammes();
+                                    } catch (e) {
+                                      debugPrint(
+                                        "Error approving programme: $e",
+                                      );
+                                      CustomPillSnackbar.show(
+                                        context,
+                                        message:
+                                            "❌ Failed to update programme.",
+                                      );
+                                    }
                                   },
                                 ),
+                              SizedBox(width: 5),
+
                               if (provider.isSuperAdmin &&
                                   data['status'] == "expired")
-                                _buildButton(
-                                  Icons.delete,
-                                  Colors.red.withOpacity(0.1),
+                                _buildGestureContainer(
                                   Colors.red,
-                                  () async {
+                                  Colors.red,
+                                  'Remove expired',
+                                  Colors.red.withOpacity(0.1),
+                                  onTap: () async {
                                     await FirebaseFirestore.instance
                                         .collection('masjidProgrammes')
                                         .doc(programmeId)
@@ -499,13 +540,14 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
                                     );
                                   },
                                 ),
-
+                              SizedBox(width: 5),
                               if (provider.isSuperAdmin)
-                                _buildButton(
-                                  Icons.close,
-                                  Colors.red.withOpacity(0.1),
+                                _buildGestureContainer(
                                   Colors.red,
-                                  () async {
+                                  Colors.red,
+                                  'Reject',
+                                  Colors.red.withOpacity(0.1),
+                                  onTap: () async {
                                     final reason =
                                         await _showRejectionReasonSheet(
                                           context,
@@ -532,6 +574,63 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
                                     }
                                   },
                                 ),
+                              SizedBox(width: 5),
+                              if (data['submittedBy'] ==
+                                      FirebaseAuth.instance.currentUser?.uid &&
+                                  data['paid'] == true)
+                                GestureDetector(
+                                  onTap: () async {
+                                    final purchaseId = data['purchaseId'];
+                                    if (purchaseId == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "No receipt available.",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    final chipService = ChipCollectService(
+                                      useSandbox: true,
+                                    );
+                                    try {
+                                      final receipt = await chipService
+                                          .getPurchase(purchaseId);
+
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ReceiptView(receipt: receipt),
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      debugPrint("Error fetching receipt: $e");
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "Failed to load receipt: $e",
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: CircleAvatar(
+                                    backgroundColor: AppColors.betterGray
+                                        .withOpacity(0.3),
+                                    child: Image.asset(
+                                      'assets/icon/receipt_outlined_icon.png',
+                                      width: 30,
+                                      height: 30,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ],
@@ -545,6 +644,30 @@ Widget _buildProgrammeList(SadaqahProvider provider) {
         ],
       );
     },
+  );
+}
+
+Widget _buildGestureContainer(
+  Color borderColor,
+  Color textColor,
+  String text,
+  Color backgroundColor, {
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(10),
+        color: backgroundColor,
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+      ),
+    ),
   );
 }
 

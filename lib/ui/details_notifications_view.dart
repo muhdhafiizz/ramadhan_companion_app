@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/sadaqah_provider.dart';
 import 'package:ramadhan_companion_app/service/chip_collect_service.dart';
@@ -93,11 +94,16 @@ Widget _buildViewButton(
 ) {
   final notificationsProvider = context.watch<NotificationsProvider>();
   final sadaqahProvider = context.read<SadaqahProvider>();
-  final String? sadaqahId = notification['sadaqahId'];
-  final String? notificationDocId = notification['docId'];
   final user = FirebaseAuth.instance.currentUser;
 
-  if (sadaqahId == null) return const SizedBox();
+  final String? sadaqahId = notification['sadaqahId'];
+  final String? programmeId = notification['programmeId'];
+  final String? notificationDocId = notification['docId'];
+
+  final bool isProgramme = programmeId != null;
+  final bool isSadaqah = sadaqahId != null;
+
+  if (!isProgramme && !isSadaqah) return const SizedBox();
 
   final currentNotif = notificationsProvider.notifications.firstWhere(
     (n) => n['docId'] == notificationDocId,
@@ -106,8 +112,6 @@ Widget _buildViewButton(
 
   final bool alreadyPaidLocal = (currentNotif['paid'] == true);
 
-  // 🔹 For super_admin: always show "View", but NOT "Proceed to Pay"
-  // If super_admin AND also the submitter → allow both
   final submittedBy = notification['recipientId'];
   final isSubmitter = submittedBy != null && submittedBy == user?.uid;
 
@@ -130,58 +134,12 @@ Widget _buildViewButton(
         if (!alreadyPaidLocal && isSubmitter) ...[
           const SizedBox(width: 10),
           Expanded(
-            child: CustomButton(
-              text: "Proceed to Pay",
-              backgroundColor: AppColors.violet.withOpacity(1),
-              textColor: Colors.white,
-              onTap: () async {
-                try {
-                  final chipService = ChipCollectService(useSandbox: true);
-                  final sadaqahProvider = context.read<SadaqahProvider>();
-
-                  final clientEmail = user?.email ?? "guest@example.com";
-                  final productName =
-                      notification['title'] ?? "Sadaqah Donation";
-                  final price = sadaqahProvider.oneOffAmountInCents;
-
-                  final result = await chipService.createPurchase(
-                    clientEmail: clientEmail,
-                    productName: productName,
-                    price: price,
-                  );
-
-                  final purchaseId = result['id'];
-                  final checkoutUrl = result['checkout_url'];
-
-                  await FirebaseFirestore.instance
-                      .collection('sadaqah_orgs')
-                      .doc(sadaqahId)
-                      .update({'purchaseId': purchaseId});
-
-                  if (checkoutUrl != null && context.mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WebViewPage(
-                          url: checkoutUrl,
-                          title: "Complete Payment",
-                          notificationDocId: notificationDocId,
-                          sadaqahId: sadaqahId,
-                        ),
-                      ),
-                    );
-                  } else {
-                    CustomPillSnackbar.show(
-                      context,
-                      message: "No checkout URL returned",
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    CustomPillSnackbar.show(context, message: "Error: $e");
-                  }
-                }
-              },
+            child: _buildProceedToPayButton(
+              context,
+              notification,
+              sadaqahId,
+              programmeId,
+              notificationDocId,
             ),
           ),
         ],
@@ -190,54 +148,88 @@ Widget _buildViewButton(
   }
 
   if (!alreadyPaidLocal && isSubmitter) {
-    return CustomButton(
-      text: "Proceed to Pay",
-      backgroundColor: AppColors.violet.withOpacity(1),
-      textColor: Colors.white,
-      onTap: () async {
-        try {
-          final chipService = ChipCollectService(useSandbox: true);
-          final sadaqahProvider = context.read<SadaqahProvider>();
-
-          final clientEmail = user?.email ?? "guest@example.com";
-          final productName = notification['title'] ?? "Sadaqah Donation";
-          final price = sadaqahProvider.oneOffAmountInCents;
-
-          final result = await chipService.createPurchase(
-            clientEmail: clientEmail,
-            productName: productName,
-            price: price,
-          );
-
-          final checkoutUrl = result['checkout_url'];
-
-          if (checkoutUrl != null && context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => WebViewPage(
-                  url: checkoutUrl,
-                  title: "Complete Payment",
-                  notificationDocId: notificationDocId,
-                  sadaqahId: sadaqahId,
-                ),
-              ),
-            );
-          } else {
-            CustomPillSnackbar.show(
-              context,
-              message: "No checkout URL returned",
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            CustomPillSnackbar.show(context, message: "Error: $e");
-          }
-        }
-      },
+    return _buildProceedToPayButton(
+      context,
+      notification,
+      sadaqahId,
+      programmeId,
+      notificationDocId,
     );
   }
 
-  // 🔹 Otherwise, show nothing
   return const SizedBox();
+}
+
+Widget _buildProceedToPayButton(
+  BuildContext context,
+  Map<String, dynamic> notification,
+  String? sadaqahId,
+  String? programmeId,
+  String? notificationDocId,
+) {
+  final user = FirebaseAuth.instance.currentUser;
+  final sadaqahProvider = context.read<SadaqahProvider>();
+  final masjidProgrammeProvider = context.read<MasjidProgrammeProvider>();
+  final chipService = ChipCollectService(useSandbox: true);
+
+  return CustomButton(
+    text: "Proceed to Pay",
+    backgroundColor: AppColors.violet.withOpacity(1),
+    textColor: Colors.white,
+    onTap: () async {
+      try {
+        final clientEmail = user?.email ?? "guest@example.com";
+        final productName = notification['title'] ?? "Payment";
+
+        // ✅ Pick correct price depending on type
+        final int price = sadaqahId != null
+            ? sadaqahProvider
+                  .oneOffAmountInCents
+            : masjidProgrammeProvider.oneOffAmountInCents;
+
+        final result = await chipService.createPurchase(
+          clientEmail: clientEmail,
+          productName: productName,
+          price: price,
+        );
+
+        final checkoutUrl = result['checkout_url'];
+        final purchaseId = result['id'];
+
+        // ✅ Update correct Firestore collection
+        if (sadaqahId != null) {
+          await FirebaseFirestore.instance
+              .collection('sadaqah_orgs')
+              .doc(sadaqahId)
+              .update({'purchaseId': purchaseId});
+        } else if (programmeId != null) {
+          await FirebaseFirestore.instance
+              .collection('masjidProgrammes')
+              .doc(programmeId)
+              .update({'purchaseId': purchaseId});
+        }
+
+        if (checkoutUrl != null && context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WebViewPage(
+                url: checkoutUrl,
+                title: "Complete Payment",
+                notificationDocId: notificationDocId,
+                sadaqahId: sadaqahId,
+                programmeId: programmeId, 
+              ),
+            ),
+          );
+        } else {
+          CustomPillSnackbar.show(context, message: "No checkout URL returned");
+        }
+      } catch (e) {
+        if (context.mounted) {
+          CustomPillSnackbar.show(context, message: "Error: $e");
+        }
+      }
+    },
+  );
 }

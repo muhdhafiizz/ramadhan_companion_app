@@ -10,6 +10,8 @@ class MasjidNearbyProvider extends ChangeNotifier {
   final MasjidNearbyService _masjidService = MasjidNearbyService();
 
   List<MasjidNearbyModel> _masjids = [];
+  MasjidNearbyModel? _selectedMasjid;
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -21,6 +23,7 @@ class MasjidNearbyProvider extends ChangeNotifier {
   List<MasjidNearbyModel> get masjids => _masjids;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  MasjidNearbyModel? get selectedMasjid => _selectedMasjid;
 
   Future<void> fetchMasjidsFromAddress(String city, String country) async {
     _isLoading = true;
@@ -92,6 +95,11 @@ class MasjidNearbyProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  set selectedMasjid(MasjidNearbyModel? m) {
+    _selectedMasjid = m;
+    notifyListeners();
   }
 
   Future<void> openMap(double lat, double lng) async {

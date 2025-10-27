@@ -15,6 +15,10 @@ class MasjidProgrammeProvider extends ChangeNotifier {
 
   MasjidProgrammeProvider() {
     _init();
+    masjidController.addListener(_onFormChanged);
+    titleController.addListener(_onFormChanged);
+    locationController.addListener(_onFormChanged);
+    joinLinkController.addListener(_onFormChanged);
   }
 
   Future<void> _init() async {
@@ -30,16 +34,31 @@ class MasjidProgrammeProvider extends ChangeNotifier {
   DateTime? dateTime;
   bool isOnline = false;
   String? posterBase64;
-  // double oneOffAmount = 6.90;
+  double oneOffAmount = 6.90;
+
+  bool _isFormValid = false;
+  bool get isFormValid => _isFormValid;
 
   String _masjidQuery = '';
   String _stateQuery = '';
 
-  bool get isFormValid =>
-      masjidController.text.trim().isNotEmpty &&
-      titleController.text.trim().isNotEmpty &&
-      dateTime != null;
-  // int get oneOffAmountInCents => (oneOffAmount * 100).round();
+  // bool get isFormValid {
+  //   final hasBasicFields =
+  //       masjidController.text.trim().isNotEmpty &&
+  //       titleController.text.trim().isNotEmpty &&
+  //       dateTime != null &&
+  //       posterBase64 != null;
+
+  //   if (!hasBasicFields) return false;
+
+  //   if (isOnline) {
+  //     return joinLinkController.text.trim().isNotEmpty;
+  //   } else {
+  //     return locationController.text.trim().isNotEmpty;
+  //   }
+  // }
+
+  int get oneOffAmountInCents => (oneOffAmount * 100).round();
 
   Future<void> pickPoster() async {
     final picker = ImagePicker();
@@ -59,6 +78,28 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     }
   }
 
+  void _onFormChanged() {
+    final hasBasicFields =
+        masjidController.text.trim().isNotEmpty &&
+        titleController.text.trim().isNotEmpty &&
+        dateTime != null &&
+        posterBase64 != null;
+
+    bool valid;
+    if (!hasBasicFields) {
+      valid = false;
+    } else {
+      valid = isOnline
+          ? joinLinkController.text.trim().isNotEmpty
+          : locationController.text.trim().isNotEmpty;
+    }
+
+    if (valid != _isFormValid) {
+      _isFormValid = valid;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadProgrammes() async {
     _isLoading = true;
     notifyListeners();
@@ -72,7 +113,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         final programmeTime = DateTime.parse(data['dateTime']);
         String status = data['status'] ?? 'pending';
 
-        // Automatically mark expired programmes 1h after dateTime
+        // Automatically expire after 1 hour past dateTime
         if (programmeTime.add(const Duration(hours: 1)).isBefore(now)) {
           status = 'expired';
           doc.reference.update({'status': 'expired'});
@@ -94,8 +135,9 @@ class MasjidProgrammeProvider extends ChangeNotifier {
         );
       }).toList();
 
+      // 🔹 Only show programmes that are 'paid' (and not expired)
       _allProgrammes = _allProgrammes
-          .where((p) => p.status != 'expired')
+          .where((p) => p.status == 'paid' && p.status != 'expired')
           .toList();
     } catch (e) {
       debugPrint("Error loading programmes: $e");
@@ -219,6 +261,7 @@ class MasjidProgrammeProvider extends ChangeNotifier {
     dateTime = null;
     isOnline = false;
     posterBase64 = null;
+    _isFormValid = false;
     notifyListeners();
   }
 

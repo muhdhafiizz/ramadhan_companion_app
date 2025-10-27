@@ -27,8 +27,9 @@ class DetailsMasjidProgrammeView extends StatelessWidget {
     final programmes = allProgrammes.where((programme) {
       if (programme.isOnline) return true;
       final location = programme.location?.toLowerCase();
-      if (location == null || (userCity == null && userCountry == null))
+      if (location == null || (userCity == null && userCountry == null)) {
         return false;
+      }
 
       final normalizedLocation = location.replaceAll(',', '').split(' ');
       final normalizedUser = ('$userCity $userCountry')
