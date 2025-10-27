@@ -626,8 +626,7 @@ void showSadaqahField(BuildContext context, SadaqahProvider provider) {
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context,
-      pageBuilder: (context) => Material(child: content),
+      context: context, builder: (context) => Material(child: content),
     ).whenComplete(() {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });

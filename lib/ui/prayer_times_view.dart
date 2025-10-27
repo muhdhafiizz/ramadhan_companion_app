@@ -488,8 +488,9 @@ Widget _buildMasjidProgramme(BuildContext context) {
           final programmes = programmeProvider.allProgrammes.where((programme) {
             if (programme.isOnline) return true;
             final location = programme.location?.toLowerCase();
-            if (location == null || (city == null && country == null))
+            if (location == null || (city == null && country == null)) {
               return false;
+            }
 
             final normalizedLocation = location.replaceAll(',', '').split(' ');
             final normalizedUser = ('$city $country')
@@ -1699,8 +1700,7 @@ void _showPrayerTimesDate(BuildContext context, PrayerTimesProvider provider) {
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context,
-      pageBuilder: (context) => Material(child: content),
+      context: context, builder: (context) => Material(child: content),
     ).whenComplete(() {
       provider.setSelectedDate(provider.activeDate);
 
@@ -1813,8 +1813,8 @@ void showProgrammeField(
                     _buildTitleText('🕌  Benefits of Adding Mosque Programme'),
                     const SizedBox(height: 12),
                     _buildContainer(),
-                    // const SizedBox(height: 12),
-                    // _buildOneOffPayment(context),
+                    const SizedBox(height: 12),
+                    _buildOneOffPayment(context),
                   ],
                 ),
 
@@ -1868,7 +1868,7 @@ void showProgrammeField(
                                       radius: const Radius.circular(10),
                                       padding: const EdgeInsets.all(0),
                                     ),
-                                    child: Container(
+                                    child: SizedBox(
                                       width: double.infinity,
                                       height: 150,
 
@@ -1906,10 +1906,10 @@ void showProgrammeField(
                                   context: context,
                                   initialDate: now,
                                   firstDate:
-                                      now, // Prevent selecting past dates
+                                      now, 
                                   lastDate: now.add(
                                     const Duration(days: 7),
-                                  ), // Allow up to 1 week ahead
+                                  ),
                                 );
 
                                 if (picked != null) {
@@ -1954,108 +1954,6 @@ void showProgrammeField(
                                 ),
                               ),
                             ),
-                            // GestureDetector(
-                            //   onTap: () async {
-                            //     await showModalBottomSheet(
-                            //       context: context,
-                            //       isScrollControlled: true,
-                            //       backgroundColor: Colors.transparent,
-                            //       builder: (context) {
-                            //         return Container(
-                            //           padding: const EdgeInsets.all(16),
-                            //           decoration: BoxDecoration(
-                            //             color: Colors.white.withOpacity(0.9),
-                            //             borderRadius:
-                            //                 const BorderRadius.vertical(
-                            //                   top: Radius.circular(25),
-                            //                 ),
-                            //           ),
-                            //           child: Column(
-                            //             mainAxisSize: MainAxisSize.min,
-                            //             children: [
-                            //               const Text(
-                            //                 'Select Date & Time',
-                            //                 style: TextStyle(
-                            //                   fontSize: 18,
-                            //                   fontWeight: FontWeight.bold,
-                            //                 ),
-                            //               ),
-                            //               const SizedBox(height: 10),
-                            //               _buildCustomCalendar(context),
-                            //               const SizedBox(height: 20),
-                            //               _buildCustomTimePicker(
-                            //                 context,
-                            //                 prayerTimesProvider,
-                            //               ),
-                            //               const SizedBox(height: 20),
-                            //               ElevatedButton(
-                            //                 style: ElevatedButton.styleFrom(
-                            //                   backgroundColor:
-                            //                       Colors.deepPurple,
-                            //                   shape: RoundedRectangleBorder(
-                            //                     borderRadius:
-                            //                         BorderRadius.circular(12),
-                            //                   ),
-                            //                 ),
-                            //                 onPressed: () {
-                            //                   final selectedDate =
-                            //                       prayerTimesProvider
-                            //                           .pickerSelectedDate;
-                            //                   final selectedTime =
-                            //                       prayerTimesProvider
-                            //                           .pickerSelectedTime;
-
-                            //                   if (selectedDate != null &&
-                            //                       selectedTime != null) {
-                            //                     provider.dateTime = DateTime(
-                            //                       selectedDate.year,
-                            //                       selectedDate.month,
-                            //                       selectedDate.day,
-                            //                       selectedTime.hour,
-                            //                       selectedTime.minute,
-                            //                     );
-                            //                   }
-
-                            //                   prayerTimesProvider
-                            //                       .clearPickerSelection();
-                            //                   Navigator.pop(context);
-                            //                 },
-
-                            //                 child: const Text("Confirm"),
-                            //               ),
-                            //             ],
-                            //           ),
-                            //         );
-                            //       },
-                            //     );
-                            //   },
-                            //   child: Consumer<PrayerTimesProvider>(
-                            //     builder: (context, provider, _) {
-                            //       return Container(
-                            //         alignment: Alignment.bottomLeft,
-                            //         padding: const EdgeInsets.all(12),
-                            //         decoration: BoxDecoration(
-                            //           border: Border.all(
-                            //             color: Colors.grey.shade300,
-                            //           ),
-                            //           borderRadius: BorderRadius.circular(10),
-                            //         ),
-                            //         child: Text(
-                            //           provider.dateTime != null
-                            //               ? DateFormat(
-                            //                   "d MMM yyyy, h:mm a",
-                            //                 ).format(provider.dateTime!)
-                            //               : "Select Date & Time",
-                            //           style: TextStyle(
-                            //             color: provider.dateTime == null
-                            //                 ? Colors.grey
-                            //                 : Colors.black,
-                            //           ),
-                            //         ),
-                            //       );
-                            //     },
-                            //   ),
-                            // ),
                             SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2123,8 +2021,7 @@ void showProgrammeField(
 
   if (Theme.of(context).platform == TargetPlatform.iOS) {
     showCupertinoSheet(
-      context: context,
-      pageBuilder: (context) => Material(child: content),
+      context: context, builder: (context) => Material(child: content),
     ).whenComplete(() {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     });
@@ -2139,38 +2036,38 @@ void showProgrammeField(
   }
 }
 
-// Widget _buildOneOffPayment(BuildContext context) {
-//   final programmeProvider = context.watch<MasjidProgrammeProvider>();
+Widget _buildOneOffPayment(BuildContext context) {
+  final programmeProvider = context.watch<MasjidProgrammeProvider>();
 
-//   return Column(
-//     crossAxisAlignment: CrossAxisAlignment.start,
-//     children: [
-//       const Text('One-off Payment', style: TextStyle(fontSize: 14)),
-//       Text(
-//         'RM ${formatCurrency(programmeProvider.oneOffAmount)}',
-//         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-//       ),
-//       SizedBox(height: 10),
-//       Container(
-//         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-//         decoration: BoxDecoration(
-//           color: AppColors.violet.withOpacity(0.1),
-//           border: Border.all(color: AppColors.violet.withOpacity(1)),
-//           borderRadius: BorderRadius.circular(20),
-//         ),
-//         child: Text(
-//           'Your payment supports app maintenance and improvements.',
-//           style: TextStyle(
-//             color: AppColors.violet.withOpacity(1),
-//             fontWeight: FontWeight.w500,
-//             fontSize: 12,
-//           ),
-//           textAlign: TextAlign.center,
-//         ),
-//       ),
-//     ],
-//   );
-// }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('One-off Payment', style: TextStyle(fontSize: 14)),
+      Text(
+        'RM ${formatCurrency(programmeProvider.oneOffAmount)}',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+      ),
+      SizedBox(height: 10),
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppColors.violet.withOpacity(0.1),
+          border: Border.all(color: AppColors.violet.withOpacity(1)),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          'Your payment supports app maintenance and improvements.',
+          style: TextStyle(
+            color: AppColors.violet.withOpacity(1),
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ],
+  );
+}
 
 Widget _buildContainer() {
   return Container(
@@ -2476,7 +2373,9 @@ Widget _buildCustomCalendar(BuildContext context) {
 // }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
   final double minExtent;
+  @override
   final double maxExtent;
   final Widget Function(
     BuildContext context,

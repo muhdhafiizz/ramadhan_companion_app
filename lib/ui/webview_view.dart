@@ -12,6 +12,7 @@ class WebViewPage extends StatelessWidget {
   final String title;
   final String? notificationDocId;
   final String? sadaqahId;
+  final String? programmeId;
 
   const WebViewPage({
     super.key,
@@ -19,6 +20,7 @@ class WebViewPage extends StatelessWidget {
     required this.title,
     this.notificationDocId,
     this.sadaqahId,
+    this.programmeId,
   });
 
   @override
@@ -41,44 +43,61 @@ class WebViewPage extends StatelessWidget {
                       onLoadStop: (controller, uri) async {
                         if (uri == null) return;
                         final currentUrl = uri.toString();
-                        print("Redirected to: $currentUrl");
+                        debugPrint("Redirected to: $currentUrl");
 
+                        // ✅ SUCCESS CASE
                         if (currentUrl.contains("/success/")) {
                           provider.setStatus("success");
 
-                          if (notificationDocId != null) {
-                            try {
+                          try {
+                            // ✅ Mark notification as paid
+                            if (notificationDocId != null) {
                               await FirebaseFirestore.instance
                                   .collection('notifications')
                                   .doc(notificationDocId)
                                   .update({'paid': true});
-                            } catch (e) {
-                              debugPrint(
-                                'Failed to update Firestore paid flag: $e',
-                              );
                             }
+
+                            bool isProgramme = false;
+
+                            // ✅ If sadaqah payment
+                            if (sadaqahId != null) {
+                              final sadaqahProvider = context.read<SadaqahProvider>();
+                              await sadaqahProvider.paySadaqah(sadaqahId!);
+                            }
+
+                            // ✅ If masjid programme payment
+                            if (programmeId != null) {
+                              isProgramme = true;
+                              await FirebaseFirestore.instance
+                                  .collection('masjidProgrammes')
+                                  .doc(programmeId)
+                                  .update({'status': 'paid', 'paid': true});
+                            }
+
+                            // ✅ Redirect to result page
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PaymentResultsView(
+                                  isSuccess: true,
+                                  isProgramme: isProgramme, // ✅ pass type
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            debugPrint("❌ Firestore update error: $e");
                           }
-
-                          final sadaqahProvider = context
-                              .read<SadaqahProvider>();
-                          await sadaqahProvider.paySadaqah(
-                            sadaqahId!,
-                          );
-
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const PaymentResultsView(isSuccess: true),
-                            ),
-                          );
-                        } else if (currentUrl.contains("/failure/")) {
+                        }
+                        // ❌ FAILURE CASE
+                        else if (currentUrl.contains("/failure/")) {
                           provider.setStatus("failure");
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const PaymentResultsView(isSuccess: false),
+                              builder: (_) => const PaymentResultsView(
+                                isSuccess: false,
+                              ),
                             ),
                           );
                         }

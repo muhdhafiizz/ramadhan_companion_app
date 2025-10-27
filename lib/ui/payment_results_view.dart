@@ -5,11 +5,24 @@ import 'package:ramadhan_companion_app/widgets/custom_button.dart';
 
 class PaymentResultsView extends StatelessWidget {
   final bool isSuccess;
+  final bool isProgramme;
 
-  const PaymentResultsView({super.key, required this.isSuccess});
+  const PaymentResultsView({
+    super.key,
+    required this.isSuccess,
+    this.isProgramme = true,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final successTitle = isProgramme
+        ? "Programme Payment Successful"
+        : "Sadaqah Payment Successful";
+
+    final successMessage = isProgramme
+        ? "Expand your impact. Every programme you add brings more goodness to the Ummah."
+        : "Your charity is a lifeline. Help someone in need and earn eternal reward.";
+
     return Scaffold(
       backgroundColor: isSuccess ? Colors.green.shade50 : Colors.red.shade50,
       body: SafeArea(
@@ -34,21 +47,20 @@ class PaymentResultsView extends StatelessWidget {
                       ),
                 const SizedBox(height: 20),
                 Text(
-                  isSuccess ? "Payment Successful 🎉" : "Payment Failed ❌",
+                  isSuccess ? successTitle : "Payment Failed ❌",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: isSuccess
-                        ? Colors.green.shade800
-                        : Colors.red.shade800,
+                    color:
+                        isSuccess ? Colors.green.shade800 : Colors.red.shade800,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   isSuccess
-                      ? "You have helped people easier to sadaqah!"
+                      ? successMessage
                       : "Something went wrong. Please try again.",
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
@@ -63,28 +75,6 @@ class PaymentResultsView extends StatelessWidget {
                   backgroundColor: isSuccess ? Colors.green : Colors.red,
                   textColor: Colors.white,
                 ),
-                // ElevatedButton(
-                //   onPressed: () {
-                //     Navigator.pushReplacement(
-                //       context,
-                //       MaterialPageRoute(builder: (_) => PrayerTimesView()),
-                //     );
-                //   },
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: isSuccess ? Colors.green : Colors.red,
-                //     padding: const EdgeInsets.symmetric(
-                //       horizontal: 24,
-                //       vertical: 12,
-                //     ),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(12),
-                //     ),
-                //   ),
-                //   child: const Text(
-                //     "Back to Homepage",
-                //     style: TextStyle(fontSize: 18, color: Colors.white),
-                //   ),
-                // ),
               ],
             ),
           ),
