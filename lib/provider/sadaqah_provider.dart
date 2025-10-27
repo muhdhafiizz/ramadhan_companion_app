@@ -23,7 +23,7 @@ class SadaqahProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasShownReminder = false;
   bool _isFormValid = false;
-  double oneOffAmount = 21.90;
+  double oneOffAmount = 26.90;
 
   SubmissionStatus _submissionStatus = SubmissionStatus.idle;
 

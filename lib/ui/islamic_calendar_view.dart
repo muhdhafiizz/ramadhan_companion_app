@@ -26,6 +26,7 @@ class IslamicCalendarView extends StatelessWidget {
                   _buildYearAndNextMonth(provider),
                   const SizedBox(height: 10),
 
+                  /// Weekday headers
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: HijriCalendar.shortWeekdays
@@ -43,8 +44,9 @@ class IslamicCalendarView extends StatelessWidget {
                         )
                         .toList(),
                   ),
-
                   const SizedBox(height: 10),
+
+                  /// Calendar Grid
                   Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(8),
@@ -65,21 +67,72 @@ class IslamicCalendarView extends StatelessWidget {
                         final isToday =
                             (day.toFormat("dd/MM/yyyy") == todayKey);
 
+                        // Convert Hijri → Gregorian
+                        final gregorian = day.hijriToGregorian(
+                          day.hYear,
+                          day.hMonth,
+                          day.hDay,
+                        );
+
+                        // Check if this day is a special one
+                        final isSpecial = provider.specialDays.any(
+                          (s) => s.day == day.hDay && s.month == day.hMonth,
+                        );
+
                         return Container(
                           decoration: BoxDecoration(
                             color: isToday
                                 ? Colors.green.withOpacity(0.3)
                                 : Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
+                            border: isSpecial
+                                ? Border.all(color: Colors.amber, width: 2)
+                                : null,
                           ),
-                          child: Center(
-                            child: Text(
-                              "${day.hDay}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                          child: Stack(
+                            children: [
+                              /// Top-right Gregorian date
+                              Positioned(
+                                top: 4,
+                                right: 6,
+                                child: Text(
+                                  gregorian.day.toString(),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
                               ),
-                            ),
+
+                              /// Center Hijri date
+                              Center(
+                                child: Text(
+                                  "${day.hDay}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: isToday
+                                        ? Colors.green.shade800
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+
+                              /// Optional indicator for special days
+                              if (isSpecial)
+                                const Positioned(
+                                  bottom: 4,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.star_rounded,
+                                      color: Colors.amber,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         );
                       },
@@ -89,7 +142,6 @@ class IslamicCalendarView extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   _buildTitleText('Special Days'),
-
                   Expanded(
                     child: provider.specialDays.isEmpty
                         ? const Center(child: Text("No special days loaded"))
@@ -106,8 +158,8 @@ class IslamicCalendarView extends StatelessWidget {
                                         s.month == provider.focusedDate.hMonth,
                                   )
                                   .toList();
-
                               final special = filtered[index];
+
                               return Container(
                                 margin: const EdgeInsets.symmetric(
                                   vertical: 6,
@@ -124,7 +176,9 @@ class IslamicCalendarView extends StatelessWidget {
                                     width: 30,
                                   ),
                                   title: Text(special.name),
-                                  subtitle: Text("Day: ${special.day}"),
+                                  subtitle: Text(
+                                    "Hijri Day: ${special.day}  •  Gregorian: ${HijriCalendar().hijriToGregorian(provider.focusedDate.hYear, special.month, special.day).day}/${HijriCalendar().hijriToGregorian(provider.focusedDate.hYear, special.month, special.day).month}",
+                                  ),
                                 ),
                               );
                             },
