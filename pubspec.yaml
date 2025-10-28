@@ -103,6 +103,7 @@ flutter:
     - assets/images/ummah_logo_transparent.png
     - assets/images/mosque_2_image.jpg
     - assets/icon/empty_data_icon.png
+    - assets/images/fpx_logo.png
 
   fonts:
     - family: Liter
@@ -112,7 +113,7 @@ flutter:
       fonts:
         - asset: assets/font/Amiri,Funnel_Display,Liter,Nunito_Sans,Open_Sans/Amiri/Amiri-Bold.ttf
     - family: Sans
-      fonts: 
+      fonts:
         - asset: assets/font/SplineSans-VariableFont_wght.ttf
 
 flutter_launcher_icons:
