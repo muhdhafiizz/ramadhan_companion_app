@@ -20,12 +20,12 @@ Future<void> scheduleNotification({
       priority: Priority.high,
       sound: playAdhan
           ? RawResourceAndroidNotificationSound(
-              'adhan_notification',
+              'adhan_notification_cut',
             ) 
           : null, 
       playSound: true,
     ),
-    iOS: DarwinNotificationDetails(sound: playAdhan ? 'adhan_notification.caf' : null),
+    iOS: DarwinNotificationDetails(sound: playAdhan ? 'adhan_notification_cut.caf' : null),
   );
 
   await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -54,3 +54,26 @@ Future<void> ensureExactAlarmPermission() async {
     }
   }
 }
+
+Future<void> requestNotificationPermissions() async {
+  final androidImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+  if (androidImplementation != null) {
+    await androidImplementation.requestNotificationsPermission();
+  }
+
+  final iosImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+
+  if (iosImplementation != null) {
+    await iosImplementation.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+}
+

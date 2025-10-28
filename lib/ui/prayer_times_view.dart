@@ -511,17 +511,9 @@ Widget _buildMasjidProgramme(BuildContext context) {
                   word.isNotEmpty &&
                   normalizedLocation.any((locWord) => locWord.contains(word)),
             );
-
-            print('📍 Checking programme: ${programme.title}');
-            print('   Location: $location');
-            print('   Normalized Location: $normalizedLocation');
-            print('   Normalized User: $normalizedUser');
-            print('   Has match: $hasMatch');
-
             return hasMatch;
           }).toList();
 
-          print('✅ Matched ${programmes.length} programmes for this location.');
 
           if (programmes.isEmpty) {
             return SizedBox(

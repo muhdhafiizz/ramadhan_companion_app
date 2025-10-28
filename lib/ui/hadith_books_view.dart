@@ -113,7 +113,7 @@ Widget _buildAppBar(BuildContext context) {
 
 Widget _buildShimmerLoading() {
   return Column(
-    children: List.generate(10, (index) {
+    children: List.generate(4, (index) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
         child: Row(

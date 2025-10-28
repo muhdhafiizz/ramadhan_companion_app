@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:ramadhan_companion_app/firebase_options.dart';
+import 'package:ramadhan_companion_app/helper/local_notifications.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/calendar_provider.dart';
 import 'package:ramadhan_companion_app/provider/carousel_provider.dart';
@@ -95,6 +96,7 @@ void main() async {
   );
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
+  await requestNotificationPermissions();
   final prayerProvider = PrayerTimesProvider();
   await prayerProvider.initialize();
   // await requestExactAlarmPermission();
