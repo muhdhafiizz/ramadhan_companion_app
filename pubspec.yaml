@@ -104,6 +104,7 @@ flutter:
     - assets/images/mosque_2_image.jpg
     - assets/icon/empty_data_icon.png
     - assets/images/fpx_logo.png
+    - assets/audio/adhan_notification_cut.mp3
 
   fonts:
     - family: Liter

@@ -12,7 +12,7 @@
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		8661CB1B2E9F630000289443 /* adhan_notification.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8661CB1A2E9F630000289443 /* adhan_notification.caf */; };
+		867794C92EB05F3200D7DFDF /* adhan_notification_cut.caf in Resources */ = {isa = PBXBuildFile; fileRef = 867794C82EB05F3200D7DFDF /* adhan_notification_cut.caf */; };
 		86CA550E2E69D9990091E859 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86CA550D2E69D9990091E859 /* WidgetKit.framework */; };
 		86CA55102E69D9990091E859 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86CA550F2E69D9990091E859 /* SwiftUI.framework */; };
 		86CA55212E69D99B0091E859 /* PrayerTimeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 86CA550C2E69D9990091E859 /* PrayerTimeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -78,7 +78,7 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
-		8661CB1A2E9F630000289443 /* adhan_notification.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_notification.caf; sourceTree = "<group>"; };
+		867794C82EB05F3200D7DFDF /* adhan_notification_cut.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_notification_cut.caf; sourceTree = "<group>"; };
 		86CA550C2E69D9990091E859 /* PrayerTimeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrayerTimeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		86CA550D2E69D9990091E859 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		86CA550F2E69D9990091E859 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -108,7 +108,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		86A8AFBB2E6F1FF0003197A9 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
 		86CA55112E69D9990091E859 /* PrayerTimeWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (8661C8B32E9E3E0B00289443 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = PrayerTimeWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -176,8 +175,6 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
-				8661CB1A2E9F630000289443 /* adhan_notification.caf */,
-				86A8AFBB2E6F1FF0003197A9 /* Resources */,
 				86CA55282E69DA3F0091E859 /* PrayerTimeWidgetExtension.entitlements */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
@@ -203,6 +200,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				867794C82EB05F3200D7DFDF /* adhan_notification_cut.caf */,
 				86CA55292E69DB540091E859 /* Runner.entitlements */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
@@ -262,7 +260,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				86A8AFBB2E6F1FF0003197A9 /* Resources */,
 				86CA55112E69D9990091E859 /* PrayerTimeWidget */,
 			);
 			name = PrayerTimeWidgetExtension;
@@ -358,8 +355,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
+				867794C92EB05F3200D7DFDF /* adhan_notification_cut.caf in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
-				8661CB1B2E9F630000289443 /* adhan_notification.caf in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				CCFC7369D571CEBD6525632A /* GoogleService-Info.plist in Resources */,
