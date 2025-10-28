@@ -177,59 +177,215 @@ Widget _buildProceedToPayButton(
     backgroundColor: AppColors.violet.withOpacity(1),
     textColor: Colors.white,
     onTap: () async {
-      try {
-        final clientEmail = user?.email ?? "guest@example.com";
-        final productName = notification['title'] ?? "Payment";
+      final clientEmail = user?.email ?? "guest@example.com";
+      final productName = notification['title'] ?? "Payment";
 
-        // ✅ Pick correct price depending on type
-        final int price = sadaqahId != null
-            ? sadaqahProvider
-                  .oneOffAmountInCents
-            : masjidProgrammeProvider.oneOffAmountInCents;
+      final int price = sadaqahId != null
+          ? sadaqahProvider.oneOffAmountInCents
+          : masjidProgrammeProvider.oneOffAmountInCents;
 
-        final result = await chipService.createPurchase(
-          clientEmail: clientEmail,
-          productName: productName,
-          price: price,
-        );
-
-        final checkoutUrl = result['checkout_url'];
-        final purchaseId = result['id'];
-
-        // ✅ Update correct Firestore collection
-        if (sadaqahId != null) {
-          await FirebaseFirestore.instance
-              .collection('sadaqah_orgs')
-              .doc(sadaqahId)
-              .update({'purchaseId': purchaseId});
-        } else if (programmeId != null) {
-          await FirebaseFirestore.instance
-              .collection('masjidProgrammes')
-              .doc(programmeId)
-              .update({'purchaseId': purchaseId});
-        }
-
-        if (checkoutUrl != null && context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => WebViewPage(
-                url: checkoutUrl,
-                title: "Complete Payment",
-                notificationDocId: notificationDocId,
-                sadaqahId: sadaqahId,
-                programmeId: programmeId, 
-              ),
-            ),
-          );
-        } else {
-          CustomPillSnackbar.show(context, message: "No checkout URL returned");
-        }
-      } catch (e) {
-        if (context.mounted) {
-          CustomPillSnackbar.show(context, message: "Error: $e");
-        }
-      }
+      _showConfirmationSheet(
+        context,
+        clientEmail: clientEmail,
+        productName: productName,
+        price: price,
+        chipService: chipService,
+        sadaqahId: sadaqahId,
+        programmeId: programmeId,
+        notificationDocId: notificationDocId,
+      );
     },
+  );
+}
+
+Future<void> _showConfirmationSheet(
+  BuildContext parentContext, {
+  required String clientEmail,
+  required String productName,
+  required int price,
+  required ChipCollectService chipService,
+  String? sadaqahId,
+  String? programmeId,
+  String? notificationDocId,
+}) async {
+  await showModalBottomSheet(
+    context: parentContext,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      String selectedMethod = "fpx";
+
+      return FractionallySizedBox(
+        heightFactor: 0.65,
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 5,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        "Confirm Payment",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.betterGray.withOpacity(1),
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLayout('Item', productName),
+                            const Divider(),
+                            _buildLayout('Email', clientEmail),
+                            const Divider(),
+                            _buildLayout(
+                              'Amount',
+                              'RM ${(price / 100).toStringAsFixed(2)}',
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        "Select Payment Method",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        title: Row(
+                          children: [
+                            Image.asset(
+                              "assets/images/fpx_logo.png",
+                              height: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text("FPX"),
+                          ],
+                        ),
+                        value: "fpx",
+                        groupValue: selectedMethod,
+                        onChanged: (value) {
+                          setState(() => selectedMethod = value!);
+                        },
+                        controlAffinity: ListTileControlAffinity.trailing,
+                      ),
+                    ],
+                  ),
+                ),
+                bottomNavigationBar: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: CustomButton(
+                      text: "Confirm & Pay",
+                      backgroundColor: AppColors.violet.withOpacity(1),
+                      textColor: Colors.white,
+                      onTap: () async {
+                        Navigator.pop(context);
+
+                        try {
+                          final result = await chipService.createPurchase(
+                            clientEmail: clientEmail,
+                            productName: productName,
+                            price: price,
+                          );
+
+                          final checkoutUrl = result['checkout_url'];
+                          final purchaseId = result['id'];
+
+                          if (sadaqahId != null) {
+                            await FirebaseFirestore.instance
+                                .collection('sadaqah_orgs')
+                                .doc(sadaqahId)
+                                .update({'purchaseId': purchaseId});
+                          } else if (programmeId != null) {
+                            await FirebaseFirestore.instance
+                                .collection('masjidProgrammes')
+                                .doc(programmeId)
+                                .update({'purchaseId': purchaseId});
+                          }
+
+                          if (checkoutUrl != null && parentContext.mounted) {
+                            Navigator.push(
+                              parentContext,
+                              MaterialPageRoute(
+                                builder: (_) => WebViewPage(
+                                  url: checkoutUrl,
+                                  title: "Complete Payment",
+                                  notificationDocId: notificationDocId,
+                                  sadaqahId: sadaqahId,
+                                  programmeId: programmeId,
+                                ),
+                              ),
+                            );
+                          } else {
+                            CustomPillSnackbar.show(
+                              parentContext,
+                              message: "No checkout URL returned",
+                            );
+                          }
+                        } catch (e) {
+                          if (parentContext.mounted) {
+                            CustomPillSnackbar.show(
+                              parentContext,
+                              message: "Error: $e",
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildLayout(String title, String subtitle) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(height: 5),
+      Text(subtitle),
+    ],
   );
 }
