@@ -4,18 +4,24 @@ import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/service/quran_daily_service.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum Reciter { alafasy, husary, shaatree }
 
 class QuranDetailProvider extends ChangeNotifier {
-  final int surahNumber;
+  int _currentSurah;
   final int? initialVerse;
+
+  int get surahNumber => _currentSurah;
 
   List<Map<String, String>> _allVerses = [];
   List<Map<String, String>> _filteredVerses = [];
   String _query = "";
   double _arabicFontSize = 23;
   double _translationFontSize = 16;
+  quran.Translation _selectedTranslation = quran.Translation.enSaheeh;
+
+  quran.Translation get selectedTranslation => _selectedTranslation;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -44,7 +50,8 @@ class QuranDetailProvider extends ChangeNotifier {
 
   int? _playingVerse;
 
-  QuranDetailProvider(this.surahNumber, {this.initialVerse}) {
+  QuranDetailProvider(int initialSurah, {this.initialVerse})
+    : _currentSurah = initialSurah {
     _loadVerses();
     _setupScrollListener();
     _setupAudioListeners();
@@ -79,6 +86,17 @@ class QuranDetailProvider extends ChangeNotifier {
   bool get isVersePlaying => _playingVerse != null;
   double _lastOffset = 0;
 
+  final List<Map<String, dynamic>> availableTranslations = [
+    {
+      "name": "English (Sahih International)",
+      "value": quran.Translation.enSaheeh,
+    },
+    {"name": "English", "value": quran.Translation.enClearQuran},
+    {"name": "Bahasa Malaysia", "value": quran.Translation.indonesian},
+    {"name": "Mandarin", "value": quran.Translation.chinese},
+    {"name": "Français (Hamidullah)", "value": quran.Translation.frHamidullah},
+  ];
+
   void _setupScrollListener() {
     itemPositionsListener.itemPositions.addListener(() {
       final positions = itemPositionsListener.itemPositions.value;
@@ -92,6 +110,65 @@ class QuranDetailProvider extends ChangeNotifier {
 
       notifyListeners();
     });
+  }
+
+  Future<void> loadSurah(int newSurahNumber) async {
+    // Clear tafsir cache and reset verse expansion
+    _tafsirCache.clear();
+    _expandedVerses.clear();
+
+    // Update surah number
+    _currentSurah = newSurahNumber;
+
+    // Reload verses
+    _loadVerses();
+
+    // Reset scroll position
+    scrollToTop();
+
+    notifyListeners();
+  }
+
+  Future<void> setTranslationLanguage(quran.Translation translation) async {
+    _selectedTranslation = translation;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_translation', translation.name);
+    _reloadTranslations();
+  }
+
+  Future<void> loadSavedTranslation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('selected_translation');
+
+    if (savedName != null) {
+      try {
+        _selectedTranslation = quran.Translation.values.firstWhere(
+          (t) => t.name == savedName,
+          orElse: () => quran.Translation.enSaheeh,
+        );
+      } catch (e) {
+        _selectedTranslation = quran.Translation.enSaheeh;
+      }
+      _reloadTranslations();
+    }
+  }
+
+  void _reloadTranslations() {
+    final verseCount = quran.getVerseCount(surahNumber);
+    _allVerses = List.generate(verseCount, (index) {
+      final verseNum = index + 1;
+      return {
+        "number": verseNum.toString(),
+        "arabic": quran.getVerse(surahNumber, verseNum, verseEndSymbol: true),
+        "translation": quran.getVerseTranslation(
+          surahNumber,
+          verseNum,
+          translation: _selectedTranslation,
+        ),
+      };
+    });
+    _filteredVerses = List.from(_allVerses);
+    notifyListeners();
   }
 
   void setArabicFontSize(double size) {
@@ -143,7 +220,7 @@ class QuranDetailProvider extends ChangeNotifier {
   }
 
   void _loadVerses() {
-    final verseCount = quran.getVerseCount(surahNumber);
+    final verseCount = quran.getVerseCount(_currentSurah);
     _allVerses = List.generate(verseCount, (index) {
       final verseNum = index + 1;
       return {
