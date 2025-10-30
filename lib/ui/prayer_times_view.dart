@@ -20,6 +20,7 @@ import 'package:ramadhan_companion_app/provider/location_input_provider.dart';
 import 'package:ramadhan_companion_app/provider/masjid_programme_provider.dart';
 import 'package:ramadhan_companion_app/provider/notifications_provider.dart';
 import 'package:ramadhan_companion_app/provider/prayer_times_provider.dart';
+import 'package:ramadhan_companion_app/provider/quran_provider.dart';
 import 'package:ramadhan_companion_app/ui/details_masjid_programme_view.dart';
 import 'package:ramadhan_companion_app/ui/details_verse_view.dart';
 import 'package:ramadhan_companion_app/ui/hadith_books_view.dart';
@@ -28,6 +29,7 @@ import 'package:ramadhan_companion_app/ui/masjid_nearby_view.dart';
 import 'package:ramadhan_companion_app/ui/notifications_view.dart';
 import 'package:ramadhan_companion_app/ui/qibla_finder_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_detail_view.dart';
+import 'package:ramadhan_companion_app/ui/quran_page_view.dart';
 import 'package:ramadhan_companion_app/ui/quran_view.dart';
 import 'package:ramadhan_companion_app/ui/sadaqah_view.dart';
 import 'package:ramadhan_companion_app/ui/settings_view.dart';
@@ -513,7 +515,6 @@ Widget _buildMasjidProgramme(BuildContext context) {
             );
             return hasMatch;
           }).toList();
-
 
           if (programmes.isEmpty) {
             return SizedBox(
@@ -1401,84 +1402,116 @@ Widget _buildLocateMe(BuildContext context, PrayerTimesProvider provider) {
 }
 
 Widget _buildBookmark(BuildContext context) {
-  final provider = Provider.of<BookmarkProvider>(context);
+  final provider = context.watch<BookmarkProvider>();
 
   if (provider.bookmarks.isEmpty) return const SizedBox.shrink();
 
   return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _buildTitleText("Your Bookmark"),
+      _buildTitleText('Your Bookmarks'),
       SizedBox(
-        height: 80,
+        height: 90,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: provider.bookmarks.length,
           itemBuilder: (context, index) {
             final bookmark = provider.bookmarks[index];
-            final parts = bookmark.split(":");
-
-            if (parts.length < 2) return const SizedBox.shrink();
-
-            final surahNum = int.tryParse(parts[0]) ?? 0;
-            final verseNum = int.tryParse(parts[1]) ?? 0;
-
-            if (surahNum == 0 || verseNum == 0) return const SizedBox.shrink();
-
-            final surahName = quran.getSurahName(surahNum);
-
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SurahDetailView(
-                      surahNumber: surahNum,
-                      initialVerse: verseNum,
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                margin: EdgeInsets.only(
-                  left: index == 0 ? 20 : 0,
-                  right: index == provider.bookmarks.length - 1 ? 20 : 10,
-                  top: 10,
-                  bottom: 20,
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.30),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          surahName,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(": $verseNum"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
+            if (bookmark.startsWith("page:")) {
+              final page = int.tryParse(bookmark.split(":")[1]) ?? 0;
+              return _buildPageBookmarkCard(context, page);
+            } else {
+              final parts = bookmark.split(":");
+              if (parts.length < 2) return const SizedBox.shrink();
+              final surahNum = int.tryParse(parts[0]) ?? 0;
+              final verseNum = int.tryParse(parts[1]) ?? 0;
+              return _buildVerseBookmarkCard(context, surahNum, verseNum);
+            }
           },
         ),
       ),
     ],
+  );
+}
+
+Widget _buildPageBookmarkCard(BuildContext context, int page) {
+  final qProvider = Provider.of<QuranProvider>(context, listen: false);
+  final pagesMap = qProvider.getQuranPages();
+  final pageVerses = pagesMap[page];
+  final firstSurahName = (pageVerses != null && pageVerses.isNotEmpty)
+      ? quran.getSurahName(pageVerses.first['surah']!)
+      : 'Unknown';
+
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => QuranPageView(pageNumber: page)),
+      );
+    },
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Page $page",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          Text(firstSurahName, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildVerseBookmarkCard(
+  BuildContext context,
+  int surahNum,
+  int verseNum,
+) {
+  final surahName = quran.getSurahName(surahNum);
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              SurahDetailView(surahNumber: surahNum, initialVerse: verseNum),
+        ),
+      );
+    },
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        "$surahName : $verseNum",
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+      ),
+    ),
   );
 }
 
@@ -2416,21 +2449,28 @@ Future<void> schedulePrayerNotifications(PrayerTimesProvider provider) async {
   void schedulePrayer(int id, String name, String time) {
     final prayerTime = parsePrayerTime(time);
 
-    scheduleNotification(
-      id: id * 10,
-      title: "$name Reminder",
-      body: "$name prayer will be in 20 minutes",
-      scheduledDate: prayerTime.subtract(const Duration(minutes: 20)),
-      playAdhan: false,
-    );
+    final now = DateTime.now();
 
-    scheduleNotification(
-      id: id * 10 + 1,
-      title: "Prayer Time",
-      body: "It's time for $name",
-      scheduledDate: prayerTime,
-      playAdhan: true,
-    );
+    final reminderTime = prayerTime.subtract(const Duration(minutes: 20));
+    if (reminderTime.isAfter(now)) {
+      scheduleNotification(
+        id: id * 10,
+        title: "$name Reminder",
+        body: "$name prayer will be in 20 minutes",
+        scheduledDate: reminderTime,
+        playAdhan: false,
+      );
+    }
+
+    if (prayerTime.isAfter(now)) {
+      scheduleNotification(
+        id: id * 10 + 1,
+        title: "Prayer Time",
+        body: "It's time for $name",
+        scheduledDate: prayerTime,
+        playAdhan: true,
+      );
+    }
   }
 
   schedulePrayer(1, "Fajr", provider.times!.fajr);

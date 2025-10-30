@@ -50,7 +50,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MasjidNearbyProvider()),
         ChangeNotifierProvider(create: (_) => QiblaProvider()),
         ChangeNotifierProvider(create: (_) => IslamicCalendarProvider()),
-        ChangeNotifierProvider(create: (_) => QuranProvider()),
+        ChangeNotifierProvider(create: (_) => QuranProvider(1)),
         ChangeNotifierProvider(create: (_) => BookmarkProvider()),
         ChangeNotifierProvider(
           create: (_) {

@@ -4,6 +4,7 @@ import 'package:quran/quran.dart' as quran;
 import 'package:ramadhan_companion_app/helper/distance_calculation.dart';
 import 'package:ramadhan_companion_app/provider/bookmark_provider.dart';
 import 'package:ramadhan_companion_app/provider/quran_detail_provider.dart';
+import 'package:ramadhan_companion_app/ui/quran_page_view.dart';
 import 'package:ramadhan_companion_app/widgets/app_colors.dart';
 import 'package:ramadhan_companion_app/widgets/custom_audio_snackbar.dart';
 import 'package:ramadhan_companion_app/widgets/custom_pill_snackbar.dart';
@@ -29,7 +30,7 @@ class SurahDetailView extends StatelessWidget {
           QuranDetailProvider(surahNumber, initialVerse: initialVerse),
       builder: (context, child) {
         return _SurahDetailBody(
-          surahNumber: surahNumber,
+          // surahNumber: surahNumber,
           initialVerse: initialVerse,
         );
       },
@@ -38,14 +39,14 @@ class SurahDetailView extends StatelessWidget {
 }
 
 class _SurahDetailBody extends StatelessWidget {
-  final int surahNumber;
   final int? initialVerse;
 
-  const _SurahDetailBody({required this.surahNumber, this.initialVerse});
+  const _SurahDetailBody({this.initialVerse});
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<QuranDetailProvider>();
+    final surahNumber = provider.surahNumber;
 
     return Scaffold(
       body: SafeArea(
@@ -153,7 +154,9 @@ class _SurahDetailBody extends StatelessWidget {
                                           expanded
                                               ? Icons.expand_less
                                               : Icons.expand_more,
-                                          color: Colors.purple,
+                                          color: AppColors.violet.withOpacity(
+                                            1,
+                                          ),
                                         ),
                                         const SizedBox(width: 6),
                                         const Text(
@@ -226,6 +229,11 @@ class _SurahDetailBody extends StatelessWidget {
                   ],
                 ),
               ),
+              _buildBottomNavForSurah(
+                context,
+                surahNumber: surahNumber,
+                provider: provider,
+              ),
             ],
           ),
         ),
@@ -258,12 +266,16 @@ Widget _buildAppBar(BuildContext context, int surahNumber) {
       ),
       const Spacer(),
       GestureDetector(
-        onTap: () => _showFontSizeAdjuster(provider, context),
-        child: Image.asset(
-          'assets/icon/slider_filled_icon.png',
-          width: 24,
-          height: 24,
+        onTap: () => showQuranSettingsBottomSheet(context, provider),
+        child: Icon(
+          Icons.menu_outlined,
+          color: AppColors.violet.withOpacity(1),
         ),
+        // Image.asset(
+        //   'assets/icon/slider_filled_icon.png',
+        //   width: 24,
+        //   height: 24,
+        // ),
       ),
 
       SizedBox(width: 10),
@@ -271,11 +283,15 @@ Widget _buildAppBar(BuildContext context, int surahNumber) {
         onTap: () {
           provider.playAudio();
         },
-        child: Image.asset(
-          'assets/icon/volume_icon.png',
-          width: 24,
-          height: 24,
+        child: Icon(
+          Icons.volume_up_outlined,
+          color: AppColors.violet.withOpacity(1),
         ),
+        // Image.asset(
+        //   'assets/icon/volume_icon.png',
+        //   width: 24,
+        //   height: 24,
+        // ),
       ),
     ],
   );
@@ -293,21 +309,78 @@ Widget _buildShimmerLoading() {
   );
 }
 
+Widget _buildBottomNavForSurah(
+  BuildContext context, {
+  required int surahNumber,
+  required QuranDetailProvider provider,
+}) {
+  final bool isFirstSurah = surahNumber == 1;
+  final bool isLastSurah = surahNumber == 114;
+
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade100,
+      border: Border(top: BorderSide(color: Colors.grey.shade300)),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        if (!isFirstSurah)
+          ElevatedButton.icon(
+            style: whiteButtonStyle,
+            onPressed: () async {
+              await provider.loadSurah(surahNumber - 1);
+            },
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+            label: const Text("Previous"),
+          )
+        else
+          const SizedBox(width: 120),
+
+        GestureDetector(
+          onTap: () => showSurahList(context, provider),
+          child: Text(
+            "Surah $surahNumber / 114",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+
+        if (!isLastSurah)
+          ElevatedButton.icon(
+            style: blackButtonStyle,
+            onPressed: () async {
+              await provider.loadSurah(surahNumber + 1);
+            },
+            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+            label: const Text("Next"),
+          )
+        else
+          const SizedBox(width: 120),
+      ],
+    ),
+  );
+}
+
 Widget _buildBookmark(BuildContext context, int surahNumber, int verseNum) {
   final bookmarkProvider = Provider.of<BookmarkProvider>(context);
 
   return IconButton(
     icon: Image.asset(
-      bookmarkProvider.isBookmarked(surahNumber, verseNum)
+      bookmarkProvider.isVerseBookmarked(surahNumber, verseNum)
           ? "assets/icon/bookmark_icon.png"
           : "assets/icon/bookmark_empty_icon.png",
       width: 20,
       height: 20,
     ),
     onPressed: () {
-      bookmarkProvider.toggleBookmark(surahNumber, verseNum);
+      bookmarkProvider.toggleVerseBookmark(surahNumber, verseNum);
 
-      bookmarkProvider.isBookmarked(surahNumber, verseNum)
+      bookmarkProvider.isVerseBookmarked(surahNumber, verseNum)
           ? CustomPillSnackbar.show(
               context,
               message: "✅ Added to bookmark",
@@ -372,62 +445,304 @@ Widget _buildVerseAudio(
   );
 }
 
-void _showFontSizeAdjuster(QuranDetailProvider provider, BuildContext context) {
-  showModalBottomSheet(
+Future<void> showQuranSettingsBottomSheet(
+  BuildContext context,
+  QuranDetailProvider provider,
+) async {
+  return showModalBottomSheet(
     backgroundColor: Colors.white,
     context: context,
+    isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (context) {
+    builder: (_) {
       return ChangeNotifierProvider.value(
         value: provider,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
               const Text(
-                "Adjust Font Size",
+                "Adjust Quran Settings",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
 
-              const Text("Arabic Font"),
+              // Translation Language Selector
+              const Text(
+                "Translation Language",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
               Consumer<QuranDetailProvider>(
-                builder: (context, provider, _) {
+                builder: (_, provider, __) {
+                  final selectedLang = provider.availableTranslations
+                      .firstWhere(
+                        (lang) => lang["value"] == provider.selectedTranslation,
+                        orElse: () => provider.availableTranslations.first,
+                      );
+
+                  return InkWell(
+                    onTap: () => _showTranslationSelector(provider, context),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(selectedLang["name"]),
+                          const Icon(Icons.keyboard_arrow_down_rounded),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 25),
+
+              // Arabic Font Size
+              const Text(
+                "Arabic Font Size",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Consumer<QuranDetailProvider>(
+                builder: (_, provider, __) {
                   return Slider(
                     value: provider.arabicFontSize,
                     min: 18,
                     max: 40,
-                    activeColor: Colors.black,
-                    inactiveColor: AppColors.betterGray.withOpacity(1),
                     divisions: 4,
+                    activeColor: Colors.black,
+                    inactiveColor: Colors.grey.shade300,
                     label: "${provider.arabicFontSize.toInt()}",
                     onChanged: provider.setArabicFontSize,
                   );
                 },
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
 
-              const Text("Translation Font"),
+              // Translation Font Size
+              const Text(
+                "Translation Font Size",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               Consumer<QuranDetailProvider>(
-                builder: (context, provider, _) {
+                builder: (_, provider, __) {
                   return Slider(
                     value: provider.translationFontSize,
                     min: 12,
                     max: 30,
-                    activeColor: Colors.black,
-                    inactiveColor: AppColors.betterGray.withOpacity(1),
                     divisions: 4,
+                    activeColor: Colors.black,
+                    inactiveColor: Colors.grey.shade300,
                     label: "${provider.translationFontSize.toInt()}",
                     onChanged: provider.setTranslationFontSize,
                   );
                 },
               ),
             ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// Bottom sheet for translation selection
+void _showTranslationSelector(
+  QuranDetailProvider provider,
+  BuildContext context,
+) {
+  showModalBottomSheet(
+    backgroundColor: Colors.white,
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const Text(
+              "Select Translation",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            ...provider.availableTranslations.map((lang) {
+              final isSelected = lang["value"] == provider.selectedTranslation;
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  lang["name"],
+                  style: TextStyle(
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    color: isSelected ? Colors.black : Colors.grey.shade700,
+                  ),
+                ),
+                trailing: isSelected
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () {
+                  provider.setTranslationLanguage(lang["value"]);
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void showSurahList(BuildContext context, QuranDetailProvider provider) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.white,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      final TextEditingController searchController = TextEditingController();
+      final ValueNotifier<String> searchQuery = ValueNotifier('');
+
+      final double sheetHeight = MediaQuery.of(context).size.height * 0.75;
+
+      return SizedBox(
+        height: sheetHeight,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+
+                const Text(
+                  "Select Surah",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 15),
+
+                // 🔍 Search bar
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: "Search Surah name or number...",
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (value) => searchQuery.value = value,
+                ),
+                const SizedBox(height: 15),
+
+                // 📜 Surah list
+                Expanded(
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: searchQuery,
+                    builder: (_, query, __) {
+                      final surahs = List.generate(114, (i) => i + 1).where((
+                        num,
+                      ) {
+                        final arabic = quran.getSurahName(num);
+                        final english = quran.getSurahNameEnglish(num);
+                        return arabic.contains(query) ||
+                            english.toLowerCase().contains(
+                              query.toLowerCase(),
+                            ) ||
+                            num.toString() == query;
+                      }).toList();
+
+                      return ListView.builder(
+                        itemCount: surahs.length,
+                        itemBuilder: (context, index) {
+                          final num = surahs[index];
+                          final arabic = quran.getSurahName(num);
+                          final english = quran.getSurahNameEnglish(num);
+                          final ayahCount = quran.getVerseCount(num);
+
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.grey.shade200,
+                              child: Text(
+                                num.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              arabic,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text("$english • $ayahCount verses"),
+                            onTap: () async {
+                              Navigator.pop(context); 
+                              await provider.loadSurah(num);
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
